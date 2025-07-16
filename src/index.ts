@@ -1,9 +1,9 @@
 // Main entry point for the beep-sdk
 
 import axios, { AxiosInstance } from 'axios';
-import { WalletsModule } from './modules/wallets';
 import { PaymentsModule } from './modules/payments';
-import { InvoicesModule, Invoice } from './modules/invoices';
+import { Invoice, SupportedToken } from './types';
+
 
 // Configuration for the BeepClient
 interface BeepClientOptions {
@@ -12,19 +12,22 @@ interface BeepClientOptions {
 }
 
 // Interface for the simplified payment request
+export * from './types';
+
+// Interface for the simplified payment request
 export interface RequestPaymentPayload {
   amount: number;
-  currency: string;
+  token?: SupportedToken; // The token type (USDC, etc.)
+  splTokenAddress?: string; // Optional: The SPL token address (alternative to token)
   description: string;
-  payerId: string; // The ID of the user or merchant who will be paying.
+  payerType?: 'customer_wallet' | 'merchant_wallet'; // Added payerType field to match API requirements
 }
 
 // The main client for interacting with the BEEP API
 export class BeepClient {
   private client: AxiosInstance;
-  public wallets: WalletsModule;
   public payments: PaymentsModule;
-  public invoices: InvoicesModule;
+
 
   constructor(options: BeepClientOptions) {
     this.client = axios.create({
@@ -36,9 +39,8 @@ export class BeepClient {
     });
 
     // Initialize modules
-    this.wallets = new WalletsModule(this.client);
     this.payments = new PaymentsModule(this.client);
-    this.invoices = new InvoicesModule(this.client);
+
   }
 
   /**
@@ -48,7 +50,25 @@ export class BeepClient {
    * @returns A promise that resolves to the created invoice.
    */
   public async requestPayment(payload: RequestPaymentPayload): Promise<Invoice> {
-    const response = await this.client.post<Invoice>('/request-payment', payload);
+    // Prepare the request payload
+    const requestBody: Record<string, any> = {
+      amount: payload.amount,
+      description: payload.description
+    };
+    
+    // Pass through splTokenAddress if provided, otherwise use token
+    if (payload.splTokenAddress) {
+      requestBody.splTokenAddress = payload.splTokenAddress;
+    } else {
+      requestBody.token = payload.token || SupportedToken.USDC; // Default to USDC if not specified
+    }
+
+    // Add payerType if provided
+    if (payload.payerType) {
+      requestBody.payerType = payload.payerType;
+    }
+    
+    const response = await this.client.post<Invoice>('/v1/payments/request-payment', requestBody);
     return response.data;
   }
 
