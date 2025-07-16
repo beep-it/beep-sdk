@@ -61,9 +61,9 @@ export class TokenUtils {
   }
 
   /**
-   * Get the default token (USDC)
+   * Get the default token (USDT)
    */
   static getDefaultToken(): SupportedToken {
-    return SupportedToken.USDC;
+    return SupportedToken.USDT;
   }
 }

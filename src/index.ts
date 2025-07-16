@@ -80,7 +80,7 @@ export class BeepClient {
     };
     
     // Determine token type
-    const token = payload.token || SupportedToken.USDC; // Default to USDC if not specified
+    const token = payload.token || SupportedToken.USDT; // Default to USDT if not specified
     
     // Pass through splTokenAddress if provided, otherwise use token
     if (payload.splTokenAddress) {

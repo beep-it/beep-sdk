@@ -28,7 +28,7 @@ export class PaymentsModule {
     
     // Convert price from decimal string/number to integer base units
     if (requestPayload.price) {
-      const token = requestPayload.token || SupportedToken.USDC; // Default to USDC if not specified
+      const token = requestPayload.token || SupportedToken.USDT; // Default to USDT if not specified
       const decimals = TokenUtils.getTokenDecimals(token);
       const priceValue = typeof requestPayload.price === 'string' ? 
         parseFloat(requestPayload.price) : requestPayload.price;

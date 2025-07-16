@@ -100,7 +100,7 @@ describe('BeepClient', () => {
     expect(requestData.splTokenAddress).toBe(splTokenAddress);
   });
 
-  it('requestPayment defaults to USDC if no token or splTokenAddress provided', async () => {
+  it('requestPayment defaults to USDT if no token or splTokenAddress provided', async () => {
     mockAxios.onPost('/v1/payment/request-payment').reply(200, {
       invoiceId: 'inv_test123',
       merchantId: 'merch_123',
@@ -112,10 +112,10 @@ describe('BeepClient', () => {
       description: 'Test payment'
     });
 
-    // Verify the request was made with USDC token
+    // Verify the request was made with USDT token
     expect(mockAxios.history.post.length).toBe(1);
     const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.token).toBe(SupportedToken.USDC);
+    expect(requestData.token).toBe(SupportedToken.USDT);
   });
 
   it('requestPayment throws error when API request fails', async () => {
