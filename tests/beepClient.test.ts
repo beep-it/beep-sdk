@@ -21,7 +21,7 @@ describe('BeepClient', () => {
     mockAxios.restore();
   });
 
-  test('healthCheck should check API health', async () => {
+  it('healthCheck should check API health', async () => {
     // Mock a successful health check response
     mockAxios.onGet('/healthz').reply(200, 'API is healthy');
 
@@ -31,21 +31,19 @@ describe('BeepClient', () => {
     expect(result).toBe('API is healthy');
   });
 
-  test('requestPayment creates an invoice with token', async () => {
+  it('requestPayment creates an invoice with token', async () => {
     // Mock the response for the API call
-    mockAxios.onPost('/v1/payments/request-payment').reply(200, {
-      id: 'inv_test123',
-      merchantId: 'merch_123',
-      payerType: 'customer_wallet',
-      payerMerchantId: null,
-      description: 'Test payment',
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
+      referenceKey: 'ref_abc123',
+      paymentUrl: 'https://pay.beep.com/abc123',
+      qrCode: 'data:image/png;base64,abc123==',
       amount: '10.99',
       token: SupportedToken.USDC,
       splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       status: 'pending',
-      referenceKey: 'ref_abc123',
-      paymentUrl: 'https://pay.beep.com/abc123',
-      qrCode: 'data:image/png;base64,abc123==',
+      expiresAt: new Date().toISOString(),
+      receivingMerchantId: 'merch_123',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
@@ -59,7 +57,7 @@ describe('BeepClient', () => {
 
     // Assertions
     expect(result).toBeDefined();
-    expect(result.id).toBe('inv_test123');
+    expect(result.invoiceId).toBe('inv_test123');
     expect(result.amount).toBe('10.99');
     expect(result.status).toBe('pending');
     
@@ -67,14 +65,14 @@ describe('BeepClient', () => {
     expect(mockAxios.history.post.length).toBe(1);
     const requestData = JSON.parse(mockAxios.history.post[0].data);
     expect(requestData.token).toBe(SupportedToken.USDC);
-    expect(requestData.amount).toBe(10.99);
+    expect(requestData.amount).toBe(10990000);
   });
 
-  test('requestPayment falls back to splTokenAddress if token not provided', async () => {
+  it('requestPayment falls back to splTokenAddress if token not provided', async () => {
     const splTokenAddress = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
     
-    mockAxios.onPost('/v1/payments/request-payment').reply(200, {
-      id: 'inv_test123',
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
       merchantId: 'merch_123',
       payerType: 'customer_wallet',
       payerMerchantId: null,
@@ -102,12 +100,11 @@ describe('BeepClient', () => {
     expect(requestData.splTokenAddress).toBe(splTokenAddress);
   });
 
-  test('requestPayment defaults to USDC if no token or splTokenAddress provided', async () => {
-    mockAxios.onPost('/v1/payments/request-payment').reply(200, {
-      id: 'inv_test123',
+  it('requestPayment defaults to USDC if no token or splTokenAddress provided', async () => {
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
       merchantId: 'merch_123',
       status: 'pending',
-      // other fields...
     });
 
     await client.requestPayment({
@@ -121,15 +118,85 @@ describe('BeepClient', () => {
     expect(requestData.token).toBe(SupportedToken.USDC);
   });
 
-  test('requestPayment throws error when API request fails', async () => {
-    mockAxios.onPost('/v1/payments/request-payment').reply(400, {
-      error: 'Invalid request'
-    });
+  it('requestPayment throws error when API request fails', async () => {
+    mockAxios.onPost('/v1/payment/request-payment').reply(500);
 
     await expect(client.requestPayment({
       amount: 10.99,
       token: SupportedToken.USDC,
       description: 'Test payment'
     })).rejects.toThrow();
+  });
+
+  it('requestPayment throws error when response has no data', async () => {
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, null);
+
+    await expect(client.requestPayment({
+      amount: 10.99,
+      token: SupportedToken.USDC,
+      description: 'Test payment'
+    })).rejects.toThrow('No data returned from payment request');
+  });
+
+  it('converts amount to base units correctly for different tokens', async () => {
+    // Setup mock for USDC test
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
+      referenceKey: 'ref_abc123',
+      status: 'pending',
+      expiresAt: new Date().toISOString(),
+      receivingMerchantId: 'merch_123'
+    });
+
+    // Test USDC (6 decimals)
+    await client.requestPayment({
+      amount: 0.01,
+      token: SupportedToken.USDC,
+      description: 'USDC payment'
+    });
+
+    const requestData = JSON.parse(mockAxios.history.post[0].data);
+    // 0.01 with 6 decimals should be 10000
+    expect(requestData.amount).toBe(10000);
+  });
+  
+  it('converts amount to base units correctly for USDT', async () => {
+    // Setup mock for USDT test
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
+      referenceKey: 'ref_abc123',
+      status: 'pending',
+      expiresAt: new Date().toISOString(),
+      receivingMerchantId: 'merch_123'
+    });
+    
+    // Test USDT (6 decimals)
+    await client.requestPayment({
+      amount: 0.000001,
+      token: SupportedToken.USDT,
+      description: 'USDT minimum payment'
+    });
+
+    const requestData = JSON.parse(mockAxios.history.post[0].data);
+    // 0.000001 with 6 decimals should be 1
+    expect(requestData.amount).toBe(1);
+  });
+
+  it('handles payerType correctly when provided', async () => {
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
+      referenceKey: 'ref_abc123',
+      status: 'pending',
+    });
+
+    await client.requestPayment({
+      amount: 10.99,
+      token: SupportedToken.USDC,
+      description: 'Test payment',
+      payerType: 'merchant_wallet'
+    });
+
+    const requestData = JSON.parse(mockAxios.history.post[0].data);
+    expect(requestData.payerType).toBe('merchant_wallet');
   });
 });

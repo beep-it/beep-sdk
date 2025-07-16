@@ -13,17 +13,17 @@ describe.skip('Integration Tests', () => {
     // Initialize client with environment variables
     client = new BeepClient({
       apiKey: process.env.BEEP_API_KEY || 'test-api-key',
-      serverUrl: process.env.BEEP_API_URL || 'http://localhost:3000'
+      serverUrl: process.env.BEEP_API_URL || 'https://34351e6fd33a.ngrok-free.app'
     });
   });
 
-  test('healthCheck should return health status', async () => {
+  it('healthCheck should return health status', async () => {
     const health = await client.healthCheck();
     expect(health).toBeDefined();
     // We only check if it returns something as the actual response format may vary
   });
 
-  test('requestPayment creates a valid invoice', async () => {
+  it('requestPayment creates a valid invoice', async () => {
     const invoice = await client.requestPayment({
       amount: 0.01, // Small amount for testing
       token: SupportedToken.USDC,
@@ -31,13 +31,15 @@ describe.skip('Integration Tests', () => {
       payerType: 'customer_wallet'
     });
 
+    console.log('Invoice created in requestPayment:', invoice);
+
     expect(invoice).toBeDefined();
-    expect(invoice.id).toBeDefined();
+    expect(invoice.invoiceId).toBeDefined();
     // The invoice may not have a paymentUrl property in the response
     // so we just check it has the required fields
   });
 
-  test('payments module can create and retrieve a product', async () => {
+  it('payments module can create and retrieve a product', async () => {
     // Create a test product
     const product = await client.payments.createProduct({
       name: `Test Product ${Date.now()}`, // Unique name
@@ -59,7 +61,7 @@ describe.skip('Integration Tests', () => {
     await client.payments.deleteProduct(product.id);
   });
   
-  test('payments module should create and get an invoice', async () => {
+  it('payments module should create and get an invoice', async () => {
     // Create a test product
     const product = await client.payments.createProduct({
       name: 'Integration Test Product',
@@ -74,16 +76,24 @@ describe.skip('Integration Tests', () => {
       payerType: 'customer_wallet'
     });
 
+    console.log('Invoice created:', invoice);
+
     expect(invoice).toBeDefined();
     expect(invoice.id).toBeDefined();
     // The invoice may not have a paymentUrl property in the response
     // so we just check it has the required fields
     
     // Get the invoice and check it matches
-    const retrievedInvoice = await client.payments.getInvoice(invoice.id);
-    expect(retrievedInvoice.id).toBe(invoice.id);
+    // Use id or invoiceId, whichever is available
+    const invoiceId = invoice.id;
+    expect(invoiceId).toBeDefined();
+    
+    const retrievedInvoice = await client.payments.getInvoice(invoiceId!);
+
+    console.log('Invoice retrieved:', retrievedInvoice);
+    expect(retrievedInvoice.id).toBe(invoiceId);
     
     // Clean up
-    await client.payments.deleteInvoice(invoice.id);
+    await client.payments.deleteInvoice(invoiceId!);
   }, 10000);
 });

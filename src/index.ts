@@ -2,7 +2,8 @@
 
 import axios, { AxiosInstance } from 'axios';
 import { PaymentsModule } from './modules/payments';
-import { Invoice, SupportedToken } from './types';
+import { PaymentRequestResponse } from './types/payment';
+import { SupportedToken, TOKEN_DECIMALS } from './types/token';
 
 
 // Configuration for the BeepClient
@@ -40,7 +41,6 @@ export class BeepClient {
 
     // Initialize modules
     this.payments = new PaymentsModule(this.client);
-
   }
 
   /**
@@ -49,27 +49,68 @@ export class BeepClient {
    * @param payload The details of the charge.
    * @returns A promise that resolves to the created invoice.
    */
-  public async requestPayment(payload: RequestPaymentPayload): Promise<Invoice> {
+  /**
+   * Converts a decimal amount to base units based on token decimals
+   * @param amount The decimal amount (e.g., 0.01)
+   * @param token The token type
+   * @returns The amount in base units as an integer (e.g., 10000 for 0.01 USDC)
+   */
+  private convertAmountToBaseUnits(amount: number, token: SupportedToken): number {
+    const decimals = TOKEN_DECIMALS[token] || 6; // Default to 6 if not found
+    // Convert to integer base units: amount * (10^decimals)
+    return Math.round(amount * Math.pow(10, decimals));
+  }
+
+  public async requestPayment(payload: {
+    amount: number;
+    token?: SupportedToken;
+    description?: string;
+    splTokenAddress?: string;
+    payerType?: string;
+  }): Promise<PaymentRequestResponse> {
     // Prepare the request payload
-    const requestBody: Record<string, any> = {
-      amount: payload.amount,
-      description: payload.description
+    const requestBody: {
+      description: string;
+      amount?: number;
+      splTokenAddress?: string;
+      token?: SupportedToken;
+      payerType?: string;
+    } = {
+      description: payload.description || 'Payment request' // Provide a default description
     };
+    
+    // Determine token type
+    const token = payload.token || SupportedToken.USDC; // Default to USDC if not specified
     
     // Pass through splTokenAddress if provided, otherwise use token
     if (payload.splTokenAddress) {
       requestBody.splTokenAddress = payload.splTokenAddress;
     } else {
-      requestBody.token = payload.token || SupportedToken.USDC; // Default to USDC if not specified
+      // Token is guaranteed to be defined because we set a default value above
+      requestBody.token = token as SupportedToken;
     }
+    
+    // Convert decimal amount to base units
+    requestBody.amount = this.convertAmountToBaseUnits(payload.amount, token);
 
     // Add payerType if provided
     if (payload.payerType) {
       requestBody.payerType = payload.payerType;
     }
     
-    const response = await this.client.post<Invoice>('/v1/payments/request-payment', requestBody);
-    return response.data;
+    try {
+      const response = await this.client.post<PaymentRequestResponse>('/v1/payment/request-payment', requestBody);
+      
+      if (!response.data) {
+        throw new Error('No data returned from payment request');
+      }
+      
+      return response.data;
+    } catch (error: unknown) {
+      // Rethrow with more context
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to request payment: ${errorMessage}`);
+    }
   }
 
   // Example function

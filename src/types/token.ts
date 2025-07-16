@@ -3,7 +3,7 @@
  */
 export enum SupportedToken {
   USDC = 'USDC',
-  // USDT = 'USDT', // Will be supported in future
+  USDT = 'USDT', // Will be supported in future
 }
 
 /**
@@ -11,7 +11,16 @@ export enum SupportedToken {
  */
 export const TOKEN_ADDRESSES: Record<SupportedToken, string> = {
   [SupportedToken.USDC]: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T',
-  // [SupportedToken.USDT]: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+  [SupportedToken.USDT]: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', 
+};
+
+/**
+ * Decimal places for each supported token
+ * Used for converting between decimal amounts and base units
+ */
+export const TOKEN_DECIMALS: Record<SupportedToken, number> = {
+  [SupportedToken.USDC]: 6, // USDC has 6 decimal places
+  [SupportedToken.USDT]: 6, // USDT has 6 decimal places
 };
 
 /**
@@ -35,6 +44,13 @@ export class TokenUtils {
       }
     }
     return null;
+  }
+
+  /**
+   * Get the number of decimal places for a given token
+   */
+  static getTokenDecimals(token: SupportedToken): number {
+    return TOKEN_DECIMALS[token] || 6; // Default to 6 if not found
   }
 
   /**
