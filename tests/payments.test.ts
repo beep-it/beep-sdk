@@ -1,4 +1,4 @@
-import { BeepClient, SupportedToken } from '../src';
+import { BeepClient, SupportedToken, TOKEN_ADDRESSES } from '../src';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
@@ -20,15 +20,15 @@ describe('Payments Module', () => {
 
   // PRODUCT TESTS
   describe('Products', () => {
-    test('createProduct creates a product with token', async () => {
+    it('createProduct creates a product with token', async () => {
       const mockProduct = {
         id: 'prod_test123',
         merchantId: 'merch_123',
         name: 'Test Product',
         description: 'A test product',
         price: '9.99',
-        token: SupportedToken.USDC,
-        splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+        token: SupportedToken.USDT,
+        splTokenAddress: TOKEN_ADDRESSES[SupportedToken.USDT],
         isSubscription: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -40,7 +40,7 @@ describe('Payments Module', () => {
         name: 'Test Product',
         description: 'A test product',
         price: '9.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         isSubscription: false
       });
 
@@ -49,10 +49,10 @@ describe('Payments Module', () => {
       // Verify the request
       expect(mockAxios.history.post.length).toBe(1);
       const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.token).toBe(SupportedToken.USDC);
+      expect(requestData.token).toBe(SupportedToken.USDT);
     });
 
-    test('createProduct creates a subscription product', async () => {
+    it('createProduct creates a subscription product', async () => {
       mockAxios.onPost('/v1/products').reply(200, {
         id: 'prod_sub123',
         name: 'Premium Subscription',
@@ -64,7 +64,7 @@ describe('Payments Module', () => {
         name: 'Premium Subscription',
         description: 'Monthly subscription',
         price: '14.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         isSubscription: true
       });
 
@@ -77,7 +77,7 @@ describe('Payments Module', () => {
     // Note: We've removed the metered product test as the current SDK doesn't support metadata
     // If you need metered billing, you would need to extend the Product type to include metadata
 
-    test('getProduct returns a product by ID', async () => {
+    it('getProduct returns a product by ID', async () => {
       const mockProduct = {
         id: 'prod_test123',
         name: 'Test Product',
@@ -90,7 +90,7 @@ describe('Payments Module', () => {
       expect(result).toEqual(mockProduct);
     });
 
-    test('listProducts returns all products', async () => {
+    it('listProducts returns all products', async () => {
       const mockProducts = [
         { id: 'prod_1', name: 'Product 1' },
         { id: 'prod_2', name: 'Product 2' }
@@ -102,7 +102,7 @@ describe('Payments Module', () => {
       expect(result).toEqual(mockProducts);
     });
 
-    test('updateProduct updates a product', async () => {
+    it('updateProduct updates a product', async () => {
       const mockUpdatedProduct = {
         id: 'prod_test123',
         name: 'Updated Product',
@@ -118,7 +118,7 @@ describe('Payments Module', () => {
       expect(result).toEqual(mockUpdatedProduct);
     });
 
-    test('deleteProduct deletes a product', async () => {
+    it('deleteProduct deletes a product', async () => {
       mockAxios.onDelete('/v1/products/prod_test123').reply(200, { deleted: true });
 
       await client.payments.deleteProduct('prod_test123');
@@ -130,7 +130,7 @@ describe('Payments Module', () => {
 
   // INVOICE TESTS
   describe('Invoices', () => {
-    test('createInvoice creates a product-based invoice', async () => {
+    it('createInvoice creates a product-based invoice', async () => {
       const mockInvoice = {
         id: 'inv_test123',
         productId: 'prod_test123',
@@ -153,11 +153,11 @@ describe('Payments Module', () => {
       expect(requestData.payerType).toBe('customer_wallet');
     });
 
-    test('createInvoice creates a custom invoice with token', async () => {
+    it('createInvoice creates a custom invoice with token', async () => {
       const mockInvoice = {
         id: 'inv_custom123',
         amount: '25.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         payerType: 'customer_wallet',
         // other fields...
       };
@@ -166,7 +166,7 @@ describe('Payments Module', () => {
 
       const result = await client.payments.createInvoice({
         amount: '25.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         description: 'Custom invoice',
         payerType: 'customer_wallet'
       });
@@ -174,11 +174,11 @@ describe('Payments Module', () => {
       expect(result).toEqual(mockInvoice);
       
       const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.token).toBe(SupportedToken.USDC);
+      expect(requestData.token).toBe(SupportedToken.USDT);
       expect(requestData.payerType).toBe('customer_wallet');
     });
 
-    test('getInvoice returns an invoice by ID', async () => {
+    it('getInvoice returns an invoice by ID', async () => {
       const mockInvoice = {
         id: 'inv_test123',
         status: 'pending',
@@ -191,7 +191,7 @@ describe('Payments Module', () => {
       expect(result).toEqual(mockInvoice);
     });
 
-    test('listInvoices returns all invoices', async () => {
+    it('listInvoices returns all invoices', async () => {
       const mockInvoices = [
         { id: 'inv_1', status: 'paid' },
         { id: 'inv_2', status: 'pending' }
@@ -203,7 +203,7 @@ describe('Payments Module', () => {
       expect(result).toEqual(mockInvoices);
     });
 
-    test('deleteInvoice deletes an invoice', async () => {
+    it('deleteInvoice deletes an invoice', async () => {
       mockAxios.onDelete('/v1/invoices/inv_test123').reply(200, { deleted: true });
 
       await client.payments.deleteInvoice('inv_test123');

@@ -26,6 +26,19 @@ export class PaymentsModule {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(requestPayload.token);
     }
     
+    // Convert price from decimal string/number to integer base units
+    if (requestPayload.price) {
+      const token = requestPayload.token || SupportedToken.USDT; // Default to USDT if not specified
+      const decimals = TokenUtils.getTokenDecimals(token);
+      const priceValue = typeof requestPayload.price === 'string' ? 
+        parseFloat(requestPayload.price) : requestPayload.price;
+      
+      // Convert to base units (e.g., 0.01 USDT with 6 decimals becomes 10000)
+      const priceInBaseUnits = Math.round(priceValue * (10 ** decimals));
+      // Convert to string as the backend expects a string
+      requestPayload.price = priceInBaseUnits.toString();
+    }
+    
     const response = await this.client.post<Product>('/v1/products', requestPayload);
     return response.data;
   }

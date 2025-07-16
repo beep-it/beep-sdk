@@ -1,30 +1,30 @@
 import { TokenUtils, SupportedToken } from '../src';
 
 describe('TokenUtils', () => {
-  test('getTokenAddress returns correct address for USDC', () => {
-    const address = TokenUtils.getTokenAddress(SupportedToken.USDC);
-    expect(address).toBe('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T');
+  it('getTokenAddress returns correct address for USDT', () => {
+    const address = TokenUtils.getTokenAddress(SupportedToken.USDT);
+    expect(address).toBe('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
   });
 
-  test('isTokenSupported returns true for supported tokens', () => {
-    expect(TokenUtils.isTokenSupported(SupportedToken.USDC)).toBe(true);
+  it('isTokenSupported returns true for supported tokens', () => {
+    expect(TokenUtils.isTokenSupported(SupportedToken.USDT)).toBe(true);
   });
 
-  test('isTokenSupported returns false for unsupported tokens', () => {
+  it('isTokenSupported returns false for unsupported tokens', () => {
     expect(TokenUtils.isTokenSupported('NOT_REAL_TOKEN' as SupportedToken)).toBe(false);
   });
 
-  test('getTokenFromAddress returns correct token for address', () => {
-    const token = TokenUtils.getTokenFromAddress('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T');
-    expect(token).toBe(SupportedToken.USDC);
+  it('getTokenFromAddress returns correct token for address', () => {
+    const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
+    expect(token).toBe(SupportedToken.USDT);
   });
 
-  test('getTokenFromAddress returns null for unknown address', () => {
+  it('getTokenFromAddress returns null for unknown address', () => {
     const token = TokenUtils.getTokenFromAddress('invalid_address');
     expect(token).toBeNull();
   });
 
-  test('getDefaultToken returns USDC', () => {
-    expect(TokenUtils.getDefaultToken()).toBe(SupportedToken.USDC);
+  it('getDefaultToken returns USDT', () => {
+    expect(TokenUtils.getDefaultToken()).toBe(SupportedToken.USDT);
   });
 });
