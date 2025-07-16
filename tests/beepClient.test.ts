@@ -199,4 +199,57 @@ describe('BeepClient', () => {
     const requestData = JSON.parse(mockAxios.history.post[0].data);
     expect(requestData.payerType).toBe('merchant_wallet');
   });
+  
+  it('handles empty description by setting a default', async () => {
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
+      referenceKey: 'ref_abc123',
+      status: 'pending',
+    });
+
+    await client.requestPayment({
+      amount: 10.99,
+      token: SupportedToken.USDC,
+      description: ''
+    });
+
+    const requestData = JSON.parse(mockAxios.history.post[0].data);
+    expect(requestData.description).toBe('Payment request');
+  });
+  
+  it('handles undefined description by setting a default', async () => {
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
+      referenceKey: 'ref_abc123',
+      status: 'pending',
+    });
+
+    await client.requestPayment({
+      amount: 10.99,
+      token: SupportedToken.USDC
+      // description omitted
+    });
+
+    const requestData = JSON.parse(mockAxios.history.post[0].data);
+    expect(requestData.description).toBe('Payment request');
+  });
+  
+  it('handles large amounts correctly', async () => {
+    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
+      invoiceId: 'inv_test123',
+      referenceKey: 'ref_abc123',
+      status: 'pending',
+    });
+    
+    // Test with a large amount (1000 USDC)
+    await client.requestPayment({
+      amount: 1000,
+      token: SupportedToken.USDC,
+      description: 'Large payment'
+    });
+
+    const requestData = JSON.parse(mockAxios.history.post[0].data);
+    // 1000 with 6 decimals should be 1000000000
+    expect(requestData.amount).toBe(1000000000);
+  });
 });

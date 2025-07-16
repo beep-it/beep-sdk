@@ -74,7 +74,7 @@ You just need to tell your BEEP-Bot how much you want to charge and in what curr
    - A `paymentUrl` (a link you can send to your customer)
    - A `qrCode` (same link but as a scannable QR code for mobile)
    - A `referenceKey` (a unique ID to track this specific payment)
-   - An `id` (the invoice ID you can use to check payment status later)
+   - An `invoiceId` (the invoice ID you can use to check payment status later)
 4. **Your user pays** - They click the link or scan the code and pay using their crypto wallet
 5. **We handle the crypto magic** - All the blockchain validation, token transfers, etc.
 6. **You get notified** - Either through webhooks (if you set those up) or by checking the status
@@ -147,6 +147,7 @@ const invoice = await beep.requestPayment({
 // Now you have everything you need for the user to pay
 console.log('Payment URL:', invoice.paymentUrl);
 console.log('Reference Key:', invoice.referenceKey);
+console.log('Invoice ID:', invoice.invoiceId);
 
 // IMPORTANT PART: What to do with this info!
 // Option 1: Redirect your user to the payment page
