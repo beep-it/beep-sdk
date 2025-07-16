@@ -1,4 +1,4 @@
-import { BeepClient, SupportedToken } from '../src';
+import { BeepClient, SupportedToken, TOKEN_ADDRESSES } from '../src';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 
@@ -27,8 +27,8 @@ describe('Payments Module', () => {
         name: 'Test Product',
         description: 'A test product',
         price: '9.99',
-        token: SupportedToken.USDC,
-        splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+        token: SupportedToken.USDT,
+        splTokenAddress: TOKEN_ADDRESSES[SupportedToken.USDT],
         isSubscription: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
@@ -40,7 +40,7 @@ describe('Payments Module', () => {
         name: 'Test Product',
         description: 'A test product',
         price: '9.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         isSubscription: false
       });
 
@@ -49,7 +49,7 @@ describe('Payments Module', () => {
       // Verify the request
       expect(mockAxios.history.post.length).toBe(1);
       const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.token).toBe(SupportedToken.USDC);
+      expect(requestData.token).toBe(SupportedToken.USDT);
     });
 
     it('createProduct creates a subscription product', async () => {
@@ -64,7 +64,7 @@ describe('Payments Module', () => {
         name: 'Premium Subscription',
         description: 'Monthly subscription',
         price: '14.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         isSubscription: true
       });
 
@@ -157,7 +157,7 @@ describe('Payments Module', () => {
       const mockInvoice = {
         id: 'inv_custom123',
         amount: '25.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         payerType: 'customer_wallet',
         // other fields...
       };
@@ -166,7 +166,7 @@ describe('Payments Module', () => {
 
       const result = await client.payments.createInvoice({
         amount: '25.99',
-        token: SupportedToken.USDC,
+        token: SupportedToken.USDT,
         description: 'Custom invoice',
         payerType: 'customer_wallet'
       });
@@ -174,7 +174,7 @@ describe('Payments Module', () => {
       expect(result).toEqual(mockInvoice);
       
       const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.token).toBe(SupportedToken.USDC);
+      expect(requestData.token).toBe(SupportedToken.USDT);
       expect(requestData.payerType).toBe('customer_wallet');
     });
 

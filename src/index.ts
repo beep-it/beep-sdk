@@ -18,7 +18,7 @@ export * from './types';
 // Interface for the simplified payment request
 export interface RequestPaymentPayload {
   amount: number;
-  token?: SupportedToken; // The token type (USDC, etc.)
+  token?: SupportedToken; // The token type (USDT, etc.)
   splTokenAddress?: string; // Optional: The SPL token address (alternative to token)
   description: string;
   payerType?: 'customer_wallet' | 'merchant_wallet'; // Added payerType field to match API requirements
@@ -53,7 +53,7 @@ export class BeepClient {
    * Converts a decimal amount to base units based on token decimals
    * @param amount The decimal amount (e.g., 0.01)
    * @param token The token type
-   * @returns The amount in base units as an integer (e.g., 10000 for 0.01 USDC)
+   * @returns The amount in base units as an integer (e.g., 10000 for 0.01 USDT)
    */
   private convertAmountToBaseUnits(amount: number, token: SupportedToken): number {
     const decimals = TOKEN_DECIMALS[token] || 6; // Default to 6 if not found

@@ -2,7 +2,7 @@
  * Supported SPL tokens on the BEEP platform
  */
 export enum SupportedToken {
-  USDC = 'USDC',
+  // USDC = 'USDC',
   USDT = 'USDT', // Will be supported in future
 }
 
@@ -10,7 +10,7 @@ export enum SupportedToken {
  * Mapping of token types to their SPL addresses
  */
 export const TOKEN_ADDRESSES: Record<SupportedToken, string> = {
-  [SupportedToken.USDC]: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T',
+  // [SupportedToken.USDC]: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T',
   [SupportedToken.USDT]: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', 
 };
 
@@ -19,7 +19,7 @@ export const TOKEN_ADDRESSES: Record<SupportedToken, string> = {
  * Used for converting between decimal amounts and base units
  */
 export const TOKEN_DECIMALS: Record<SupportedToken, number> = {
-  [SupportedToken.USDC]: 6, // USDC has 6 decimal places
+  // [SupportedToken.USDC]: 6, // USDC has 6 decimal places
   [SupportedToken.USDT]: 6, // USDT has 6 decimal places
 };
 

@@ -33,7 +33,7 @@ export class PaymentsModule {
       const priceValue = typeof requestPayload.price === 'string' ? 
         parseFloat(requestPayload.price) : requestPayload.price;
       
-      // Convert to base units (e.g., 0.01 USDC with 6 decimals becomes 10000)
+      // Convert to base units (e.g., 0.01 USDT with 6 decimals becomes 10000)
       const priceInBaseUnits = Math.round(priceValue * (10 ** decimals));
       // Convert to string as the backend expects a string
       requestPayload.price = priceInBaseUnits.toString();

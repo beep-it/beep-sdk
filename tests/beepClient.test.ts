@@ -39,7 +39,7 @@ describe('BeepClient', () => {
       paymentUrl: 'https://pay.beep.com/abc123',
       qrCode: 'data:image/png;base64,abc123==',
       amount: '10.99',
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       status: 'pending',
       expiresAt: new Date().toISOString(),
@@ -51,7 +51,7 @@ describe('BeepClient', () => {
     // Call the method being tested
     const result = await client.requestPayment({
       amount: 10.99,
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: 'Test payment'
     });
 
@@ -64,7 +64,7 @@ describe('BeepClient', () => {
     // Verify the request was made with correct data
     expect(mockAxios.history.post.length).toBe(1);
     const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.token).toBe(SupportedToken.USDC);
+    expect(requestData.token).toBe(SupportedToken.USDT);
     expect(requestData.amount).toBe(10990000);
   });
 
@@ -123,7 +123,7 @@ describe('BeepClient', () => {
 
     await expect(client.requestPayment({
       amount: 10.99,
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: 'Test payment'
     })).rejects.toThrow();
   });
@@ -133,13 +133,13 @@ describe('BeepClient', () => {
 
     await expect(client.requestPayment({
       amount: 10.99,
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: 'Test payment'
     })).rejects.toThrow('No data returned from payment request');
   });
 
   it('converts amount to base units correctly for different tokens', async () => {
-    // Setup mock for USDC test
+    // Setup mock for USDT test
     mockAxios.onPost('/v1/payment/request-payment').reply(200, {
       invoiceId: 'inv_test123',
       referenceKey: 'ref_abc123',
@@ -148,11 +148,11 @@ describe('BeepClient', () => {
       receivingMerchantId: 'merch_123'
     });
 
-    // Test USDC (6 decimals)
+    // Test USDT (6 decimals)
     await client.requestPayment({
       amount: 0.01,
-      token: SupportedToken.USDC,
-      description: 'USDC payment'
+      token: SupportedToken.USDT,
+      description: 'USDT payment'
     });
 
     const requestData = JSON.parse(mockAxios.history.post[0].data);
@@ -191,7 +191,7 @@ describe('BeepClient', () => {
 
     await client.requestPayment({
       amount: 10.99,
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: 'Test payment',
       payerType: 'merchant_wallet'
     });
@@ -209,7 +209,7 @@ describe('BeepClient', () => {
 
     await client.requestPayment({
       amount: 10.99,
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: ''
     });
 
@@ -226,7 +226,7 @@ describe('BeepClient', () => {
 
     await client.requestPayment({
       amount: 10.99,
-      token: SupportedToken.USDC
+      token: SupportedToken.USDT,
       // description omitted
     });
 
@@ -241,10 +241,10 @@ describe('BeepClient', () => {
       status: 'pending',
     });
     
-    // Test with a large amount (1000 USDC)
+    // Test with a large amount (1000 USDT)
     await client.requestPayment({
       amount: 1000,
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: 'Large payment'
     });
 

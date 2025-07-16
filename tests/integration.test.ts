@@ -26,7 +26,7 @@ describe.skip('Integration Tests', () => {
   it('requestPayment creates a valid invoice', async () => {
     const invoice = await client.requestPayment({
       amount: 0.01, // Small amount for testing
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: 'Integration test payment',
       payerType: 'customer_wallet'
     });
@@ -45,7 +45,7 @@ describe.skip('Integration Tests', () => {
       name: `Test Product ${Date.now()}`, // Unique name
       description: 'Created by integration test',
       price: '0.01',
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       isSubscription: false
     });
 
@@ -66,7 +66,7 @@ describe.skip('Integration Tests', () => {
     const product = await client.payments.createProduct({
       name: 'Integration Test Product',
       price: '0.01',
-      token: SupportedToken.USDC,
+      token: SupportedToken.USDT,
       description: 'Test product for integration tests'
     });
 

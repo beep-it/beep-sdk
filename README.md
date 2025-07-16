@@ -60,7 +60,7 @@ Bet. You're all set up. Now for the fun part.
 
 ## ⚙️ How to Actually Make Money with This
 
-Let's say you want to charge someone 5 USDC for a pack of 100 magic crystals in your game. Here's how to make that money move! 💸
+Let's say you want to charge someone 5 USDT for a pack of 100 magic crystals in your game. Here's how to make that money move! 💸
 
 ### Step 1: Ask for the Money
 
@@ -88,9 +88,9 @@ const chargeDetails = {
   // You can just use normal dollar/decimal amounts now! We handle the conversion.
   amount: 5.00,
   // We've made it easier - just use our token enum instead of that crazy address!
-  token: SupportedToken.USDC, // Much cleaner than a long address, right?
+  token: SupportedToken.USDT, // Much cleaner than a long address, right?
   // or if you're old-school, you can still use the raw address:
-  // splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // This is USDC
+  // splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // This is USDT
   description: 'A pack of 100 magic crystals',
 };
 
@@ -140,7 +140,7 @@ new BeepClient(options: {
 // The money maker - this is all you need 99% of the time!
 const invoice = await beep.requestPayment({
   amount: 19.99, // Clean decimal amount
-  token: SupportedToken.USDC, // Enum magic!
+  token: SupportedToken.USDT, // Enum magic!
   description: 'VIP Battle Pass - Summer Season'
 });
 
@@ -198,8 +198,8 @@ Our shiny new enum for supported tokens! Way easier than remembering addresses.
 import { SupportedToken } from 'beep-sdk';
 
 // Use it like this
-const token = SupportedToken.USDC; // Currently supported
-// SupportedToken.USDT coming soon!
+const token = SupportedToken.USDT; // Currently supported
+// SupportedToken.USDC coming soon!
 ```
 
 ### `beep.invoices`
@@ -228,7 +228,7 @@ const product = await beep.payments.createProduct({
   name: 'Magic Sword of Destiny',
   description: 'Gives +10 attack and looks cool as heck',
   price: '9.99', // Just regular numbers as strings
-  token: SupportedToken.USDC, // So much cleaner than a crazy address
+  token: SupportedToken.USD T, // So much cleaner than a crazy address
   isSubscription: false // One-time purchase
 });
 
@@ -239,7 +239,7 @@ const subscriptionProduct = await beep.payments.createProduct({
   name: 'Premium Battle Pass',
   description: 'Monthly subscription with exclusive skins and perks',
   price: '14.99', // Monthly price
-  token: SupportedToken.USDC,
+  token: SupportedToken.USDT,
   isSubscription: true // This makes it recurring - monthly subscription!
 });
 
@@ -250,7 +250,7 @@ const meteredProduct = await beep.payments.createProduct({
   name: 'API Usage',
   description: 'Pay only for what you use - API calls',
   price: '0.001', // Price per API call
-  token: SupportedToken.USDC,
+  token: SupportedToken.USDT,
   isSubscription: false,
   metadata: { // Custom metadata for metered billing
     billingType: 'metered',
@@ -290,7 +290,7 @@ products.forEach(product => {
 const updatedProduct = await beep.payments.updateProduct('prod_123abc456def', {
   price: '14.99', // Price increase! Cha-ching!
   description: 'Now with extra sparkles ✨',
-  token: SupportedToken.USDC
+  token: SupportedToken.USDT
 });
 
 console.log('Product updated with new price:', updatedProduct.price);
@@ -317,7 +317,7 @@ const productInvoice = await beep.payments.createInvoice({
 const customInvoice = await beep.payments.createInvoice({
   description: 'Emergency dragon-slaying services',
   amount: '49.99',
-  token: SupportedToken.USDC, // Just use the enum - way cooler
+  token: SupportedToken.USDT, // Just use the enum - way cooler
   payerType: 'customer_wallet'
 });
 
@@ -360,20 +360,20 @@ For the super nerds who want to play with token addresses:
 import { TokenUtils, SupportedToken } from 'beep-sdk';
 
 // Get the address from a token enum
-const address = TokenUtils.getTokenAddress(SupportedToken.USDC);
+const address = TokenUtils.getTokenAddress(SupportedToken.USDT);
 console.log(address); // 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
 
 // Check if we support a token
-const isSupported = TokenUtils.isTokenSupported(SupportedToken.USDC); // true
+const isSupported = TokenUtils.isTokenSupported(SupportedToken.USDT); // true
 const isUsdtSupported = TokenUtils.isTokenSupported('USDT'); // false (coming soon™)
 
 // Get a token enum from an address (reverse lookup)
 const token = TokenUtils.getTokenFromAddress('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
-console.log(token); // SupportedToken.USDC
+console.log(token); // SupportedToken.USDT
 
 // Get the default token if none specified
 const defaultToken = TokenUtils.getDefaultToken();
-console.log(defaultToken); // SupportedToken.USDC
+console.log(defaultToken); // SupportedToken.USDT
 ```
 
 ---
