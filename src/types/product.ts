@@ -20,7 +20,7 @@ export interface CreateProductPayload {
   splTokenAddress?: string; // Optional if token is provided
   token?: SupportedToken; // Optional token enum
   isSubscription?: boolean;
-};
+}
 
 export interface UpdateProductPayload {
   name?: string;
@@ -29,4 +29,4 @@ export interface UpdateProductPayload {
   splTokenAddress?: string;
   token?: SupportedToken; // Optional token enum
   isSubscription?: boolean;
-};
+}

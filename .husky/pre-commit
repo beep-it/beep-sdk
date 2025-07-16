@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged to lint and build only the changed files
+npx lint-staged
+
+# Also run a full test to make sure everything works together
+npm test
