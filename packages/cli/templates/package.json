@@ -1,0 +1,18 @@
+{
+  "name": "my-beep-mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@beep/sdk-core": "file:beep-sdk-core-0.1.0.tgz",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3",
+    "@types/node": "^20.14.10"
+  }
+}

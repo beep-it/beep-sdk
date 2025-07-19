@@ -2,20 +2,15 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2020", "DOM"],
+    "lib": ["ES2020"],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "declaration": true,
-    "composite": true,
-    "sourceMap": true,
-    "declarationMap": true
+    "outDir": "./dist",
+    "rootDir": "./src"
   },
-  "files": [],
-  "references": [
-    { "path": "./packages/core" },
-    { "path": "./packages/cli" }
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }
