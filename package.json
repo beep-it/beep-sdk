@@ -2,13 +2,19 @@
   "name": "beep-sdk-monorepo",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter \"./packages/*\" build",
+    "build": "pnpm --filter @beep/sdk-core build && pnpm --filter \"./packages/*\" build",
     "test": "pnpm --filter \"./packages/*\" test",
     "build:cli": "pnpm --filter @beep/sdk-core build && pnpm --filter @beep/sdk-core run pack && pnpm --filter @beep/cli build"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
+    "eslint": "^8.49.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
     "pnpm": "^8.0.0"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "packageManager": "pnpm@8.6.0"
 }
