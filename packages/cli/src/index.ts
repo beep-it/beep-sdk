@@ -4,8 +4,17 @@ import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+/**
+ * BEEP CLI
+ *
+ * This CLI scaffolds and integrates a minimal BEEP MCP server into existing projects.
+ * Design principles:
+ *  - Never overwrite a user's files by default.
+ *  - Provide sensible templates that can run out-of-the-box.
+ *  - Keep behavior explicit and documented.
+ */
 
-// This is the main entry point for your CLI
+// This is the main entry point for the CLI
 export const program = new Command();
 
 program
@@ -28,14 +37,117 @@ program
   .requiredOption('--mode <https|stdio>', 'The communication protocol for the server')
   .option('--path <directory>', 'The path to create the server in. Defaults to the current directory.')
   .action(async (options) => {
+    /**
+     * Initialize an MCP server in the given target path.
+     *
+     * Behavior:
+     *  - Copies template files but will NOT overwrite existing files.
+     *  - Special-cases package.json to MERGE dependencies/devDependencies/scripts.
+     *  - Creates an .env from .env.example if .env is missing.
+     *  - Prefers creating a file named `mcp-server.ts` (not `server.ts`).
+     */
     const targetPath = options.path ? path.resolve(options.path) : process.cwd();
     const templatePath = path.resolve(__dirname, '../templates');
 
     console.log(`Scaffolding new BEEP MCP server at: ${targetPath}`);
 
     try {
-      // Copy the entire template directory
-      await fs.cp(templatePath, targetPath, { recursive: true });
+      /** Ensure a directory exists (mkdir -p) */
+      const ensureDir = async (dir: string) => {
+        await fs.mkdir(dir, { recursive: true });
+      };
+
+      /**
+       * Merge package.json from template into destination.
+       *
+       * Strategy:
+       *  - If dest package.json does not exist: write template as-is.
+       *  - If dest exists: merge dependencies, devDependencies, scripts (non-destructive — do not overwrite existing keys).
+       */
+      const mergePackageJson = async (srcPkgPath: string, destPkgPath: string) => {
+        const srcRaw = await fs.readFile(srcPkgPath, 'utf-8');
+        const src = JSON.parse(srcRaw);
+
+        let dest: any = {};
+        try {
+          const destRaw = await fs.readFile(destPkgPath, 'utf-8');
+          dest = JSON.parse(destRaw);
+        } catch (e) {
+          // If no existing package.json, use src entirely
+          await fs.writeFile(destPkgPath, JSON.stringify(src, null, 2) + '\n');
+          console.log('  - Created package.json');
+          return;
+        }
+
+        const merged = { ...dest };
+        const mergeField = (field: 'dependencies' | 'devDependencies' | 'scripts') => {
+          const srcField = src[field] || {};
+          const destField = dest[field] || {};
+          const out: Record<string, string> = { ...destField };
+          for (const [k, v] of Object.entries(srcField)) {
+            if (!(k in out)) {
+              out[k] = v as string;
+            }
+          }
+          if (Object.keys(out).length > 0) merged[field] = out;
+        };
+
+        mergeField('dependencies');
+        mergeField('devDependencies');
+        mergeField('scripts');
+
+        await fs.writeFile(destPkgPath, JSON.stringify(merged, null, 2) + '\n');
+        console.log('  - Updated package.json (merged dependencies, devDependencies, scripts)');
+      };
+
+      /**
+       * Recursively copy template files into target directory.
+       *
+       * Rules:
+       *  - package.json => merge via mergePackageJson
+       *  - server.ts => SKIP (we use mcp-server.ts instead)
+       *  - all other files => copy only if not present
+       */
+      const copyTemplates = async (srcDir: string, destDir: string) => {
+        await ensureDir(destDir);
+        const entries = await fs.readdir(srcDir, { withFileTypes: true });
+        for (const entry of entries) {
+          const srcPath = path.join(srcDir, entry.name);
+          const destPath = path.join(destDir, entry.name);
+
+          if (entry.isDirectory()) {
+            await copyTemplates(srcPath, destPath);
+          } else if (entry.isFile()) {
+            if (entry.name === 'package.json') {
+              await mergePackageJson(srcPath, path.join(destDir, 'package.json'));
+              continue;
+            }
+
+            // Skip legacy server.ts from templates; we provide mcp-server.ts instead
+            if (entry.name === 'server.ts') {
+              console.log('  - Skipped template server.ts (replaced by mcp-server.ts)');
+              continue;
+            }
+
+            // Do not overwrite existing files
+            try {
+              await fs.access(destPath);
+              // If exists, skip
+              console.log(`  - Skipped existing ${path.relative(destDir, destPath)}`);
+              continue;
+            } catch (_) {
+              // does not exist, proceed to copy
+            }
+
+            const fileData = await fs.readFile(srcPath);
+            await ensureDir(path.dirname(destPath));
+            await fs.writeFile(destPath, fileData);
+            console.log(`  - Added ${path.relative(destDir, destPath)}`);
+          }
+        }
+      };
+
+      await copyTemplates(templatePath, targetPath);
 
       // Create a configured .env file
       const envExamplePath = path.join(targetPath, '.env.example');
@@ -45,8 +157,20 @@ program
         /^COMMUNICATION_MODE=.*/m,
         `COMMUNICATION_MODE=${options.mode}`
       );
-      await fs.writeFile(envPath, envContent);
-      await fs.unlink(envExamplePath); // Remove the example file
+      // Only write .env if it doesn't already exist
+      try {
+        await fs.access(envPath);
+        console.log('  - .env already exists, leaving unchanged');
+      } catch (_) {
+        await fs.writeFile(envPath, envContent);
+        console.log('  - Created .env from .env.example');
+      }
+      // Clean up the example file only if it was copied
+      try {
+        await fs.unlink(envExamplePath);
+      } catch (_) {
+        /* ignore */
+      }
 
       console.log(`\n✅ BEEP MCP server created at: ${targetPath}`);
       console.log('\nNext steps:');
@@ -70,6 +194,13 @@ if (require.main === module) {
     .command('integrate <path>')
     .description('Integrate BEEP MCP into an existing project')
     .action(async (targetPath) => {
+      /**
+       * Integrate helper files into an existing project:
+       *  - Copies the example tool into <project>/tools/
+       *  - Copies the BEEP SDK tarball next to the project (for local installs)
+       *
+       * Note: We do not modify package.json here; instructions are printed for the user.
+       */
       const fullTargetPath = path.resolve(targetPath);
       console.log(`\nIntegrating BEEP files into: ${fullTargetPath}`);
 
