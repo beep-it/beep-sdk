@@ -1,0 +1,6 @@
+# Showcase build files (not included in package)
+./dist
+
+# Development files
+.DS_Store
+*.log
