@@ -17,17 +17,69 @@ Basically, it's the ultimate shortcut to getting your BEEP integration up and ru
 
 ## 🚀 Installation
 
-First things first, you need to install this bad boy. We've published it to npm, so it's a breeze. Open your terminal and run:
+### Option A — Public (when published)
+
+Once this CLI is published to npm, you can install it globally:
 
 ```bash
 # Using npm
 npm install -g @beep/cli
 
-# Or if you're a pnpm fan
+# Or with pnpm
 pnpm add -g @beep/cli
+
+# Verify
+beep --help
 ```
 
-This makes the `beep` command available anywhere on your system. To check if it worked, just type `beep --help` and you should see a list of available commands.
+### Option B — Local/Private (tarball)
+
+This CLI is currently distributed privately via a tarball. Install it locally using one of the options below.
+
+#### B1 — Global install from local tarball
+
+```bash
+# From beep-sdk/packages/cli
+pnpm prepack   # builds a fresh core SDK tarball and the CLI
+npm pack       # outputs beep-cli-<version>.tgz (e.g., beep-cli-0.1.0.tgz)
+
+# Install globally
+npm i -g ./beep-cli-0.1.0.tgz
+
+# Verify
+beep --help
+```
+
+This makes the `beep` command available anywhere on your system.
+
+#### B2 — Use inside an external app (as a devDependency)
+
+1) Pack the CLI once:
+
+```bash
+cd beep-sdk/packages/cli
+pnpm prepack && npm pack
+```
+
+2) In your external app's `package.json`, add:
+
+```json
+{
+  "devDependencies": {
+    "@beep/cli": "file:../path/to/beep-sdk/packages/cli/beep-cli-0.1.0.tgz"
+  },
+  "scripts": {
+    "beep": "beep"
+  }
+}
+```
+
+3) Install and run:
+
+```bash
+pnpm install
+pnpm beep --help   # or: npx beep --help
+```
 
 --- 
 
