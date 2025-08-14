@@ -4,7 +4,7 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.json',
+    project: ['./tsconfig.json', './packages/*/tsconfig.json'],
     tsconfigRootDir: __dirname,
     sourceType: 'module',
   },
@@ -20,8 +20,11 @@ module.exports = {
   },
   ignorePatterns: [
     'dist/**/*',
+    '**/dist/**/*',
     'node_modules/**/*',
+    '**/node_modules/**/*',
     '.eslintrc.js',
+    '**/.eslintrc.js',
   ],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',

@@ -41,7 +41,7 @@ describe.skip('Integration Tests', () => {
 
   it('payments module can create and retrieve a product', async () => {
     // Create a test product
-    const product = await client.payments.createProduct({
+    const product = await client.products.createProduct({
       name: `Test Product ${Date.now()}`, // Unique name
       description: 'Created by integration test',
       price: '0.01',
@@ -53,17 +53,17 @@ describe.skip('Integration Tests', () => {
     expect(product.id).toBeDefined();
 
     // Retrieve the product
-    const retrievedProduct = await client.payments.getProduct(product.id);
+    const retrievedProduct = await client.products.getProduct(product.id);
     expect(retrievedProduct).toBeDefined();
     expect(retrievedProduct.id).toBe(product.id);
     
     // Clean up
-    await client.payments.deleteProduct(product.id);
+    await client.products.deleteProduct(product.id);
   });
   
   it('payments module should create and get an invoice', async () => {
     // Create a test product
-    const product = await client.payments.createProduct({
+    const product = await client.products.createProduct({
       name: 'Integration Test Product',
       price: '0.01',
       token: SupportedToken.USDT,
@@ -71,7 +71,7 @@ describe.skip('Integration Tests', () => {
     });
 
     // Create an invoice from the product
-    const invoice = await client.payments.createInvoice({
+    const invoice = await client.invoices.createInvoice({
       productId: product.id,
       payerType: 'customer_wallet'
     });
@@ -88,12 +88,12 @@ describe.skip('Integration Tests', () => {
     const invoiceId = invoice.id;
     expect(invoiceId).toBeDefined();
     
-    const retrievedInvoice = await client.payments.getInvoice(invoiceId!);
+    const retrievedInvoice = await client.invoices.getInvoice(invoiceId!);
 
     console.log('Invoice retrieved:', retrievedInvoice);
     expect(retrievedInvoice.id).toBe(invoiceId);
     
     // Clean up
-    await client.payments.deleteInvoice(invoiceId!);
+    await client.invoices.deleteInvoice(invoiceId!);
   }, 10000);
 });

@@ -1,10 +1,10 @@
 // Main entry point for the beep-sdk
 
 import axios, { AxiosInstance } from 'axios';
-import { PaymentsModule } from './modules/payments';
+import { ProductsModule } from './modules/products';
+import { InvoicesModule } from './modules/invoices';
 import { PaymentRequestResponse } from './types/payment';
 import { SupportedToken, TOKEN_DECIMALS } from './types/token';
-
 
 // Configuration for the BeepClient
 interface BeepClientOptions {
@@ -24,27 +24,36 @@ export interface RequestPaymentPayload {
   payerType?: 'customer_wallet' | 'merchant_wallet'; // Added payerType field to match API requirements
 }
 
+export interface SignSolanaTransactionPayload {
+  senderAddress: string;
+  recipientAddress: string;
+  tokenMintAddress: string;
+  amount: number;
+  decimals: number;
+}
+
 // The main client for interacting with the BEEP API
 export class BeepClient {
   private client: AxiosInstance;
-  public payments: PaymentsModule;
-
+  public products: ProductsModule;
+  public invoices: InvoicesModule;
 
   constructor(options: BeepClientOptions) {
     this.client = axios.create({
       baseURL: options.serverUrl || 'https://api.beep.com', // Default to production URL
       headers: {
-        'Authorization': `Bearer ${options.apiKey}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${options.apiKey}`,
+        'Content-Type': 'application/json',
+      },
     });
 
     // Initialize modules
-    this.payments = new PaymentsModule(this.client);
+    this.products = new ProductsModule(this.client);
+    this.invoices = new InvoicesModule(this.client);
   }
 
   /**
-   * The simplest way to request a payment. 
+   * The simplest way to request a payment.
    * This one-stop method creates an invoice and prepares it for payment.
    * @param payload The details of the charge.
    * @returns A promise that resolves to the created invoice.
@@ -76,12 +85,12 @@ export class BeepClient {
       token?: SupportedToken;
       payerType?: string;
     } = {
-      description: payload.description || 'Payment request' // Provide a default description
+      description: payload.description || 'Payment request', // Provide a default description
     };
-    
+
     // Determine token type
     const token = payload.token || SupportedToken.USDT; // Default to USDT if not specified
-    
+
     // Pass through splTokenAddress if provided, otherwise use token
     if (payload.splTokenAddress) {
       requestBody.splTokenAddress = payload.splTokenAddress;
@@ -89,7 +98,7 @@ export class BeepClient {
       // Token is guaranteed to be defined because we set a default value above
       requestBody.token = token as SupportedToken;
     }
-    
+
     // Convert decimal amount to base units
     requestBody.amount = this.convertAmountToBaseUnits(payload.amount, token);
 
@@ -97,19 +106,41 @@ export class BeepClient {
     if (payload.payerType) {
       requestBody.payerType = payload.payerType;
     }
-    
+
     try {
-      const response = await this.client.post<PaymentRequestResponse>('/v1/payment/request-payment', requestBody);
-      
+      const response = await this.client.post<PaymentRequestResponse>(
+        '/v1/payment/request-payment',
+        requestBody,
+      );
+
       if (!response.data) {
         throw new Error('No data returned from payment request');
       }
-      
+
       return response.data;
     } catch (error: unknown) {
       // Rethrow with more context
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to request payment: ${errorMessage}`);
+    }
+  }
+
+  public async signSolanaTransaction(payload: SignSolanaTransactionPayload) {
+    try {
+      const response = await this.client.post<PaymentRequestResponse>(
+        '/v1/payment/sign-solana-transaction',
+        payload,
+      );
+
+      if (!response.data) {
+        throw new Error('No data returned from payment request');
+      }
+
+      return response.data;
+    } catch (error: unknown) {
+      // Rethrow with more context
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to sign solana transaction: ${errorMessage}`);
     }
   }
 

@@ -8,6 +8,9 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc --emitDeclarationOnly && tsup src/index.ts --format cjs,esm --no-dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
@@ -21,8 +24,7 @@
   },
   "lint-staged": {
     "*.{js,ts}": [
-      "eslint --fix",
-      "npm run build --if-present -- --no-dts"
+      "eslint --fix"
     ]
   },
   "keywords": [

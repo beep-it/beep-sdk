@@ -36,7 +36,7 @@ describe('Payments Module', () => {
       
       mockAxios.onPost('/v1/products').reply(200, mockProduct);
 
-      const result = await client.payments.createProduct({
+      const result = await client.products.createProduct({
         name: 'Test Product',
         description: 'A test product',
         price: '9.99',
@@ -60,7 +60,7 @@ describe('Payments Module', () => {
         // other fields...
       });
 
-      const result = await client.payments.createProduct({
+      const result = await client.products.createProduct({
         name: 'Premium Subscription',
         description: 'Monthly subscription',
         price: '14.99',
@@ -86,7 +86,7 @@ describe('Payments Module', () => {
       
       mockAxios.onGet('/v1/products/prod_test123').reply(200, mockProduct);
 
-      const result = await client.payments.getProduct('prod_test123');
+      const result = await client.products.getProduct('prod_test123');
       expect(result).toEqual(mockProduct);
     });
 
@@ -98,7 +98,7 @@ describe('Payments Module', () => {
       
       mockAxios.onGet('/v1/products').reply(200, mockProducts);
 
-      const result = await client.payments.listProducts();
+      const result = await client.products.listProducts();
       expect(result).toEqual(mockProducts);
     });
 
@@ -111,7 +111,7 @@ describe('Payments Module', () => {
       
       mockAxios.onPut('/v1/products/prod_test123').reply(200, mockUpdatedProduct);
 
-      const result = await client.payments.updateProduct('prod_test123', {
+      const result = await client.products.updateProduct('prod_test123', {
         name: 'Updated Product'
       });
       
@@ -121,7 +121,7 @@ describe('Payments Module', () => {
     it('deleteProduct deletes a product', async () => {
       mockAxios.onDelete('/v1/products/prod_test123').reply(200, { deleted: true });
 
-      await client.payments.deleteProduct('prod_test123');
+      await client.products.deleteProduct('prod_test123');
       
       expect(mockAxios.history.delete.length).toBe(1);
       expect(mockAxios.history.delete[0].url).toBe('/v1/products/prod_test123');
@@ -141,7 +141,7 @@ describe('Payments Module', () => {
       
       mockAxios.onPost('/v1/invoices').reply(200, mockInvoice);
 
-      const result = await client.payments.createInvoice({
+      const result = await client.invoices.createInvoice({
         productId: 'prod_test123',
         payerType: 'customer_wallet'
       });
@@ -164,7 +164,7 @@ describe('Payments Module', () => {
       
       mockAxios.onPost('/v1/invoices').reply(200, mockInvoice);
 
-      const result = await client.payments.createInvoice({
+      const result = await client.invoices.createInvoice({
         amount: '25.99',
         token: SupportedToken.USDT,
         description: 'Custom invoice',
@@ -187,7 +187,7 @@ describe('Payments Module', () => {
       
       mockAxios.onGet('/v1/invoices/inv_test123').reply(200, mockInvoice);
 
-      const result = await client.payments.getInvoice('inv_test123');
+      const result = await client.invoices.getInvoice('inv_test123');
       expect(result).toEqual(mockInvoice);
     });
 
@@ -199,14 +199,14 @@ describe('Payments Module', () => {
       
       mockAxios.onGet('/v1/invoices').reply(200, mockInvoices);
 
-      const result = await client.payments.listInvoices();
+      const result = await client.invoices.listInvoices();
       expect(result).toEqual(mockInvoices);
     });
 
     it('deleteInvoice deletes an invoice', async () => {
       mockAxios.onDelete('/v1/invoices/inv_test123').reply(200, { deleted: true });
 
-      await client.payments.deleteInvoice('inv_test123');
+      await client.invoices.deleteInvoice('inv_test123');
       
       expect(mockAxios.history.delete.length).toBe(1);
       expect(mockAxios.history.delete[0].url).toBe('/v1/invoices/inv_test123');
