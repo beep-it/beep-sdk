@@ -52,7 +52,7 @@ export class PaymentsModule {
         input,
       );
 
-      if (!response.data) {
+      if (!response.data || !response.data.data) {
         throw new Error('No data returned from solana transaction signing');
       }
 

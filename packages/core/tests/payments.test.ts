@@ -81,4 +81,165 @@ describe('Payments Module', () => {
       expect(mockAxios.history.post[0].url).toBe('/v1/payment/request-payment');
     });
   });
+
+  describe('signSolanaTransaction', () => {
+    const validInput = {
+      senderAddress: '11111111111111111111111111111111',
+      recipientAddress: '22222222222222222222222222222222',
+      tokenMintAddress: '33333333333333333333333333333333',
+      amount: 100000,
+      decimals: 6,
+    };
+
+    it('returns null when required fields are missing', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      // Test missing senderAddress
+      const result1 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        senderAddress: '',
+      });
+
+      expect(result1).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing required fields');
+
+      // Test missing recipientAddress
+      const result2 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        recipientAddress: '',
+      });
+
+      expect(result2).toBeNull();
+
+      // Test missing tokenMintAddress
+      const result3 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        tokenMintAddress: '',
+      });
+
+      expect(result3).toBeNull();
+
+      // Test missing amount
+      const result4 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        amount: 0,
+      });
+
+      expect(result4).toBeNull();
+
+      // Test missing decimals
+      const result5 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        decimals: 0,
+      });
+
+      expect(result5).toBeNull();
+
+      expect(mockAxios.history.post.length).toBe(0); // No API calls should be made
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('successfully signs transaction with valid input', async () => {
+      const mockTransactionData = {
+        signedTransaction: 'base64-encoded-signed-transaction',
+        transactionId: 'txn_12345',
+        signature: 'signature-string',
+      };
+
+      const mockResponse = {
+        data: mockTransactionData,
+      };
+
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, mockResponse);
+
+      const result = await client.payments.signSolanaTransaction(validInput);
+
+      expect(result).toEqual(mockTransactionData);
+      expect(mockAxios.history.post.length).toBe(1);
+      expect(mockAxios.history.post[0].url).toBe('/v1/payment/sign-solana-transaction');
+
+      // Verify the request payload
+      const requestData = JSON.parse(mockAxios.history.post[0].data);
+      expect(requestData).toEqual(validInput);
+    });
+
+    it('throws error when API returns no data', async () => {
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, {});
+
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
+        'Failed to sign solana transaction: No data returned from solana transaction signing',
+      );
+    });
+
+    it('throws error when API call fails', async () => {
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(500, {
+        error: 'Internal server error',
+      });
+
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
+        'Failed to sign solana transaction:',
+      );
+
+      expect(mockAxios.history.post.length).toBe(1);
+    });
+
+    it('throws error when network error occurs', async () => {
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').networkError();
+
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
+        'Failed to sign solana transaction:',
+      );
+
+      expect(mockAxios.history.post.length).toBe(1);
+    });
+
+    it('handles different amount values correctly', async () => {
+      const mockResponse = {
+        data: {
+          signedTransaction: 'base64-encoded-signed-transaction',
+          transactionId: 'txn_12345',
+        },
+      };
+
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, mockResponse);
+
+      // Test with large amount
+      const largeAmountInput = {
+        ...validInput,
+        amount: 1000000000, // 1 billion units
+      };
+
+      const result = await client.payments.signSolanaTransaction(largeAmountInput);
+
+      expect(result).toEqual(mockResponse.data);
+
+      const requestData = JSON.parse(mockAxios.history.post[0].data);
+      expect(requestData.amount).toBe(1000000000);
+    });
+
+    it('handles different decimal values correctly', async () => {
+      const mockResponse = {
+        data: {
+          signedTransaction: 'base64-encoded-signed-transaction',
+          transactionId: 'txn_12345',
+        },
+      };
+
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, mockResponse);
+
+      // Test with 9 decimals (SOL)
+      const solInput = {
+        ...validInput,
+        decimals: 9,
+      };
+
+      const result = await client.payments.signSolanaTransaction(solInput);
+
+      expect(result).toEqual(mockResponse.data);
+
+      const requestData = JSON.parse(mockAxios.history.post[0].data);
+      expect(requestData.decimals).toBe(9);
+    });
+  });
 });
