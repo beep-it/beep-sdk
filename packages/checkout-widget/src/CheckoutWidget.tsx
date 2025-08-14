@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { MerchantWidgetProps, MerchantWidgetState } from './types';
 import { BeepClient } from '@beep/sdk-core';
+import React, { useEffect, useState } from 'react';
+import { MerchantWidgetProps, MerchantWidgetState } from './types';
 
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
   merchantId,
@@ -26,13 +26,12 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
           serverUrl: serverUrl,
         });
 
-        const paymentResponse = await client.requestPayment({
-          amount,
-          description: `Payment for merchant ${merchantId}`,
+        const paymentResponse = await client.payments.requestAndPurchaseAsset({
+          assetIds: ['asset_1'],
         });
 
         setState({
-          qrCode: paymentResponse.qrCode,
+          qrCode: paymentResponse?.qrCode || null,
           loading: false,
           error: null,
         });

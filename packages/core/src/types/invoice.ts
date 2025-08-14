@@ -4,9 +4,10 @@ export type PayerType = 'customer_wallet' | 'merchant_wallet';
 
 export enum InvoiceStatus {
   PENDING = 'pending',
+  PAID = 'paid',
   CONFIRMED = 'confirmed',
   EXPIRED = 'expired',
-  ERROR = 'error'
+  FAILED = 'failed',
 }
 
 export interface Invoice {

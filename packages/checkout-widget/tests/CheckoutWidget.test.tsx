@@ -1,9 +1,8 @@
 // @ts-ignore
-import React from 'react';
+import { BeepClient } from '@beep/sdk-core';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { CheckoutWidget } from '../src/CheckoutWidget';
-import { BeepClient } from '@beep/sdk-core';
 
 // Mock the BeepClient
 jest.mock('@beep/sdk-core');
@@ -20,12 +19,21 @@ describe('CheckoutWidget', () => {
     apiKey: 'test-api-key',
   };
 
+  let mockRequestPayment: jest.Mock;
+
   beforeEach(() => {
+    mockRequestPayment = jest.fn();
+    
     MockedBeepClient.mockClear();
+    MockedBeepClient.mockImplementation(() => ({
+      payments: {
+        requestAndPurchaseAsset: mockRequestPayment,
+      },
+    } as any));
   });
 
   it('renders loading state initially', () => {
-    const mockRequestPayment = jest.fn().mockResolvedValue({
+    mockRequestPayment.mockResolvedValue({
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
@@ -36,8 +44,6 @@ describe('CheckoutWidget', () => {
       receivingMerchantId: 'test-merchant-123',
       status: 'pending',
     });
-
-    MockedBeepClient.prototype.requestPayment = mockRequestPayment;
 
     render(<CheckoutWidget {...defaultProps} />);
 
@@ -45,7 +51,7 @@ describe('CheckoutWidget', () => {
   });
 
   it('renders QR code after successful payment request', async () => {
-    const mockRequestPayment = jest.fn().mockResolvedValue({
+    mockRequestPayment.mockResolvedValue({
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
@@ -56,8 +62,6 @@ describe('CheckoutWidget', () => {
       receivingMerchantId: 'test-merchant-123',
       status: 'pending',
     });
-
-    MockedBeepClient.prototype.requestPayment = mockRequestPayment;
 
     render(<CheckoutWidget {...defaultProps} />);
 
@@ -68,14 +72,12 @@ describe('CheckoutWidget', () => {
     });
 
     expect(mockRequestPayment).toHaveBeenCalledWith({
-      amount: 25.5,
-      description: 'Payment for merchant test-merchant-123',
+      assetIds: ['asset_1'],
     });
   });
 
   it('renders error state when payment request fails', async () => {
-    const mockRequestPayment = jest.fn().mockRejectedValue(new Error('Network error'));
-    MockedBeepClient.prototype.requestPayment = mockRequestPayment;
+    mockRequestPayment.mockRejectedValue(new Error('Network error'));
 
     render(<CheckoutWidget {...defaultProps} />);
 
@@ -85,7 +87,7 @@ describe('CheckoutWidget', () => {
   });
 
   it('uses custom server URL when provided', async () => {
-    const mockRequestPayment = jest.fn().mockResolvedValue({
+    mockRequestPayment.mockResolvedValue({
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
@@ -96,8 +98,6 @@ describe('CheckoutWidget', () => {
       receivingMerchantId: 'test-merchant-123',
       status: 'pending',
     });
-
-    MockedBeepClient.prototype.requestPayment = mockRequestPayment;
 
     const customServerUrl = 'https://custom-server.com';
     render(<CheckoutWidget {...defaultProps} serverUrl={customServerUrl} />);

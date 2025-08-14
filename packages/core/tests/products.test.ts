@@ -1,6 +1,8 @@
-import { BeepClient, SupportedToken, TOKEN_ADDRESSES } from '../src';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { BeepClient } from '../src';
+import { SupportedToken } from '../src/types';
+import { TOKEN_ADDRESSES } from '../src/types/token';
 
 describe('Products Module', () => {
   let client: BeepClient;
@@ -10,7 +12,7 @@ describe('Products Module', () => {
     mockAxios = new MockAdapter(axios);
     client = new BeepClient({
       apiKey: 'test-api-key',
-      serverUrl: 'https://test-api.beep.com'
+      serverUrl: 'https://test-api.beep.com',
     });
   });
 
@@ -29,9 +31,9 @@ describe('Products Module', () => {
       splTokenAddress: TOKEN_ADDRESSES[SupportedToken.USDT],
       isSubscription: false,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
-    
+
     mockAxios.onPost('/v1/products').reply(200, mockProduct);
 
     const result = await client.products.createProduct({
@@ -39,11 +41,11 @@ describe('Products Module', () => {
       description: 'A test product',
       price: '9.99',
       token: SupportedToken.USDT,
-      isSubscription: false
+      isSubscription: false,
     });
 
     expect(result).toEqual(mockProduct);
-    
+
     // Verify the request
     expect(mockAxios.history.post.length).toBe(1);
     const requestData = JSON.parse(mockAxios.history.post[0].data);
@@ -63,11 +65,11 @@ describe('Products Module', () => {
       description: 'Monthly subscription',
       price: '14.99',
       token: SupportedToken.USDT,
-      isSubscription: true
+      isSubscription: true,
     });
 
     expect(result.isSubscription).toBe(true);
-    
+
     const requestData = JSON.parse(mockAxios.history.post[0].data);
     expect(requestData.isSubscription).toBe(true);
   });
@@ -78,7 +80,7 @@ describe('Products Module', () => {
       name: 'Test Product',
       // other fields...
     };
-    
+
     mockAxios.onGet('/v1/products/prod_test123').reply(200, mockProduct);
 
     const result = await client.products.getProduct('prod_test123');
@@ -88,9 +90,9 @@ describe('Products Module', () => {
   it('listProducts returns all products', async () => {
     const mockProducts = [
       { id: 'prod_1', name: 'Product 1' },
-      { id: 'prod_2', name: 'Product 2' }
+      { id: 'prod_2', name: 'Product 2' },
     ];
-    
+
     mockAxios.onGet('/v1/products').reply(200, mockProducts);
 
     const result = await client.products.listProducts();
@@ -103,13 +105,13 @@ describe('Products Module', () => {
       name: 'Updated Product',
       // other fields...
     };
-    
+
     mockAxios.onPut('/v1/products/prod_test123').reply(200, mockUpdatedProduct);
 
     const result = await client.products.updateProduct('prod_test123', {
-      name: 'Updated Product'
+      name: 'Updated Product',
     });
-    
+
     expect(result).toEqual(mockUpdatedProduct);
   });
 
@@ -117,7 +119,7 @@ describe('Products Module', () => {
     mockAxios.onDelete('/v1/products/prod_test123').reply(200, { deleted: true });
 
     await client.products.deleteProduct('prod_test123');
-    
+
     expect(mockAxios.history.delete.length).toBe(1);
     expect(mockAxios.history.delete[0].url).toBe('/v1/products/prod_test123');
   });

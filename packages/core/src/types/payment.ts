@@ -1,19 +1,11 @@
-import { SupportedToken } from './token';
 import { InvoiceStatus } from './invoice';
+import { SupportedToken } from './token';
 
-/**
- * Response type for payment request endpoints
- */
-export interface PaymentRequestResponse {
-  invoiceId: string;
-  referenceKey: string;
-  paymentUrl: string;
-  qrCode: string;
-  amount: number;
-  splTokenAddress: string;
-  expiresAt: Date;
-  receivingMerchantId: string;
-  status: InvoiceStatus;
+export interface RequestAndPurchaseAssetRequestParams {
+  /** Array of asset IDs to request and purchase */
+  assetIds?: string[];
+  /** Reference identifier for the payment transaction */
+  paymentReference?: string;
 }
 
 /**
@@ -21,8 +13,41 @@ export interface PaymentRequestResponse {
  */
 export interface RequestPaymentPayload {
   amount: number;
-  token: SupportedToken;
-  description?: string;
-  splTokenAddress?: string;
-  payerType?: string;
+  token?: SupportedToken; // The token type (USDT, etc.)
+  splTokenAddress?: string; // Optional: The SPL token address (alternative to token)
+  description: string;
+  payerType?: 'customer_wallet' | 'merchant_wallet'; // Added payerType field to match API requirements
 }
+
+/**
+ * Response type for payment request endpoints
+ */
+export interface PaymentRequestData {
+  invoiceId: string;
+  referenceKey: string;
+  paymentUrl: string;
+  amount: number;
+  splTokenAddress: string;
+  expiresAt: Date;
+  receivingMerchantId: string;
+  status: InvoiceStatus;
+  qrCode?: string;
+}
+
+export interface SignSolanaTransactionParams {
+  senderAddress: string;
+  recipientAddress: string;
+  tokenMintAddress: string;
+  amount: number;
+  decimals: number;
+}
+export interface SignSolanaTransactionData {
+  signedTransaction: string;
+  proofOfPayment: string;
+  invoiceId: string;
+  status: InvoiceStatus;
+}
+
+/**
+ * Request interface for requesting and purchasing assets
+ */
