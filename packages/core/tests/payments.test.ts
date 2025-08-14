@@ -10,7 +10,7 @@ describe('Payments Module', () => {
     mockAxios = new MockAdapter(axios);
     client = new BeepClient({
       apiKey: 'test-api-key',
-      serverUrl: 'https://test-api.beep.com'
+      serverUrl: 'https://test-api.beep.com',
     });
   });
 
@@ -31,9 +31,9 @@ describe('Payments Module', () => {
         splTokenAddress: TOKEN_ADDRESSES[SupportedToken.USDT],
         isSubscription: false,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
-      
+
       mockAxios.onPost('/v1/products').reply(200, mockProduct);
 
       const result = await client.payments.createProduct({
@@ -41,11 +41,11 @@ describe('Payments Module', () => {
         description: 'A test product',
         price: '9.99',
         token: SupportedToken.USDT,
-        isSubscription: false
+        isSubscription: false,
       });
 
       expect(result).toEqual(mockProduct);
-      
+
       // Verify the request
       expect(mockAxios.history.post.length).toBe(1);
       const requestData = JSON.parse(mockAxios.history.post[0].data);
@@ -65,11 +65,11 @@ describe('Payments Module', () => {
         description: 'Monthly subscription',
         price: '14.99',
         token: SupportedToken.USDT,
-        isSubscription: true
+        isSubscription: true,
       });
 
       expect(result.isSubscription).toBe(true);
-      
+
       const requestData = JSON.parse(mockAxios.history.post[0].data);
       expect(requestData.isSubscription).toBe(true);
     });
@@ -83,7 +83,7 @@ describe('Payments Module', () => {
         name: 'Test Product',
         // other fields...
       };
-      
+
       mockAxios.onGet('/v1/products/prod_test123').reply(200, mockProduct);
 
       const result = await client.payments.getProduct('prod_test123');
@@ -93,9 +93,9 @@ describe('Payments Module', () => {
     it('listProducts returns all products', async () => {
       const mockProducts = [
         { id: 'prod_1', name: 'Product 1' },
-        { id: 'prod_2', name: 'Product 2' }
+        { id: 'prod_2', name: 'Product 2' },
       ];
-      
+
       mockAxios.onGet('/v1/products').reply(200, mockProducts);
 
       const result = await client.payments.listProducts();
@@ -108,13 +108,13 @@ describe('Payments Module', () => {
         name: 'Updated Product',
         // other fields...
       };
-      
+
       mockAxios.onPut('/v1/products/prod_test123').reply(200, mockUpdatedProduct);
 
       const result = await client.payments.updateProduct('prod_test123', {
-        name: 'Updated Product'
+        name: 'Updated Product',
       });
-      
+
       expect(result).toEqual(mockUpdatedProduct);
     });
 
@@ -122,7 +122,7 @@ describe('Payments Module', () => {
       mockAxios.onDelete('/v1/products/prod_test123').reply(200, { deleted: true });
 
       await client.payments.deleteProduct('prod_test123');
-      
+
       expect(mockAxios.history.delete.length).toBe(1);
       expect(mockAxios.history.delete[0].url).toBe('/v1/products/prod_test123');
     });
@@ -138,16 +138,16 @@ describe('Payments Module', () => {
         payerType: 'customer_wallet',
         // other fields...
       };
-      
+
       mockAxios.onPost('/v1/invoices').reply(200, mockInvoice);
 
       const result = await client.payments.createInvoice({
         productId: 'prod_test123',
-        payerType: 'customer_wallet'
+        payerType: 'customer_wallet',
       });
-      
+
       expect(result).toEqual(mockInvoice);
-      
+
       const requestData = JSON.parse(mockAxios.history.post[0].data);
       expect(requestData.productId).toBe('prod_test123');
       expect(requestData.payerType).toBe('customer_wallet');
@@ -161,18 +161,18 @@ describe('Payments Module', () => {
         payerType: 'customer_wallet',
         // other fields...
       };
-      
+
       mockAxios.onPost('/v1/invoices').reply(200, mockInvoice);
 
       const result = await client.payments.createInvoice({
         amount: '25.99',
         token: SupportedToken.USDT,
         description: 'Custom invoice',
-        payerType: 'customer_wallet'
+        payerType: 'customer_wallet',
       });
-      
+
       expect(result).toEqual(mockInvoice);
-      
+
       const requestData = JSON.parse(mockAxios.history.post[0].data);
       expect(requestData.token).toBe(SupportedToken.USDT);
       expect(requestData.payerType).toBe('customer_wallet');
@@ -184,7 +184,7 @@ describe('Payments Module', () => {
         status: 'pending',
         // other fields...
       };
-      
+
       mockAxios.onGet('/v1/invoices/inv_test123').reply(200, mockInvoice);
 
       const result = await client.payments.getInvoice('inv_test123');
@@ -194,9 +194,9 @@ describe('Payments Module', () => {
     it('listInvoices returns all invoices', async () => {
       const mockInvoices = [
         { id: 'inv_1', status: 'paid' },
-        { id: 'inv_2', status: 'pending' }
+        { id: 'inv_2', status: 'pending' },
       ];
-      
+
       mockAxios.onGet('/v1/invoices').reply(200, mockInvoices);
 
       const result = await client.payments.listInvoices();
@@ -207,9 +207,73 @@ describe('Payments Module', () => {
       mockAxios.onDelete('/v1/invoices/inv_test123').reply(200, { deleted: true });
 
       await client.payments.deleteInvoice('inv_test123');
-      
+
       expect(mockAxios.history.delete.length).toBe(1);
       expect(mockAxios.history.delete[0].url).toBe('/v1/invoices/inv_test123');
+    });
+  });
+
+  describe('requestProduct', () => {
+    it('returns null when no paymentReference and no assetIds provided', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      const result = await client.payments.requestProduct({});
+
+      expect(result).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'One of paymentReference or assetIds is required',
+      );
+      expect(mockAxios.history.post.length).toBe(0); // No API call should be made
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('calls endpoint and returns mocked data when paymentReference provided but no assetIds', async () => {
+      const mockProduct = {
+        id: 'prod_test123',
+        name: 'Test Product',
+        description: 'A test product',
+        price: '9.99',
+      };
+
+      const mockResponse = {
+        success: true,
+        data: mockProduct,
+      };
+
+      mockAxios.onPost('/v1/payment/request-payment').reply(200, mockResponse);
+
+      const result = await client.payments.requestProduct({
+        paymentReference: 'pay_ref_123',
+      });
+
+      expect(result).toEqual(mockProduct);
+      expect(mockAxios.history.post.length).toBe(1);
+      expect(mockAxios.history.post[0].url).toBe('/v1/payment/request-payment');
+    });
+
+    it('calls endpoint and returns mocked data when assetIds provided but no paymentReference', async () => {
+      const mockProduct = {
+        id: 'prod_test456',
+        name: 'Asset Product',
+        description: 'Product from asset',
+        price: '15.99',
+      };
+
+      const mockResponse = {
+        success: true,
+        data: mockProduct,
+      };
+
+      mockAxios.onPost('/v1/payment/request-payment').reply(200, mockResponse);
+
+      const result = await client.payments.requestProduct({
+        assetIds: ['asset_1', 'asset_2'],
+      });
+
+      expect(result).toEqual(mockProduct);
+      expect(mockAxios.history.post.length).toBe(1);
+      expect(mockAxios.history.post[0].url).toBe('/v1/payment/request-payment');
     });
   });
 });

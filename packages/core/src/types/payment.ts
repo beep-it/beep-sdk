@@ -26,3 +26,13 @@ export interface RequestPaymentPayload {
   splTokenAddress?: string;
   payerType?: string;
 }
+
+/**
+ * Request interface for requesting and purchasing assets
+ */
+export interface RequestAndPurchaseAssetRequest {
+  /** Array of asset IDs to request and purchase */
+  assetIds?: string[];
+  /** Reference identifier for the payment transaction */
+  paymentReference?: string;
+}
