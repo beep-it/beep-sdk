@@ -3,6 +3,8 @@
 import { Command } from 'commander';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { execSync } from 'child_process';
+import * as readline from 'readline';
 
 /**
  * BEEP CLI
@@ -16,6 +18,23 @@ import * as path from 'path';
 
 // This is the main entry point for the CLI
 export const program = new Command();
+
+/**
+ * Prompt user for input
+ */
+const promptUser = (question: string): Promise<string> => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim());
+    });
+  });
+};
 
 program
   .version('0.1.0')
@@ -149,21 +168,71 @@ program
 
       await copyTemplates(templatePath, targetPath);
 
-      // Create a configured .env file
+      // Install dependencies automatically
+      console.log('\n📦 Installing dependencies...');
+      try {
+        execSync('npm install', { 
+          cwd: targetPath, 
+          stdio: 'inherit' 
+        });
+        console.log('✅ Dependencies installed successfully');
+      } catch (error) {
+        console.log('⚠️  Failed to install dependencies automatically. Please run "npm install" manually.');
+      }
+
+      // Prompt for API key and create configured .env file
+      console.log('\n🔑 Setting up your environment...');
+      const apiKey = await promptUser('Enter your BEEP API key (or press Enter to skip): ');
+      
       const envExamplePath = path.join(targetPath, '.env.example');
       const envPath = path.join(targetPath, '.env');
       let envContent = await fs.readFile(envExamplePath, 'utf-8');
+      
+      // Set communication mode
       envContent = envContent.replace(
         /^COMMUNICATION_MODE=.*/m,
         `COMMUNICATION_MODE=${options.mode}`
       );
-      // Only write .env if it doesn't already exist
+      
+      // Set API key if provided
+      if (apiKey) {
+        envContent = envContent.replace(
+          /^BEEP_API_KEY=.*/m,
+          `BEEP_API_KEY=${apiKey}`
+        );
+      }
+      
+      // Handle .env file: create or merge safely
       try {
-        await fs.access(envPath);
-        console.log('  - .env already exists, leaving unchanged');
+        // Check if .env already exists
+        const existingEnv = await fs.readFile(envPath, 'utf-8');
+        
+        // Merge: only add missing BEEP variables
+        let updatedEnv = existingEnv;
+        let hasUpdates = false;
+        
+        // Add COMMUNICATION_MODE if not present
+        if (!existingEnv.includes('COMMUNICATION_MODE=')) {
+          updatedEnv += `\n# BEEP MCP Server configuration\nCOMMUNICATION_MODE=${options.mode}\n`;
+          hasUpdates = true;
+        }
+        
+        // Add BEEP_API_KEY if not present and user provided one
+        if (apiKey && !existingEnv.includes('BEEP_API_KEY=')) {
+          updatedEnv += `BEEP_API_KEY=${apiKey}\n`;
+          hasUpdates = true;
+        }
+        
+        if (hasUpdates) {
+          await fs.writeFile(envPath, updatedEnv);
+          console.log('  - Updated existing .env with BEEP configuration');
+        } else {
+          console.log('  - .env already contains BEEP configuration, leaving unchanged');
+        }
       } catch (_) {
+        // .env doesn't exist, create it
         await fs.writeFile(envPath, envContent);
-        console.log('  - Created .env from .env.example');
+        console.log('  - Created .env with your configuration');
       }
       // Clean up the example file only if it was copied
       try {
@@ -176,12 +245,15 @@ program
       console.log('\nNext steps:');
       console.log(`\n1. Navigate to your new server:`);
       console.log(`   cd ${options.path || path.basename(targetPath)}`);
-      console.log(`\n2. Install dependencies:`);
-      console.log(`   npm install`);
-      console.log(`\n3. Configure your environment:`);
-      console.log(`   Fill in your BEEP_API_KEY in the .env file.`);
-      console.log(`\n4. Run the server:`);
-      console.log(`   npm run dev`);
+      
+      if (!apiKey) {
+        console.log(`\n2. Configure your API key:`);
+        console.log(`   Add your BEEP_API_KEY to the .env file.`);
+        console.log(`\n3. Build and run the server:`);
+      } else {
+        console.log(`\n2. Build and run the server:`);
+      }
+      console.log(`   npm run build && npm start`);
 
     } catch (error) {
       console.error('\n❌ An error occurred during scaffolding:', error);

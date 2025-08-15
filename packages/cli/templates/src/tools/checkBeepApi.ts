@@ -1,15 +1,24 @@
 import { BeepClient } from '@beep/sdk-core';
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { MCPToolDefinition } from '../mcp-server';
 
 export interface CheckBeepApiResult {
   status: string;
   timestamp: string;
 }
 
+// Zod schema (no parameters needed)
+export const checkBeepApiSchema = z.object({});
+
+// Auto-generated TypeScript type
+export type CheckBeepApiParams = z.infer<typeof checkBeepApiSchema>;
+
 /**
  * Checks the status of the BEEP API using the SDK.
  * @returns The API status.
  */
-export async function checkBeepApi(): Promise<CheckBeepApiResult | { error: string }> {
+export async function checkBeepApi(params: CheckBeepApiParams): Promise<CheckBeepApiResult | { error: string }> {
   if (!process.env.BEEP_API_KEY) {
     return { error: 'BEEP_API_KEY is not configured in the .env file.' };
   }
@@ -31,3 +40,13 @@ export async function checkBeepApi(): Promise<CheckBeepApiResult | { error: stri
     return { error: `Failed to connect to BEEP API: ${errorMessage}` };
   }
 }
+
+/**
+ * MCP Tool Definition with Zod schema
+ */
+export const checkBeepApiTool: MCPToolDefinition = {
+  name: 'checkBeepApi',
+  description: 'Check the status of the BEEP API using the SDK',
+  inputSchema: zodToJsonSchema(checkBeepApiSchema),
+  handler: checkBeepApi,
+};

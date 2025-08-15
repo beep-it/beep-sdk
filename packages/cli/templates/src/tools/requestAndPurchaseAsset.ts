@@ -1,19 +1,33 @@
 import { BeepClient } from '@beep/sdk-core';
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { MCPToolDefinition } from '../mcp-server';
 
-export interface RequestAndPurchaseAssetRequestParams {
-  /** Array of asset IDs to request and purchase */
-  assetIds?: string[];
-  /** Reference identifier for the payment transaction */
-  paymentReference?: string;
+// Zod schema for request and purchase asset
+export const requestAndPurchaseAssetSchema = z.object({
+  assetIds: z.array(z.string()).optional().describe('Array of asset IDs to request and purchase'),
+  paymentReference: z.string().optional().describe('Reference identifier for the payment transaction'),
+});
+
+// Auto-generated TypeScript type
+export type RequestAndPurchaseAssetRequestParams = z.infer<typeof requestAndPurchaseAssetSchema>;
+
+export interface MCPResponse {
+  content: Array<{
+    type: string;
+    text: string;
+  }>;
+  isError?: boolean;
+}
+
+export interface MCPErrorResponse {
+  error: string;
 }
 
 export async function requestAndPurchaseAsset(
   params: RequestAndPurchaseAssetRequestParams,
-): Promise<any> {
-  const { assetIds, paymentReference } = (params || {}) as {
-    assetIds?: string[];
-    paymentReference?: string;
-  };
+): Promise<MCPResponse | MCPErrorResponse> {
+  const { assetIds, paymentReference } = params;
 
   const apiKey = process.env.BEEP_API_KEY;
   if (!apiKey) {
@@ -61,11 +75,6 @@ export async function requestAndPurchaseAsset(
   }
 
   // Branch 2: paymentReference provided -> validate and return resource
-  // Not currently supported directly by the SDK. We need two capabilities:
-  // [SDK-LOGIC-NEEDED] BeepClient.validatePayment(referenceKey: string): Promise<{ isValid: boolean; invoiceId?: string }>
-  // [SDK-LOGIC-NEEDED] BeepClient.getPaidResource(resourceId: string): Promise<any>
-  // For now, return a structured note describing the missing pieces.
-
   const result = await client.payments.requestAndPurchaseAsset({
     assetIds,
   });
@@ -104,3 +113,13 @@ export async function requestAndPurchaseAsset(
     ],
   };
 }
+
+/**
+ * MCP Tool Definition with Zod schema
+ */
+export const requestAndPurchaseAssetTool: MCPToolDefinition = {
+  name: 'requestAndPurchaseAsset',
+  description: 'Request and purchase assets using HTTP 402 Payment Required flow',
+  inputSchema: zodToJsonSchema(requestAndPurchaseAssetSchema),
+  handler: requestAndPurchaseAsset,
+};

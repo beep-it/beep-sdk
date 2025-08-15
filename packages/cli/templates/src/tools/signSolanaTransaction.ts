@@ -1,19 +1,30 @@
 import { BeepClient } from '@beep/sdk-core';
+import { z } from 'zod';
+import { zodToJsonSchema } from 'zod-to-json-schema';
+import { MCPToolDefinition } from '../mcp-server';
+
 /**
- * Skeleton: signSolanaTokenTransaction
+ * Skeleton: signSolanaTransaction
  *
  * Returns a mock token transaction signing result. Replace with SDK token tx handling.
  */
 
-export interface SignSolanaTransactionParams {
-  senderAddress: string;
-  recipientAddress: string;
-  tokenMintAddress: string;
-  amount: number;
-  decimals: number;
-}
+// Zod schema defines both validation and types
+export const signSolanaTransactionSchema = z.object({
+  senderAddress: z.string().describe('Solana address of the transaction sender'),
+  recipientAddress: z.string().describe('Solana address of the transaction recipient'),
+  tokenMintAddress: z.string().describe('SPL token mint address'),
+  amount: z.number().positive().describe('Amount to transfer in base units'),
+  decimals: z.number().int().min(0).max(18).describe('Number of decimal places for the token'),
+});
 
-export async function signSolanaTransaction(params: SignSolanaTransactionParams): Promise<any> {
+// Auto-generated TypeScript type
+export type SignSolanaTransactionParams = z.infer<typeof signSolanaTransactionSchema>;
+
+export async function signSolanaTransaction(params: unknown): Promise<any> {
+  // Validate parameters with Zod schema
+  const validatedParams = signSolanaTransactionSchema.parse(params);
+  
   const apiKey = process.env.BEEP_API_KEY;
   if (!apiKey) {
     return { error: 'BEEP_API_KEY is not configured in the .env file.' };
@@ -21,13 +32,23 @@ export async function signSolanaTransaction(params: SignSolanaTransactionParams)
 
   const client = new BeepClient({ apiKey });
 
-  const transactionResult = await client.payment.signSolanaTransaction({
-    senderAddress: params.senderAddress,
-    recipientAddress: params.recipientAddress,
-    tokenMintAddress: params.tokenMintAddress,
-    amount: params.amount,
-    decimals: params.decimals,
+  const transactionResult = await client.payments.signSolanaTransaction({
+    senderAddress: validatedParams.senderAddress,
+    recipientAddress: validatedParams.recipientAddress,
+    tokenMintAddress: validatedParams.tokenMintAddress,
+    amount: validatedParams.amount,
+    decimals: validatedParams.decimals,
   });
 
   return { content: [{ type: 'text', text: JSON.stringify(transactionResult) }] };
 }
+
+/**
+ * MCP Tool Definition with Zod schema
+ */
+export const signSolanaTransactionTool: MCPToolDefinition = {
+  name: 'signSolanaTransaction',
+  description: 'Sign a Solana blockchain transaction',
+  inputSchema: zodToJsonSchema(signSolanaTransactionSchema),
+  handler: signSolanaTransaction,
+};

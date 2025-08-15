@@ -2,6 +2,17 @@ import { program } from '../src/index';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+// Mock readline module before importing anything else
+jest.mock('readline', () => ({
+  createInterface: jest.fn(() => ({
+    question: jest.fn((_question: string, callback: (answer: string) => void) => {
+      // Simulate user pressing Enter (empty input)
+      callback('');
+    }),
+    close: jest.fn(),
+  })),
+}));
+
 const baseTestDir = path.join(__dirname, 'test-scaffold');
 
 describe('BEEP CLI init-mcp', () => {
@@ -38,7 +49,7 @@ describe('BEEP CLI init-mcp', () => {
 
     const envContent = await fs.readFile(path.join(testDir, '.env'), 'utf-8');
     expect(envContent).toContain('COMMUNICATION_MODE=https');
-  });
+  }, 30000);
 
   it('should scaffold a new server with stdio mode', async () => {
     const testDir = path.join(baseTestDir, 'stdio-test');
@@ -52,5 +63,5 @@ describe('BEEP CLI init-mcp', () => {
 
     const envContent = await fs.readFile(path.join(testDir, '.env'), 'utf-8');
     expect(envContent).toContain('COMMUNICATION_MODE=stdio');
-  });
+  }, 30000);
 });
