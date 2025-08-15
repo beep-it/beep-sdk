@@ -1,4 +1,5 @@
-import { TokenUtils, SupportedToken } from '../src';
+import { SupportedToken } from '../src/types';
+import { TokenUtils } from '../src/types/token';
 
 describe('TokenUtils', () => {
   it('getTokenAddress returns correct address for USDT', () => {

@@ -1,6 +1,6 @@
-import { BeepClient, SupportedToken, TOKEN_ADDRESSES } from '../src';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
+import { BeepClient } from '../src';
 
 describe('Payments Module', () => {
   let client: BeepClient;
@@ -18,206 +18,11 @@ describe('Payments Module', () => {
     mockAxios.restore();
   });
 
-  // PRODUCT TESTS
-  describe('Products', () => {
-    it('createProduct creates a product with token', async () => {
-      const mockProduct = {
-        id: 'prod_test123',
-        merchantId: 'merch_123',
-        name: 'Test Product',
-        description: 'A test product',
-        price: '9.99',
-        token: SupportedToken.USDT,
-        splTokenAddress: TOKEN_ADDRESSES[SupportedToken.USDT],
-        isSubscription: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      mockAxios.onPost('/v1/products').reply(200, mockProduct);
-
-      const result = await client.payments.createProduct({
-        name: 'Test Product',
-        description: 'A test product',
-        price: '9.99',
-        token: SupportedToken.USDT,
-        isSubscription: false,
-      });
-
-      expect(result).toEqual(mockProduct);
-
-      // Verify the request
-      expect(mockAxios.history.post.length).toBe(1);
-      const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.token).toBe(SupportedToken.USDT);
-    });
-
-    it('createProduct creates a subscription product', async () => {
-      mockAxios.onPost('/v1/products').reply(200, {
-        id: 'prod_sub123',
-        name: 'Premium Subscription',
-        isSubscription: true,
-        // other fields...
-      });
-
-      const result = await client.payments.createProduct({
-        name: 'Premium Subscription',
-        description: 'Monthly subscription',
-        price: '14.99',
-        token: SupportedToken.USDT,
-        isSubscription: true,
-      });
-
-      expect(result.isSubscription).toBe(true);
-
-      const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.isSubscription).toBe(true);
-    });
-
-    // Note: We've removed the metered product test as the current SDK doesn't support metadata
-    // If you need metered billing, you would need to extend the Product type to include metadata
-
-    it('getProduct returns a product by ID', async () => {
-      const mockProduct = {
-        id: 'prod_test123',
-        name: 'Test Product',
-        // other fields...
-      };
-
-      mockAxios.onGet('/v1/products/prod_test123').reply(200, mockProduct);
-
-      const result = await client.payments.getProduct('prod_test123');
-      expect(result).toEqual(mockProduct);
-    });
-
-    it('listProducts returns all products', async () => {
-      const mockProducts = [
-        { id: 'prod_1', name: 'Product 1' },
-        { id: 'prod_2', name: 'Product 2' },
-      ];
-
-      mockAxios.onGet('/v1/products').reply(200, mockProducts);
-
-      const result = await client.payments.listProducts();
-      expect(result).toEqual(mockProducts);
-    });
-
-    it('updateProduct updates a product', async () => {
-      const mockUpdatedProduct = {
-        id: 'prod_test123',
-        name: 'Updated Product',
-        // other fields...
-      };
-
-      mockAxios.onPut('/v1/products/prod_test123').reply(200, mockUpdatedProduct);
-
-      const result = await client.payments.updateProduct('prod_test123', {
-        name: 'Updated Product',
-      });
-
-      expect(result).toEqual(mockUpdatedProduct);
-    });
-
-    it('deleteProduct deletes a product', async () => {
-      mockAxios.onDelete('/v1/products/prod_test123').reply(200, { deleted: true });
-
-      await client.payments.deleteProduct('prod_test123');
-
-      expect(mockAxios.history.delete.length).toBe(1);
-      expect(mockAxios.history.delete[0].url).toBe('/v1/products/prod_test123');
-    });
-  });
-
-  // INVOICE TESTS
-  describe('Invoices', () => {
-    it('createInvoice creates a product-based invoice', async () => {
-      const mockInvoice = {
-        id: 'inv_test123',
-        productId: 'prod_test123',
-        status: 'pending',
-        payerType: 'customer_wallet',
-        // other fields...
-      };
-
-      mockAxios.onPost('/v1/invoices').reply(200, mockInvoice);
-
-      const result = await client.payments.createInvoice({
-        productId: 'prod_test123',
-        payerType: 'customer_wallet',
-      });
-
-      expect(result).toEqual(mockInvoice);
-
-      const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.productId).toBe('prod_test123');
-      expect(requestData.payerType).toBe('customer_wallet');
-    });
-
-    it('createInvoice creates a custom invoice with token', async () => {
-      const mockInvoice = {
-        id: 'inv_custom123',
-        amount: '25.99',
-        token: SupportedToken.USDT,
-        payerType: 'customer_wallet',
-        // other fields...
-      };
-
-      mockAxios.onPost('/v1/invoices').reply(200, mockInvoice);
-
-      const result = await client.payments.createInvoice({
-        amount: '25.99',
-        token: SupportedToken.USDT,
-        description: 'Custom invoice',
-        payerType: 'customer_wallet',
-      });
-
-      expect(result).toEqual(mockInvoice);
-
-      const requestData = JSON.parse(mockAxios.history.post[0].data);
-      expect(requestData.token).toBe(SupportedToken.USDT);
-      expect(requestData.payerType).toBe('customer_wallet');
-    });
-
-    it('getInvoice returns an invoice by ID', async () => {
-      const mockInvoice = {
-        id: 'inv_test123',
-        status: 'pending',
-        // other fields...
-      };
-
-      mockAxios.onGet('/v1/invoices/inv_test123').reply(200, mockInvoice);
-
-      const result = await client.payments.getInvoice('inv_test123');
-      expect(result).toEqual(mockInvoice);
-    });
-
-    it('listInvoices returns all invoices', async () => {
-      const mockInvoices = [
-        { id: 'inv_1', status: 'paid' },
-        { id: 'inv_2', status: 'pending' },
-      ];
-
-      mockAxios.onGet('/v1/invoices').reply(200, mockInvoices);
-
-      const result = await client.payments.listInvoices();
-      expect(result).toEqual(mockInvoices);
-    });
-
-    it('deleteInvoice deletes an invoice', async () => {
-      mockAxios.onDelete('/v1/invoices/inv_test123').reply(200, { deleted: true });
-
-      await client.payments.deleteInvoice('inv_test123');
-
-      expect(mockAxios.history.delete.length).toBe(1);
-      expect(mockAxios.history.delete[0].url).toBe('/v1/invoices/inv_test123');
-    });
-  });
-
-  describe('requestProduct', () => {
+  describe('requestAndPurchaseAsset', () => {
     it('returns null when no paymentReference and no assetIds provided', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      const result = await client.payments.requestProduct({});
+      const result = await client.payments.requestAndPurchaseAsset({});
 
       expect(result).toBeNull();
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -243,7 +48,7 @@ describe('Payments Module', () => {
 
       mockAxios.onPost('/v1/payment/request-payment').reply(200, mockResponse);
 
-      const result = await client.payments.requestProduct({
+      const result = await client.payments.requestAndPurchaseAsset({
         paymentReference: 'pay_ref_123',
       });
 
@@ -267,13 +72,174 @@ describe('Payments Module', () => {
 
       mockAxios.onPost('/v1/payment/request-payment').reply(200, mockResponse);
 
-      const result = await client.payments.requestProduct({
+      const result = await client.payments.requestAndPurchaseAsset({
         assetIds: ['asset_1', 'asset_2'],
       });
 
       expect(result).toEqual(mockProduct);
       expect(mockAxios.history.post.length).toBe(1);
       expect(mockAxios.history.post[0].url).toBe('/v1/payment/request-payment');
+    });
+  });
+
+  describe('signSolanaTransaction', () => {
+    const validInput = {
+      senderAddress: '11111111111111111111111111111111',
+      recipientAddress: '22222222222222222222222222222222',
+      tokenMintAddress: '33333333333333333333333333333333',
+      amount: 100000,
+      decimals: 6,
+    };
+
+    it('returns null when required fields are missing', async () => {
+      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+
+      // Test missing senderAddress
+      const result1 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        senderAddress: '',
+      });
+
+      expect(result1).toBeNull();
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Missing required fields');
+
+      // Test missing recipientAddress
+      const result2 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        recipientAddress: '',
+      });
+
+      expect(result2).toBeNull();
+
+      // Test missing tokenMintAddress
+      const result3 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        tokenMintAddress: '',
+      });
+
+      expect(result3).toBeNull();
+
+      // Test missing amount
+      const result4 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        amount: 0,
+      });
+
+      expect(result4).toBeNull();
+
+      // Test missing decimals
+      const result5 = await client.payments.signSolanaTransaction({
+        ...validInput,
+        decimals: 0,
+      });
+
+      expect(result5).toBeNull();
+
+      expect(mockAxios.history.post.length).toBe(0); // No API calls should be made
+
+      consoleErrorSpy.mockRestore();
+    });
+
+    it('successfully signs transaction with valid input', async () => {
+      const mockTransactionData = {
+        signedTransaction: 'base64-encoded-signed-transaction',
+        transactionId: 'txn_12345',
+        signature: 'signature-string',
+      };
+
+      const mockResponse = {
+        data: mockTransactionData,
+      };
+
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, mockResponse);
+
+      const result = await client.payments.signSolanaTransaction(validInput);
+
+      expect(result).toEqual(mockTransactionData);
+      expect(mockAxios.history.post.length).toBe(1);
+      expect(mockAxios.history.post[0].url).toBe('/v1/payment/sign-solana-transaction');
+
+      // Verify the request payload
+      const requestData = JSON.parse(mockAxios.history.post[0].data);
+      expect(requestData).toEqual(validInput);
+    });
+
+    it('throws error when API returns no data', async () => {
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, {});
+
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
+        'Failed to sign solana transaction: No data returned from solana transaction signing',
+      );
+    });
+
+    it('throws error when API call fails', async () => {
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(500, {
+        error: 'Internal server error',
+      });
+
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
+        'Failed to sign solana transaction:',
+      );
+
+      expect(mockAxios.history.post.length).toBe(1);
+    });
+
+    it('throws error when network error occurs', async () => {
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').networkError();
+
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
+        'Failed to sign solana transaction:',
+      );
+
+      expect(mockAxios.history.post.length).toBe(1);
+    });
+
+    it('handles different amount values correctly', async () => {
+      const mockResponse = {
+        data: {
+          signedTransaction: 'base64-encoded-signed-transaction',
+          transactionId: 'txn_12345',
+        },
+      };
+
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, mockResponse);
+
+      // Test with large amount
+      const largeAmountInput = {
+        ...validInput,
+        amount: 1000000000, // 1 billion units
+      };
+
+      const result = await client.payments.signSolanaTransaction(largeAmountInput);
+
+      expect(result).toEqual(mockResponse.data);
+
+      const requestData = JSON.parse(mockAxios.history.post[0].data);
+      expect(requestData.amount).toBe(1000000000);
+    });
+
+    it('handles different decimal values correctly', async () => {
+      const mockResponse = {
+        data: {
+          signedTransaction: 'base64-encoded-signed-transaction',
+          transactionId: 'txn_12345',
+        },
+      };
+
+      mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, mockResponse);
+
+      // Test with 9 decimals (SOL)
+      const solInput = {
+        ...validInput,
+        decimals: 9,
+      };
+
+      const result = await client.payments.signSolanaTransaction(solInput);
+
+      expect(result).toEqual(mockResponse.data);
+
+      const requestData = JSON.parse(mockAxios.history.post[0].data);
+      expect(requestData.decimals).toBe(9);
     });
   });
 });
