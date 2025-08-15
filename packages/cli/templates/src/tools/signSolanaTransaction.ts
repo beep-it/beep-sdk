@@ -2,6 +2,7 @@ import { BeepClient } from '@beep/sdk-core';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { MCPToolDefinition } from '../mcp-server';
+import { MCPErrorResponse, MCPResponse } from '../types';
 
 /**
  * Skeleton: signSolanaTransaction
@@ -21,10 +22,12 @@ export const signSolanaTransactionSchema = z.object({
 // Auto-generated TypeScript type
 export type SignSolanaTransactionParams = z.infer<typeof signSolanaTransactionSchema>;
 
-export async function signSolanaTransaction(params: unknown): Promise<any> {
+export async function signSolanaTransaction(
+  params: unknown,
+): Promise<MCPResponse | MCPErrorResponse> {
   // Validate parameters with Zod schema
   const validatedParams = signSolanaTransactionSchema.parse(params);
-  
+
   const apiKey = process.env.BEEP_API_KEY;
   if (!apiKey) {
     return { error: 'BEEP_API_KEY is not configured in the .env file.' };
@@ -32,7 +35,7 @@ export async function signSolanaTransaction(params: unknown): Promise<any> {
 
   const client = new BeepClient({ apiKey });
 
-  const transactionResult = await client.payments.signSolanaTransaction({
+  const transactionResult = await (client.payments as any).signSolanaTransaction({
     senderAddress: validatedParams.senderAddress,
     recipientAddress: validatedParams.recipientAddress,
     tokenMintAddress: validatedParams.tokenMintAddress,

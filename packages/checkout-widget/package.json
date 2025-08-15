@@ -12,7 +12,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && tsup src/index.ts --format cjs,esm --no-dts",
+    "build": "tsup src/index.ts --format cjs,esm --no-dts",
     "build:showcase": "tsup --config tsup.config.ts",
     "dev": "npm run build:showcase && npx serve . -p 8080",
     "dev:watch": "tsup src/index.ts --format cjs,esm --dts --watch",

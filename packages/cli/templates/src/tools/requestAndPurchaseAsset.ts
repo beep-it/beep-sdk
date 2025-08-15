@@ -2,30 +2,22 @@ import { BeepClient } from '@beep/sdk-core';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { MCPToolDefinition } from '../mcp-server';
+import { MCPErrorResponse, MCPResponse } from '../types';
 
 // Zod schema for request and purchase asset
 export const requestAndPurchaseAssetSchema = z.object({
   assetIds: z.array(z.string()).optional().describe('Array of asset IDs to request and purchase'),
-  paymentReference: z.string().optional().describe('Reference identifier for the payment transaction'),
+  paymentReference: z
+    .string()
+    .optional()
+    .describe('Reference identifier for the payment transaction'),
 });
 
-// Auto-generated TypeScript type
-export type RequestAndPurchaseAssetRequestParams = z.infer<typeof requestAndPurchaseAssetSchema>;
-
-export interface MCPResponse {
-  content: Array<{
-    type: string;
-    text: string;
-  }>;
-  isError?: boolean;
-}
-
-export interface MCPErrorResponse {
-  error: string;
-}
+// Auto-generated TypeScript type (using different name to avoid conflict)
+export type RequestAndPurchaseAssetParams = z.infer<typeof requestAndPurchaseAssetSchema>;
 
 export async function requestAndPurchaseAsset(
-  params: RequestAndPurchaseAssetRequestParams,
+  params: RequestAndPurchaseAssetParams,
 ): Promise<MCPResponse | MCPErrorResponse> {
   const { assetIds, paymentReference } = params;
 
@@ -39,7 +31,7 @@ export async function requestAndPurchaseAsset(
   // Branch 1: No paymentReference -> initiate payment request via SDK
   if (!paymentReference) {
     try {
-      const result = await client.payments.requestAndPurchaseAsset({
+      const result = await (client.payments as any).requestAndPurchaseAsset({
         assetIds,
         paymentReference,
       });
@@ -75,7 +67,7 @@ export async function requestAndPurchaseAsset(
   }
 
   // Branch 2: paymentReference provided -> validate and return resource
-  const result = await client.payments.requestAndPurchaseAsset({
+  const result = await (client.payments as any).requestAndPurchaseAsset({
     assetIds,
   });
 
