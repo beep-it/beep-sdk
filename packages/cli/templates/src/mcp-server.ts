@@ -1,16 +1,14 @@
 import 'dotenv/config';
 import * as http from 'http';
 import { checkBeepApi, CheckBeepApiResult } from './tools/checkBeepApi';
-import { getPaidResource } from './tools/getPaidResource';
-import { payInvoice } from './tools/payInvoice';
-import { executePreauthorizedTransfer } from './tools/executePreauthorizedTransfer';
-import { getPaymentWidget } from './tools/getPaymentWidget';
-import { initiateDeviceLogin } from './tools/initiateDeviceLogin';
 import { createMerchantAccountFromSSO } from './tools/createMerchantAccountFromSSO';
-import { signSolanaTransaction } from './tools/signSolanaTransaction';
-import { getTransactionStatus } from './tools/getTransactionStatus';
-import { signSolanaTokenTransaction } from './tools/signSolanaTokenTransaction';
 import { getAvailableWallets } from './tools/getAvailableWallets';
+import { getPaymentWidget } from './tools/getPaymentWidget';
+import { getTransactionStatus } from './tools/getTransactionStatus';
+import { initiateDeviceLogin } from './tools/initiateDeviceLogin';
+import { payInvoice } from './tools/payInvoice';
+import { requestAndPurchaseAsset } from './tools/requestAndPurchaseAsset';
+import { signSolanaTransaction } from './tools/signSolanaTransaction';
 
 /**
  * Type representing free-form tool parameters.
@@ -38,16 +36,14 @@ const tools: ToolRegistry = {
   // Health
   checkBeepApi,
   // Payments flow (HTTP 402 style)
-  getPaidResource,
+  requestAndPurchaseAsset,
   payInvoice,
-  executePreauthorizedTransfer,
   getPaymentWidget,
   // Auth / onboarding
   initiateDeviceLogin,
   createMerchantAccountFromSSO,
   // Transactions and wallet utilities
   signSolanaTransaction,
-  signSolanaTokenTransaction,
   getTransactionStatus,
   getAvailableWallets,
 };
@@ -72,7 +68,7 @@ function startHttpServer() {
   const server = http.createServer((req, res) => {
     if (req.method === 'POST' && req.url === '/invoke') {
       let body = '';
-      req.on('data', chunk => {
+      req.on('data', (chunk) => {
         body += chunk.toString();
       });
       req.on('end', async () => {
@@ -137,7 +133,9 @@ function startStdioServer() {
   } else if (communicationMode === 'stdio') {
     startStdioServer();
   } else {
-    console.error("Invalid COMMUNICATION_MODE specified in .env file. Please use 'https' or 'stdio'.");
+    console.error(
+      "Invalid COMMUNICATION_MODE specified in .env file. Please use 'https' or 'stdio'.",
+    );
     process.exit(1);
   }
 })();
