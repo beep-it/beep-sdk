@@ -4,3 +4,6 @@ dist
 coverage
 *.tsbuildinfo
 
+# Generated tarballs - should be built fresh, not committed
+*.tgz
+

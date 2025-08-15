@@ -1,143 +1,104 @@
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import 'dotenv/config';
-import * as http from 'http';
-import { checkBeepApi, CheckBeepApiResult } from './tools/checkBeepApi';
-import { getPaidResource } from './tools/getPaidResource';
-import { payInvoice } from './tools/payInvoice';
-import { executePreauthorizedTransfer } from './tools/executePreauthorizedTransfer';
-import { getPaymentWidget } from './tools/getPaymentWidget';
-import { initiateDeviceLogin } from './tools/initiateDeviceLogin';
-import { createMerchantAccountFromSSO } from './tools/createMerchantAccountFromSSO';
-import { signSolanaTransaction } from './tools/signSolanaTransaction';
-import { getTransactionStatus } from './tools/getTransactionStatus';
-import { signSolanaTokenTransaction } from './tools/signSolanaTokenTransaction';
-import { getAvailableWallets } from './tools/getAvailableWallets';
+
+// Import tool definitions (not just handlers)
+import { checkBeepApiTool } from './tools/checkBeepApi';
+import { getAvailableWalletsTool } from './tools/getAvailableWallets';
+import { requestAndPurchaseAssetTool } from './tools/requestAndPurchaseAsset';
+import { signSolanaTransactionTool } from './tools/signSolanaTransaction';
 
 /**
- * Type representing free-form tool parameters.
+ * MCP Tool Definition with Zod schema support
  */
-export type ToolParams = Record<string, unknown>;
-
-/**
- * Tool function interface for MCP tools.
- */
-export type ToolFunction = (params: ToolParams) => Promise<CheckBeepApiResult | { error: string }>;
-
-/**
- * Registry mapping tool names to tool implementations.
- */
-export interface ToolRegistry {
-  [key: string]: ToolFunction;
+export interface MCPToolDefinition {
+  name: string;
+  description: string;
+  inputSchema: any; // JSON Schema object (converted from Zod)
+  handler: (params: any) => Promise<any>;
 }
 
 /**
- * Minimal tool registry.
- * Tool names mirror the production MCP server in `beep-server/src/mcp/server.ts`.
- * Implementations here are placeholders; real logic should come from the SDK.
+ * Registry of all MCP tools with their schemas
  */
-const tools: ToolRegistry = {
-  // Health
-  checkBeepApi,
-  // Payments flow (HTTP 402 style)
-  getPaidResource,
-  payInvoice,
-  executePreauthorizedTransfer,
-  getPaymentWidget,
-  // Auth / onboarding
-  initiateDeviceLogin,
-  createMerchantAccountFromSSO,
-  // Transactions and wallet utilities
-  signSolanaTransaction,
-  signSolanaTokenTransaction,
-  getTransactionStatus,
-  getAvailableWallets,
+export interface MCPToolRegistry {
+  [key: string]: MCPToolDefinition;
+}
+
+/**
+ * MCP tool registry - tools are imported from individual files
+ * Each tool file exports its own schema and handler
+ */
+const tools: MCPToolRegistry = {
+  checkBeepApi: checkBeepApiTool,
+  requestAndPurchaseAsset: requestAndPurchaseAssetTool,
+  signSolanaTransaction: signSolanaTransactionTool,
+  getAvailableWallets: getAvailableWalletsTool,
 };
 
 /**
- * Resolve communication mode from environment.
- * Expected values: 'https' | 'stdio'.
+ * Create and configure the MCP server
  */
-const communicationMode = process.env.COMMUNICATION_MODE;
+function createMCPServer(): Server {
+  const server = new Server(
+    {
+      // NOTE: You will need to update the name and version of the server
+      name: 'mcp-server',
+      version: '1.0.0',
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+    },
+  );
 
-/**
- * Starts a basic HTTPS-like HTTP server that exposes a simple POST /invoke endpoint.
- * This is a minimal reference implementation; production servers should handle:
- *  - Authentication
- *  - Request validation and schema
- *  - Streaming responses where applicable
- */
-function startHttpServer() {
-  console.log('Starting server in HTTPS mode...');
-  const port = process.env.PORT || 8443;
+  // Register list_tools handler
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    return {
+      tools: Object.values(tools).map((tool) => ({
+        name: tool.name,
+        description: tool.description,
+        inputSchema: tool.inputSchema,
+      })),
+    };
+  });
 
-  const server = http.createServer((req, res) => {
-    if (req.method === 'POST' && req.url === '/invoke') {
-      let body = '';
-      req.on('data', chunk => {
-        body += chunk.toString();
-      });
-      req.on('end', async () => {
-        try {
-          const { toolName, params } = JSON.parse(body);
-          const tool = tools[toolName as keyof typeof tools];
+  // Register call_tool handler with dynamic tool execution
+  server.setRequestHandler(CallToolRequestSchema, async (request: any) => {
+    const { name, arguments: args } = request.params;
 
-          if (tool) {
-            const result = await tool(params as ToolParams);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ result }));
-          } else {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Tool not found' }));
-          }
-        } catch (error) {
-          console.error('Error processing request:', error);
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: 'Invalid JSON' }));
-        }
-      });
-    } else {
-      res.writeHead(404, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Not Found' }));
+    const tool = tools[name];
+    if (!tool) {
+      throw new Error(`Tool ${name} not found`);
     }
-  });
 
-  server.listen(port, () => {
-    console.log(`BEEP MCP Server listening on port ${port}`);
-  });
-}
-
-/**
- * Starts a basic STDIO loop, reading JSON lines from stdin and writing results to stdout.
- * This is suitable for clients that communicate over stdio.
- */
-function startStdioServer() {
-  console.log('Starting server in STDIO mode...');
-  process.stdin.on('data', async (data) => {
     try {
-      const { toolName, params } = JSON.parse(data.toString());
-      const tool = tools[toolName as keyof typeof tools];
-      if (tool) {
-        const result = await tool(params as ToolParams);
-        process.stdout.write(JSON.stringify({ result }) + '\n');
-      } else {
-        process.stdout.write(JSON.stringify({ error: 'Tool not found' }) + '\n');
-      }
+      const result = await tool.handler(args || {});
+      return { content: [{ type: 'text', text: JSON.stringify(result) }] };
     } catch (error) {
-      console.error('Error processing stdio data:', error);
-      process.stdout.write(JSON.stringify({ error: 'Invalid JSON' }) + '\n');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Tool ${name} failed: ${errorMessage}`);
     }
   });
+
+  return server;
 }
 
 /**
- * Entry point: choose server mode based on COMMUNICATION_MODE.
+ * Start the MCP server
  */
-(function main() {
-  if (communicationMode === 'https') {
-    startHttpServer();
-  } else if (communicationMode === 'stdio') {
-    startStdioServer();
-  } else {
-    console.error("Invalid COMMUNICATION_MODE specified in .env file. Please use 'https' or 'stdio'.");
-    process.exit(1);
-  }
-})();
+async function main() {
+  const server = createMCPServer();
+  const transport = new StdioServerTransport();
+
+  await server.connect(transport);
+  console.error('BEEP MCP Server running on stdio');
+}
+
+// Start the server
+main().catch((error) => {
+  console.error('Server failed to start:', error);
+  process.exit(1);
+});
