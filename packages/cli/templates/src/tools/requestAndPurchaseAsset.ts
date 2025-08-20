@@ -1,8 +1,8 @@
-import { BeepClient } from '@beep/sdk-core';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { MCPToolDefinition } from '../mcp-server';
 import { MCPErrorResponse, MCPResponse } from '../types';
+import { beepClient } from './beepClient';
 
 // Zod schema for request and purchase asset
 export const requestAndPurchaseAssetSchema = z.object({
@@ -21,17 +21,10 @@ export async function requestAndPurchaseAsset(
 ): Promise<MCPResponse | MCPErrorResponse> {
   const { assetIds, paymentReference } = params;
 
-  const apiKey = process.env.BEEP_API_KEY;
-  if (!apiKey) {
-    return { error: 'BEEP_API_KEY is not configured in the .env file.' };
-  }
-
-  const client = new BeepClient({ apiKey });
-
   // Branch 1: No paymentReference -> initiate payment request via SDK
   if (!paymentReference) {
     try {
-      const result = await (client.payments as any).requestAndPurchaseAsset({
+      const result = await (beepClient.payments as any).requestAndPurchaseAsset({
         assetIds,
         paymentReference,
       });
@@ -67,7 +60,7 @@ export async function requestAndPurchaseAsset(
   }
 
   // Branch 2: paymentReference provided -> validate and return resource
-  const result = await (client.payments as any).requestAndPurchaseAsset({
+  const result = await (beepClient.payments as any).requestAndPurchaseAsset({
     assetIds,
   });
 
