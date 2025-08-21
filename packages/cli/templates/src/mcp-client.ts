@@ -29,7 +29,8 @@ export class McpClientInternal {
   private async _initialize(): Promise<void> {
     try {
       console.info('Starting and connecting to the MCP server...');
-      const mcpServerPath = path.resolve(__dirname, '../mcp/dist/mcp-server.js');
+      // TODO SST: Find a way to reference the module directly here.
+      const mcpServerPath = path.resolve(__dirname, '../dist/mcp-server.js');
       const transport = new StdioClientTransport({
         command: 'node',
         args: [mcpServerPath],
@@ -45,8 +46,6 @@ export class McpClientInternal {
       );
 
       await this._mcpClient.connect(transport);
-      const tools = await this._mcpClient.listTools();
-      console.debug(`Available tools: ${tools}`);
       this.isInitialized = true;
     } catch (error) {
       console.error('Failed to initialize MCP server:', error);

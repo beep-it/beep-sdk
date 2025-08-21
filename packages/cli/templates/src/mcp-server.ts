@@ -102,7 +102,6 @@ async function main() {
   const transport = new StdioServerTransport();
 
   await server.connect(transport);
-  console.error('BEEP MCP Server running on stdio');
 }
 
 // Start the server
