@@ -8,6 +8,10 @@ import { checkBeepApiTool } from './tools/checkBeepApi';
 import { getAvailableWalletsTool } from './tools/getAvailableWallets';
 import { requestAndPurchaseAssetTool } from './tools/requestAndPurchaseAsset';
 import { signSolanaTransactionTool } from './tools/signSolanaTransaction';
+import { issuePaymentTool } from './tools/issuePayment';
+import { pauseStreamingTool } from './tools/pauseStreaming';
+import { startStreamingTool } from './tools/startStreaming';
+import { stopStreamingTool } from './tools/stopStreaming';
 
 /**
  * MCP Tool Definition with Zod schema support
@@ -35,6 +39,10 @@ const tools: MCPToolRegistry = {
   requestAndPurchaseAsset: requestAndPurchaseAssetTool,
   signSolanaTransaction: signSolanaTransactionTool,
   getAvailableWallets: getAvailableWalletsTool,
+  issuePayment: issuePaymentTool,
+  pauseStreaming: pauseStreamingTool,
+  startStreaming: startStreamingTool,
+  stopStreaming: stopStreamingTool,
 };
 
 /**
@@ -94,7 +102,6 @@ async function main() {
   const transport = new StdioServerTransport();
 
   await server.connect(transport);
-  console.error('BEEP MCP Server running on stdio');
 }
 
 // Start the server

@@ -1,7 +1,7 @@
-import { BeepClient } from '@beep/sdk-core';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { MCPToolDefinition } from '../mcp-server';
+import { beepClient } from './beepClient';
 
 export interface CheckBeepApiResult {
   status: string;
@@ -18,16 +18,10 @@ export type CheckBeepApiParams = z.infer<typeof checkBeepApiSchema>;
  * Checks the status of the BEEP API using the SDK.
  * @returns The API status.
  */
-export async function checkBeepApi(params: CheckBeepApiParams): Promise<CheckBeepApiResult | { error: string }> {
-  if (!process.env.BEEP_API_KEY) {
-    return { error: 'BEEP_API_KEY is not configured in the .env file.' };
-  }
-
+export async function checkBeepApi(
+  params: CheckBeepApiParams,
+): Promise<CheckBeepApiResult | { error: string }> {
   try {
-    const beepClient = new BeepClient({
-      apiKey: process.env.BEEP_API_KEY,
-    });
-
     const status = await beepClient.healthCheck();
 
     return {
