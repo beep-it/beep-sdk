@@ -37,7 +37,7 @@ const ShowcasePage: React.FC = () => {
             amount={25.99}
             primaryColor="#007bff"
             labels={{
-              scanQr: 'Scan to Pay',
+              scanQr: 'Scan with your phone or copy address',
             }}
             assets={[{ assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 }]}
             apiKey="beep_sk_-axb-Nz13wfxMjYAlIy2PfGOc1lg60F9mhJ6Y9QnYI0"

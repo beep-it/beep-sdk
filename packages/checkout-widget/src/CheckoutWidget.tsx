@@ -1,8 +1,128 @@
 import { BeepClient } from '@beep/sdk-core';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { MerchantWidgetProps, MerchantWidgetState } from './types';
 import QRCode from 'react-qr-code';
 import beepLogo from './beep_logo_mega.svg';
+
+function parseSolanaPayURI(uri: string) {
+  const url = new URL(uri);
+
+  return {
+    recipient: url.pathname,
+    amount: url.searchParams.get('amount'),
+    splToken: url.searchParams.get('spl-token'),
+    reference: url.searchParams.get('reference'),
+    label: url.searchParams.get('label'),
+    message: url.searchParams.get('message'),
+  };
+}
+
+const WalletAddressLabel = ({ walletAddress = '0x1234567890121234567890121234567890120611' }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(walletAddress);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
+
+  const truncateAddress = (address: string) => {
+    if (address.length <= 20) {
+      return address;
+    }
+    return `${address.slice(0, 12)}...${address.slice(-4)}`;
+  };
+
+  return (
+    <div style={styles.container}>
+      <div style={styles.labelContainer}>
+        <span style={styles.walletLabel}>{truncateAddress(walletAddress)}</span>
+        <button
+          onClick={handleCopy}
+          style={styles.copyButton}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#f0f0f0';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'transparent';
+          }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+      {copied && <div style={styles.copyFeedback}>Copied to clipboard!</div>}
+    </div>
+  );
+};
+
+const styles = {
+  container: {
+    position: 'relative',
+    maxWidth: '240px',
+    margin: '20px auto',
+  },
+  labelContainer: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: '20px',
+    padding: '12px 16px',
+    paddingRight: '48px',
+    border: '1px solid #e0e0e0',
+    minHeight: '20px',
+  },
+  walletLabel: {
+    flex: 1,
+    fontSize: '14px',
+    color: '#666',
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    userSelect: 'none',
+  },
+  copyButton: {
+    position: 'absolute',
+    right: '8px',
+    background: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '8px',
+    borderRadius: '8px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#666',
+    transition: 'background-color 0.2s ease',
+  },
+  copyFeedback: {
+    position: 'absolute',
+    top: '-35px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    backgroundColor: '#333',
+    color: 'white',
+    padding: '6px 12px',
+    borderRadius: '6px',
+    fontSize: '12px',
+    whiteSpace: 'nowrap',
+    zIndex: 1000,
+  },
+};
 
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
   amount,
@@ -91,6 +211,11 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     return () => clearInterval(interval);
   }, [state.referenceKey, state.paymentSuccess, assets, apiKey, serverUrl]);
 
+  const recepientWallet = useMemo(
+    () => (state.paymentUrl ? parseSolanaPayURI(state.paymentUrl)?.recipient : ''),
+    [state.paymentUrl],
+  );
+
   const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
@@ -103,10 +228,12 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
   };
 
   const labelStyle: React.CSSProperties = {
-    color: primaryColor,
-    fontSize: '16px',
-    fontWeight: 'bold',
+    color: '#96969B',
+    fontSize: '14px',
+    fontWeight: 500,
     marginBottom: '16px',
+    textAlign: 'center',
+    opacity: 0.7,
   };
 
   const qrStyle: React.CSSProperties = {
@@ -217,12 +344,19 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
         </div>
       ) : (
         <>
-          <div style={labelStyle}>{labels.scanQr}</div>
+          <div style={labelStyle}>{labels.scanQr ?? 'Scan with your phone or copy address'}</div>
           {state.paymentUrl && (
             <div style={qrStyle}>
               <QRCode value={state.paymentUrl} size={200} />
             </div>
           )}
+          <div
+            style={{
+              margin: '30px auto 32px auto',
+            }}
+          >
+            <WalletAddressLabel walletAddress={recepientWallet} />
+          </div>
         </>
       )}
       {/* Footer */}
