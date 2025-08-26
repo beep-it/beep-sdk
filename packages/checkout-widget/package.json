@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "@beep/sdk-core": "workspace:*",
-    "qrcode": "^1.5.3"
+    "qrcode": "^1.5.3",
+    "react-qr-code": "^2.0.18"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.4",

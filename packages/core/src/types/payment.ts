@@ -41,6 +41,14 @@ export interface PaymentRequestData {
   qrCode?: string;
 }
 
+/**
+ * Response if the invoice is paid.
+ */
+export interface PaymentRequestPaidData {
+  type: string;
+  value: object[];
+}
+
 export interface SignSolanaTransactionParams {
   senderAddress: string;
   recipientAddress: string;

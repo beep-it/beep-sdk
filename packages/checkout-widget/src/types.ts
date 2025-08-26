@@ -16,4 +16,6 @@ export interface MerchantWidgetState {
   loading: boolean;
   error: string | null;
   referenceKey: string | null;
+  paymentUrl: string | null;
+  paymentSuccess: boolean;
 }

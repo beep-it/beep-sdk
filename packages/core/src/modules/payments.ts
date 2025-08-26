@@ -2,6 +2,7 @@ import { AxiosInstance } from 'axios';
 import { RequestAndPurchaseAssetResponse, SignSolanaTransactionResponse } from '../types';
 import {
   PaymentRequestData,
+  PaymentRequestPaidData,
   RequestAndPurchaseAssetRequestParams,
   SignSolanaTransactionData,
   SignSolanaTransactionParams,
