@@ -77,7 +77,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
           paymentReference: state.referenceKey!,
           generateQrCode: false,
         });
-        if (response!.referenceKey) {
+        if (!response?.referenceKey) {
           setState((prev) => ({ ...prev, paymentSuccess: true }));
           return;
         }
