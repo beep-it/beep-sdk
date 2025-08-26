@@ -34,61 +34,61 @@ const ShowcasePage: React.FC = () => {
         <div style={{ textAlign: 'center' }}>
           <h3 style={{ marginBottom: '20px', color: '#666' }}>Default Theme</h3>
           <CheckoutWidget
-            merchantId="demo-merchant-001"
             amount={25.99}
             primaryColor="#007bff"
             labels={{
               scanQr: 'Scan to Pay',
             }}
-            apiKey="demo-api-key-123"
-            serverUrl="https://api.beep.demo"
+            assets={[{ assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 }]}
+            apiKey="beep_sk_-axb-Nz13wfxMjYAlIy2PfGOc1lg60F9mhJ6Y9QnYI0"
+            serverUrl="http://localhost:4070"
           />
         </div>
 
         {/* Green Theme */}
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ marginBottom: '20px', color: '#666' }}>Green Theme</h3>
-          <CheckoutWidget
-            merchantId="demo-merchant-002"
-            amount={15.5}
-            primaryColor="#28a745"
-            labels={{
-              scanQr: 'Pay with QR',
-            }}
-            apiKey="demo-api-key-456"
-            serverUrl="https://api.beep.demo"
-          />
-        </div>
+        {/*<div style={{ textAlign: 'center' }}>*/}
+        {/*  <h3 style={{ marginBottom: '20px', color: '#666' }}>Green Theme</h3>*/}
+        {/*  <CheckoutWidget*/}
+        {/*    merchantId="demo-merchant-002"*/}
+        {/*    amount={15.5}*/}
+        {/*    primaryColor="#28a745"*/}
+        {/*    labels={{*/}
+        {/*      scanQr: 'Pay with QR',*/}
+        {/*    }}*/}
+        {/*    apiKey="demo-api-key-456"*/}
+        {/*    serverUrl="http://localhost:4070"*/}
+        {/*  />*/}
+        {/*</div>*/}
 
         {/* Purple Theme */}
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ marginBottom: '20px', color: '#666' }}>Purple Theme</h3>
-          <CheckoutWidget
-            merchantId="demo-merchant-003"
-            amount={99.99}
-            primaryColor="#6f42c1"
-            labels={{
-              scanQr: 'Quick Pay',
-            }}
-            apiKey="demo-api-key-789"
-            serverUrl="https://api.beep.demo"
-          />
-        </div>
+        {/*<div style={{ textAlign: 'center' }}>*/}
+        {/*  <h3 style={{ marginBottom: '20px', color: '#666' }}>Purple Theme</h3>*/}
+        {/*  <CheckoutWidget*/}
+        {/*    merchantId="demo-merchant-003"*/}
+        {/*    amount={99.99}*/}
+        {/*    primaryColor="#6f42c1"*/}
+        {/*    labels={{*/}
+        {/*      scanQr: 'Quick Pay',*/}
+        {/*    }}*/}
+        {/*    apiKey="demo-api-key-789"*/}
+        {/*    serverUrl="http://localhost:4070"*/}
+        {/*  />*/}
+        {/*</div>*/}
 
         {/* Orange Theme */}
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ marginBottom: '20px', color: '#666' }}>Orange Theme</h3>
-          <CheckoutWidget
-            merchantId="demo-merchant-004"
-            amount={5.0}
-            primaryColor="#fd7e14"
-            labels={{
-              scanQr: 'Scan & Pay',
-            }}
-            apiKey="demo-api-key-abc"
-            serverUrl="https://api.beep.demo"
-          />
-        </div>
+        {/*<div style={{ textAlign: 'center' }}>*/}
+        {/*  <h3 style={{ marginBottom: '20px', color: '#666' }}>Orange Theme</h3>*/}
+        {/*  <CheckoutWidget*/}
+        {/*    merchantId="demo-merchant-004"*/}
+        {/*    amount={5.0}*/}
+        {/*    primaryColor="#fd7e14"*/}
+        {/*    labels={{*/}
+        {/*      scanQr: 'Scan & Pay',*/}
+        {/*    }}*/}
+        {/*    apiKey="demo-api-key-abc"*/}
+        {/*    serverUrl="http://localhost:4070"*/}
+        {/*  />*/}
+        {/*</div>*/}
       </div>
 
       <div

@@ -17,7 +17,7 @@ export class PaymentsModule {
   async requestAndPurchaseAsset(
     input: RequestAndPurchaseAssetRequestParams,
   ): Promise<PaymentRequestData | null> {
-    if (!input.paymentReference && !input.assetIds?.length) {
+    if (!input.paymentReference && !input.assets?.length) {
       console.error('One of paymentReference or assetIds is required');
       return null;
     }
@@ -25,9 +25,13 @@ export class PaymentsModule {
     try {
       const response = await this.client.post<RequestAndPurchaseAssetResponse>(
         `/v1/payment/request-payment`,
+        input,
       );
       return response.data.data;
     } catch (error) {
+      if ((error as any).response?.status === 402) {
+        return (error as any).response?.data?.data;
+      }
       console.error('Failed to request and purchase asset:', error);
       return null;
     }

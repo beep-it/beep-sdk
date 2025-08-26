@@ -3,17 +3,18 @@ import React, { useEffect, useState } from 'react';
 import { MerchantWidgetProps, MerchantWidgetState } from './types';
 
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
-  merchantId,
   amount,
   primaryColor,
   labels,
   apiKey,
   serverUrl,
+  assets,
 }) => {
   const [state, setState] = useState<MerchantWidgetState>({
     qrCode: null,
     loading: true,
     error: null,
+    referenceKey: null,
   });
 
   useEffect(() => {
@@ -27,25 +28,28 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
         });
 
         const paymentResponse = await client.payments.requestAndPurchaseAsset({
-          assetIds: ['asset_1'],
+          assets,
+          generateQrCode: true,
         });
 
         setState({
           qrCode: paymentResponse?.qrCode || null,
           loading: false,
           error: null,
+          referenceKey: paymentResponse?.referenceKey || null,
         });
       } catch (error) {
         setState({
           qrCode: null,
           loading: false,
           error: error instanceof Error ? error.message : 'Failed to load payment data',
+          referenceKey: null,
         });
       }
     };
 
     fetchPaymentData();
-  }, [merchantId, amount, apiKey, serverUrl]);
+  }, [amount, apiKey, serverUrl]);
 
   const containerStyle: React.CSSProperties = {
     display: 'flex',
