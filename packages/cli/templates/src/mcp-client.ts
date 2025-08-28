@@ -1,6 +1,19 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import path from 'path';
+
+interface McpClientStdioParams {
+  type: 'stdio';
+  path: string;
+}
+
+interface McpClientHttpOptions {
+  type: 'http';
+  url: URL;
+}
+
+type McpClientInitParams = McpClientStdioParams | McpClientHttpOptions;
 
 /**
  * MCP Client wrapper that manages communication with the MCP server via child process
@@ -13,7 +26,7 @@ export class McpClientInternal {
   /**
    * Initialize the MCP server and establish communication
    */
-  async initialize(): Promise<void> {
+  async initialize(params: McpClientInitParams): Promise<void> {
     if (this.isInitialized) {
       return;
     }
@@ -22,19 +35,44 @@ export class McpClientInternal {
       return this.initializationPromise;
     }
 
-    this.initializationPromise = this._initialize();
-    return this.initializationPromise;
+    if (params.type === 'stdio') {
+      this.initializationPromise = this._initializeStdio(params);
+    }
+    if (params.type === 'http') {
+      this.initializationPromise = this._initializeHttp(params);
+    }
+    return this.initializationPromise!;
   }
 
-  private async _initialize(): Promise<void> {
+  private async _initializeStdio(params: McpClientStdioParams): Promise<void> {
     try {
       console.info('Starting and connecting to the MCP server...');
       // TODO SST: Find a way to reference the module directly here.
-      const mcpServerPath = path.resolve(__dirname, '../dist/mcp-server.js');
+      const mcpServerPath = params.path ?? path.resolve(__dirname, '../dist/mcp-server.js');
       const transport = new StdioClientTransport({
         command: 'node',
         args: [mcpServerPath],
       });
+
+      this._mcpClient = new Client(
+        {
+          name: 'mcp-server',
+          version: '1.0.0',
+        },
+        { capabilities: {} },
+      );
+
+      await this._mcpClient.connect(transport);
+      this.isInitialized = true;
+    } catch (error) {
+      console.error('Failed to initialize MCP server:', error);
+    }
+  }
+
+  private async _initializeHttp(params: McpClientHttpOptions): Promise<void> {
+    try {
+      console.info('Starting and connecting to the MCP server through HTTP...');
+      const transport = new StreamableHTTPClientTransport(params.url);
 
       this._mcpClient = new Client(
         {
