@@ -25,7 +25,8 @@
     "pack": "npm pack"
   },
   "dependencies": {
-    "commander": "^12.0.0"
+    "commander": "^12.0.0",
+    "express": "^5.1.0"
   },
   "devDependencies": {
     "@beep/sdk-core": "workspace:*",
