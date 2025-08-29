@@ -1,7 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import path from 'path';
 
 interface McpClientStdioParams {
   type: 'stdio';
@@ -48,10 +47,9 @@ export class McpClientInternal {
     try {
       console.info('Starting and connecting to the MCP server...');
       // TODO SST: Find a way to reference the module directly here.
-      const mcpServerPath = params.path ?? path.resolve(__dirname, '../dist/mcp-server.js');
       const transport = new StdioClientTransport({
         command: 'node',
-        args: [mcpServerPath],
+        args: [params.path],
       });
 
       this._mcpClient = new Client(
