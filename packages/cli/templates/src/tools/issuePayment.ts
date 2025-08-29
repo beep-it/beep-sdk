@@ -22,7 +22,7 @@ export const issuePaymentApiSchema = z.object({
 
 export type IssuePaymentApiParams = z.infer<typeof issuePaymentApiSchema>;
 
-export async function issuePayment(params: IssuePaymentApiParams): Promise<any> {
+export async function issuePayment(params: IssuePaymentApiParams) {
   const { assetChunks, payingMerchantId, invoiceId } = params as {
     assetChunks: Array<{ assetId: string; quantity: number }>;
     payingMerchantId: string;
@@ -43,10 +43,11 @@ export async function issuePayment(params: IssuePaymentApiParams): Promise<any> 
       content: [
         {
           type: 'text',
-          text: `Payment issued successfully. Reference key: ${response.referenceKey}, Invoice ID: ${response.invoiceId}`,
+          text: `Payment issued successfully. Invoice ID: ${response.invoiceId}, Reference key: ${response.referenceKey}`,
         },
       ],
       data: response,
+      isError: false,
     };
   } catch (error) {
     return {
@@ -56,7 +57,8 @@ export async function issuePayment(params: IssuePaymentApiParams): Promise<any> 
           text: `Error issuing payment: ${error instanceof Error ? error.message : String(error)}`,
         },
       ],
-      error: error,
+      data: error,
+      isError: true,
     };
   }
 }

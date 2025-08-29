@@ -84,13 +84,14 @@ function createMCPServer(): Server {
 
     const tool = tools[name];
     if (!tool) {
-      // TODO SST: Return proper response.
+      // TODO SST: Return proper JSONRPC error response.
       throw new Error(`Tool ${name} not found`);
     }
 
     try {
       const result = await tool.handler(args || {});
-      return { content: [{ type: 'text', text: JSON.stringify(result) }] };
+      console.log(`Tool called ${name}`);
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Tool ${name} failed: ${errorMessage}`);

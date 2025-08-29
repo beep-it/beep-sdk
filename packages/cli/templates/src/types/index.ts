@@ -1,3 +1,5 @@
+import { PromptMessage } from '@modelcontextprotocol/sdk/dist/cjs/types';
+
 export interface MCPResponse {
   content: Array<{
     type: string;
@@ -21,6 +23,14 @@ export interface McpHttpHandlerParams {
   logger: ILogger;
 }
 
+export interface McpServerResponse<T> extends PromptMessage {
+  data?: T;
+  isError?: boolean;
+}
+
+/**
+ * Base error class, use this to throw errors in tools.
+ */
 export class McpServerError {
   constructor(
     public message: string,
