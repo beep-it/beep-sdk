@@ -7,6 +7,10 @@ import {
   SignSolanaTransactionParams,
 } from '../types/payment';
 
+/**
+ * Module for handling payment operations including asset purchases and Solana transactions
+ * Provides methods for creating payment requests and signing blockchain transactions
+ */
 export class PaymentsModule {
   private client: AxiosInstance;
 
@@ -14,6 +18,24 @@ export class PaymentsModule {
     this.client = client;
   }
 
+  /**
+   * Creates a payment request for purchasing assets
+   * 
+   * @param input - Parameters for the asset purchase request
+   * @returns Promise that resolves to payment request data, or null if validation fails
+   * 
+   * @example
+   * ```typescript
+   * const payment = await beep.payments.requestAndPurchaseAsset({
+   *   paymentReference: 'premium_subscription_123',
+   *   assetIds: ['asset_1', 'asset_2']
+   * });
+   * 
+   * if (payment) {
+   *   console.log('Payment URL:', payment.paymentUrl);
+   * }
+   * ```
+   */
   async requestAndPurchaseAsset(
     input: RequestAndPurchaseAssetRequestParams,
   ): Promise<PaymentRequestData | null> {
@@ -33,6 +55,32 @@ export class PaymentsModule {
     }
   }
 
+  /**
+   * Signs a Solana transaction for direct blockchain payment processing
+   * 
+   * @param input - Transaction parameters including addresses, amounts, and token details
+   * @returns Promise that resolves to signed transaction data
+   * @throws {Error} When transaction signing fails or required fields are missing
+   * 
+   * @example
+   * ```typescript
+   * try {
+   *   const signedTx = await beep.payments.signSolanaTransaction({
+   *     senderAddress: 'sender_wallet_address',
+   *     recipientAddress: 'recipient_wallet_address',
+   *     tokenMintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+   *     amount: 1000000, // 1.0 USDT in base units
+   *     decimals: 6
+   *   });
+   *   
+   *   if (signedTx) {
+   *     console.log('Transaction ready for broadcast:', signedTx.signedTransaction);
+   *   }
+   * } catch (error) {
+   *   console.error('Transaction signing failed:', error);
+   * }
+   * ```
+   */
   public async signSolanaTransaction(
     input: SignSolanaTransactionParams,
   ): Promise<SignSolanaTransactionData | null> {
@@ -58,7 +106,6 @@ export class PaymentsModule {
 
       return response.data.data;
     } catch (error: unknown) {
-      // Rethrow with more context
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to sign solana transaction: ${errorMessage}`);
     }
