@@ -1,11 +1,18 @@
 import { InvoiceStatus } from './invoice';
 import { SupportedToken } from './token';
 
+export interface BeepPurchaseAsset {
+  assetId: string;
+  quantity: number;
+}
+
 export interface RequestAndPurchaseAssetRequestParams {
-  /** Array of asset IDs to request and purchase */
-  assetIds?: string[];
+  /** Array of assets (IDs, quantity) to request and purchase */
+  assets: BeepPurchaseAsset[];
   /** Reference identifier for the payment transaction */
   paymentReference?: string;
+  /** Generates a QR code if true. */
+  generateQrCode?: boolean;
 }
 
 /**
@@ -32,6 +39,14 @@ export interface PaymentRequestData {
   receivingMerchantId: string;
   status: InvoiceStatus;
   qrCode?: string;
+}
+
+/**
+ * Response if the invoice is paid.
+ */
+export interface PaymentRequestPaidData {
+  type: string;
+  value: object[];
 }
 
 export interface SignSolanaTransactionParams {

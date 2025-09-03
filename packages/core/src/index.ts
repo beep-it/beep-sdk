@@ -24,6 +24,7 @@ export class BeepClient {
       headers: {
         Authorization: `Bearer ${options.apiKey}`,
         'Content-Type': 'application/json',
+        'X-Beep-Client': 'beep-sdk',
       },
     });
 

@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --no-dts",
     "build:showcase": "tsup --config tsup.config.ts",
-    "dev": "npm run build:showcase && npx serve . -p 8080",
+    "dev": "npm run build:showcase && npx serve . -p 8090",
     "dev:watch": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest",
@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "@beep/sdk-core": "workspace:*",
-    "qrcode": "^1.5.3"
+    "qrcode": "^1.5.3",
+    "react-qr-code": "^2.0.18"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.4",
