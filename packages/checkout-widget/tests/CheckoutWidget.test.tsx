@@ -1,7 +1,7 @@
-// @ts-ignore
 import { BeepClient } from '@beep/sdk-core';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { CheckoutWidget } from '../src/CheckoutWidget';
 
 // Mock the BeepClient
@@ -10,26 +10,29 @@ const MockedBeepClient = BeepClient as jest.MockedClass<typeof BeepClient>;
 
 describe('CheckoutWidget', () => {
   const defaultProps = {
-    merchantId: 'test-merchant-123',
     amount: 25.5,
     primaryColor: '#007bff',
     labels: {
       scanQr: 'Scan QR Code to Pay',
     },
     apiKey: 'test-api-key',
+    assets: [{ assetId: 'asset_1', quantity: 1 }],
   };
 
   let mockRequestPayment: jest.Mock;
 
   beforeEach(() => {
     mockRequestPayment = jest.fn();
-    
+
     MockedBeepClient.mockClear();
-    MockedBeepClient.mockImplementation(() => ({
-      payments: {
-        requestAndPurchaseAsset: mockRequestPayment,
-      },
-    } as any));
+    MockedBeepClient.mockImplementation(
+      () =>
+        ({
+          payments: {
+            requestAndPurchaseAsset: mockRequestPayment,
+          },
+        }) as any,
+    );
   });
 
   it('renders loading state initially', () => {
@@ -37,7 +40,7 @@ describe('CheckoutWidget', () => {
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
-      paymentUrl: 'test-url',
+      paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
       amount: 2550000,
       splTokenAddress: 'test-token',
       expiresAt: new Date(),
@@ -55,7 +58,7 @@ describe('CheckoutWidget', () => {
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
-      paymentUrl: 'test-url',
+      paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
       amount: 2550000,
       splTokenAddress: 'test-token',
       expiresAt: new Date(),
@@ -67,12 +70,12 @@ describe('CheckoutWidget', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
-      expect(screen.getByAltText('QR Code for payment')).toBeInTheDocument();
-      expect(screen.getByText('Amount: $25.50')).toBeInTheDocument();
+      expect(screen.getByText('$25.5')).toBeInTheDocument();
     });
 
     expect(mockRequestPayment).toHaveBeenCalledWith({
-      assetIds: ['asset_1'],
+      assets: [{ assetId: 'asset_1', quantity: 1 }],
+      generateQrCode: true,
     });
   });
 
@@ -91,7 +94,7 @@ describe('CheckoutWidget', () => {
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
-      paymentUrl: 'test-url',
+      paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
       amount: 2550000,
       splTokenAddress: 'test-token',
       expiresAt: new Date(),

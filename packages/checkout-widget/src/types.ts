@@ -1,5 +1,6 @@
+import { BeepPurchaseAsset } from '@beep/sdk-core';
+
 export interface MerchantWidgetProps {
-  merchantId: string;
   amount: number;
   primaryColor: string;
   labels: {
@@ -7,10 +8,14 @@ export interface MerchantWidgetProps {
   };
   apiKey: string;
   serverUrl?: string;
+  assets: BeepPurchaseAsset;
 }
 
 export interface MerchantWidgetState {
   qrCode: string | null;
   loading: boolean;
   error: string | null;
+  referenceKey: string | null;
+  paymentUrl: string | null;
+  paymentSuccess: boolean;
 }

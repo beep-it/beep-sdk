@@ -20,17 +20,17 @@ export class PaymentsModule {
 
   /**
    * Creates a payment request for purchasing assets
-   * 
+   *
    * @param input - Parameters for the asset purchase request
    * @returns Promise that resolves to payment request data, or null if validation fails
-   * 
+   *
    * @example
    * ```typescript
    * const payment = await beep.payments.requestAndPurchaseAsset({
    *   paymentReference: 'premium_subscription_123',
    *   assetIds: ['asset_1', 'asset_2']
    * });
-   * 
+   *
    * if (payment) {
    *   console.log('Payment URL:', payment.paymentUrl);
    * }
@@ -39,17 +39,21 @@ export class PaymentsModule {
   async requestAndPurchaseAsset(
     input: RequestAndPurchaseAssetRequestParams,
   ): Promise<PaymentRequestData | null> {
-    if (!input.paymentReference && !input.assetIds?.length) {
-      console.error('One of paymentReference or assetIds is required');
+    if (!input.paymentReference && !input.assets?.length) {
+      console.error('One of paymentReference or assets is required');
       return null;
     }
 
     try {
       const response = await this.client.post<RequestAndPurchaseAssetResponse>(
         `/v1/payment/request-payment`,
+        input,
       );
       return response.data.data;
     } catch (error) {
+      if ((error as any).response?.status === 402) {
+        return (error as any).response?.data?.data;
+      }
       console.error('Failed to request and purchase asset:', error);
       return null;
     }
@@ -57,11 +61,11 @@ export class PaymentsModule {
 
   /**
    * Signs a Solana transaction for direct blockchain payment processing
-   * 
+   *
    * @param input - Transaction parameters including addresses, amounts, and token details
    * @returns Promise that resolves to signed transaction data
    * @throws {Error} When transaction signing fails or required fields are missing
-   * 
+   *
    * @example
    * ```typescript
    * try {
@@ -72,7 +76,7 @@ export class PaymentsModule {
    *     amount: 1000000, // 1.0 USDT in base units
    *     decimals: 6
    *   });
-   *   
+   *
    *   if (signedTx) {
    *     console.log('Transaction ready for broadcast:', signedTx.signedTransaction);
    *   }

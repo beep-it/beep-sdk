@@ -1,14 +1,21 @@
 import { InvoiceStatus } from './invoice';
 import { SupportedToken } from './token';
+export interface BeepPurchaseAsset {
+  assetId: string;
+  quantity: number;
+}
 
 /**
  * Parameters for requesting and purchasing assets via the BEEP payment system
  */
+
 export interface RequestAndPurchaseAssetRequestParams {
-  /** Array of asset IDs to request and purchase */
-  assetIds?: string[];
+  /** Array of assets (IDs, quantity) to request and purchase */
+  assets: BeepPurchaseAsset[];
   /** Reference identifier for the payment transaction */
   paymentReference?: string;
+  /** Generates a QR code if true. */
+  generateQrCode?: boolean;
 }
 
 /**
@@ -18,19 +25,19 @@ export interface RequestAndPurchaseAssetRequestParams {
 export interface RequestPaymentPayload {
   /** The amount to charge in decimal format (e.g., 10.50 for $10.50) */
   amount: number;
-  /** 
+  /**
    * The token type to use for payment
    * @see {@link SupportedToken} for available options
    */
   token?: SupportedToken;
-  /** 
+  /**
    * SPL token address for custom tokens (alternative to using the token enum)
    * @remarks Use either `token` or `splTokenAddress`, not both
    */
   splTokenAddress?: string;
   /** Human-readable description of what the payment is for */
   description: string;
-  /** 
+  /**
    * Specifies who will be paying for this transaction
    * @default 'customer_wallet'
    */
@@ -58,11 +65,16 @@ export interface PaymentRequestData {
   receivingMerchantId: string;
   /** Current status of the invoice */
   status: InvoiceStatus;
-  /** 
+  /**
    * QR code data for mobile wallet scanning (optional)
    * @remarks Contains the same payment information as paymentUrl but in QR format
    */
   qrCode?: string;
+}
+
+export interface PaymentRequestPaidData {
+  type: string;
+  value: object[];
 }
 
 /**
