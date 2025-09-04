@@ -4,6 +4,10 @@ import QRCode from 'react-qr-code';
 import beepLogo from './beep_logo_mega.svg';
 import { MerchantWidgetProps, MerchantWidgetState } from './types';
 
+/**
+ * Parses a Solana Pay URI to extract payment parameters.
+ * Expected format: solana:recipient?amount=X&reference=Y&label=Z
+ */
 function parseSolanaPayURI(uri: string) {
   const url = new URL(uri);
 
@@ -124,6 +128,18 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
+/**
+ * CheckoutWidget - A complete Solana payment interface
+ * 
+ * Features:
+ * - Generates QR codes for mobile wallet scanning
+ * - Shows copyable wallet addresses for desktop users
+ * - Polls payment status every 15 seconds
+ * - Displays success state when payment is confirmed
+ * 
+ * The widget handles both customer-to-merchant payments via Solana Pay.
+ * Styling uses inline styles for easy embedding without CSS conflicts.
+ */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
   amount,
   primaryColor,
@@ -141,6 +157,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     paymentSuccess: false,
   });
 
+  // Initial payment setup - generates QR code and payment URL
   useEffect(() => {
     const fetchPaymentData = async () => {
       try {
@@ -179,6 +196,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     fetchPaymentData();
   }, [amount, apiKey, serverUrl]);
 
+  // Payment status polling - checks every 15 seconds for completion
   useEffect(() => {
     if (!state.referenceKey || state.paymentSuccess) {
       return;
@@ -211,6 +229,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     return () => clearInterval(interval);
   }, [state.referenceKey, state.paymentSuccess, assets, apiKey, serverUrl]);
 
+  // Extract wallet address from Solana Pay URI for display
   const recepientWallet = useMemo(
     () => (state.paymentUrl ? parseSolanaPayURI(state.paymentUrl)?.recipient : ''),
     [state.paymentUrl],
