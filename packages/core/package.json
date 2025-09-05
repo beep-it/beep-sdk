@@ -1,6 +1,6 @@
 {
   "name": "@beep-it/sdk-core",
-  "version": "0.1.0",
+  "version": "0.1.0-beta.0",
   "description": "Official TypeScript SDK for the BEEP Payment and Invoice Server",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
