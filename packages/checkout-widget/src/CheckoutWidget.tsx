@@ -1,9 +1,13 @@
 import { BeepClient } from '@beep/sdk-core';
 import React, { useEffect, useMemo, useState } from 'react';
-import { MerchantWidgetProps, MerchantWidgetState } from './types';
 import QRCode from 'react-qr-code';
 import beepLogo from './beep_logo_mega.svg';
+import { MerchantWidgetProps, MerchantWidgetState } from './types';
 
+/**
+ * Parses a Solana Pay URI to extract payment parameters.
+ * Expected format: solana:recipient?amount=X&reference=Y&label=Z
+ */
 function parseSolanaPayURI(uri: string) {
   const url = new URL(uri);
 
@@ -45,10 +49,10 @@ const WalletAddressLabel = ({ walletAddress = '0x1234567890121234567890121234567
           onClick={handleCopy}
           style={styles.copyButton}
           onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#f0f0f0';
+            (e.target as HTMLButtonElement).style.backgroundColor = '#f0f0f0';
           }}
           onMouseLeave={(e) => {
-            e.target.style.backgroundColor = 'transparent';
+            (e.target as HTMLButtonElement).style.backgroundColor = 'transparent';
           }}
         >
           <svg
@@ -71,7 +75,7 @@ const WalletAddressLabel = ({ walletAddress = '0x1234567890121234567890121234567
   );
 };
 
-const styles = {
+const styles: Record<string, React.CSSProperties> = {
   container: {
     position: 'relative',
     maxWidth: '240px',
@@ -124,6 +128,18 @@ const styles = {
   },
 };
 
+/**
+ * CheckoutWidget - A complete Solana payment interface
+ * 
+ * Features:
+ * - Generates QR codes for mobile wallet scanning
+ * - Shows copyable wallet addresses for desktop users
+ * - Polls payment status every 15 seconds
+ * - Displays success state when payment is confirmed
+ * 
+ * The widget handles both customer-to-merchant payments via Solana Pay.
+ * Styling uses inline styles for easy embedding without CSS conflicts.
+ */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
   amount,
   primaryColor,
@@ -141,6 +157,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     paymentSuccess: false,
   });
 
+  // Initial payment setup - generates QR code and payment URL
   useEffect(() => {
     const fetchPaymentData = async () => {
       try {
@@ -179,6 +196,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     fetchPaymentData();
   }, [amount, apiKey, serverUrl]);
 
+  // Payment status polling - checks every 15 seconds for completion
   useEffect(() => {
     if (!state.referenceKey || state.paymentSuccess) {
       return;
@@ -211,6 +229,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     return () => clearInterval(interval);
   }, [state.referenceKey, state.paymentSuccess, assets, apiKey, serverUrl]);
 
+  // Extract wallet address from Solana Pay URI for display
   const recepientWallet = useMemo(
     () => (state.paymentUrl ? parseSolanaPayURI(state.paymentUrl)?.recipient : ''),
     [state.paymentUrl],
@@ -259,7 +278,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     fontSize: '14px',
   };
 
-  const cardStyles = {
+  const cardStyles: React.CSSProperties = {
     width: '100%',
     maxWidth: '400px',
     minWidth: '300px',
@@ -271,45 +290,45 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   };
 
-  const mainContentStyles = {
+  const mainContentStyles: React.CSSProperties = {
     padding: '48px 32px',
     textAlign: 'center',
   };
 
-  const labelStyles = {
+  const labelStyles: React.CSSProperties = {
     color: '#6b7280',
     fontSize: '14px',
     marginBottom: '8px',
     fontWeight: '400',
   };
 
-  const amountStyles = {
+  const amountStyles: React.CSSProperties = {
     fontSize: '36px',
     fontWeight: 'bold',
     color: '#111827',
     margin: '0',
   };
 
-  const footerStyles = {
+  const footerStyles: React.CSSProperties = {
     backgroundColor: '#f9fafb',
     padding: '16px 24px',
     textAlign: 'center',
     borderTop: '1px solid #f3f4f6',
   };
 
-  const footerContentStyles = {
+  const footerContentStyles: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '8px',
   };
 
-  const poweredByTextStyles = {
+  const poweredByTextStyles: React.CSSProperties = {
     color: '#9ca3af',
     fontSize: '14px',
   };
 
-  const logoContainerStyles = {
+  const logoContainerStyles: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     gap: '4px',

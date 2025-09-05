@@ -7,20 +7,39 @@ import { execSync } from 'child_process';
 import * as readline from 'readline';
 
 /**
- * BEEP CLI
- *
- * This CLI scaffolds and integrates a minimal BEEP MCP server into existing projects.
+ * @fileoverview BEEP CLI - Scaffolding tool for MCP (Model Context Protocol) servers
+ * 
+ * This CLI helps developers integrate BEEP payment functionality into their projects
+ * by generating MCP server templates that AI agents can interact with.
+ * 
  * Design principles:
- *  - Never overwrite a user's files by default.
- *  - Provide sensible templates that can run out-of-the-box.
- *  - Keep behavior explicit and documented.
+ * - Never overwrite user files by default (non-destructive)
+ * - Provide working templates out-of-the-box
+ * - Keep all behavior explicit and documented
+ * - Support both new projects and existing codebases
+ * 
+ * @example CLI usage
+ * ```bash
+ * # Create new MCP server with HTTPS transport
+ * npx @beep/cli init-mcp --mode https --path ./my-payment-server
+ * 
+ * # Create MCP server with stdio transport (for Claude Desktop)
+ * npx @beep/cli init-mcp --mode stdio
+ * 
+ * # Add BEEP tools to existing MCP server
+ * npx @beep/cli integrate ./existing-mcp-project
+ * ```
  */
 
-// This is the main entry point for the CLI
+/**
+ * Main CLI program instance.
+ * Exported for testing and programmatic access.
+ */
 export const program = new Command();
 
 /**
- * Prompt user for input
+ * Prompts user for input via command line interface.
+ * Used for interactive configuration during scaffolding.
  */
 const promptUser = (question: string): Promise<string> => {
   const rl = readline.createInterface({
@@ -40,21 +59,37 @@ program
   .version('0.1.0')
   .description('A CLI for scaffolding and managing BEEP MCP servers');
 
-// A simple command to test the CLI
+/**
+ * Simple test command to verify CLI installation.
+ * Useful for troubleshooting and development.
+ */
 program
   .command('hello')
-  .description('Prints a greeting')
+  .description('Prints a greeting to verify CLI installation')
   .action(() => {
     console.log('Hello, from the BEEP CLI!');
   });
 
 
-// The main command for scaffolding a new MCP server
+/**
+ * Primary scaffolding command - creates a complete MCP server with BEEP integration.
+ * 
+ * Supports two communication modes:
+ * - 'https': For web-based AI agents and API integrations
+ * - 'stdio': For desktop AI clients like Claude Desktop
+ * 
+ * The generated server includes:
+ * - Complete MCP server setup with proper error handling
+ * - Pre-configured BEEP payment tools
+ * - Environment configuration with API key management
+ * - TypeScript build configuration
+ * - Ready-to-use package.json with all dependencies
+ */
 program
   .command('init-mcp')
-  .description('Scaffolds a new BEEP MCP server in a target repository')
-  .requiredOption('--mode <https|stdio>', 'The communication protocol for the server')
-  .option('--path <directory>', 'The path to create the server in. Defaults to the current directory.')
+  .description('Scaffolds a new BEEP MCP server with payment tools')
+  .requiredOption('--mode <https|stdio>', 'Communication protocol: https (web agents) or stdio (desktop clients)')
+  .option('--path <directory>', 'Target directory (defaults to current directory)')
   .action(async (options) => {
     /**
      * Initialize an MCP server in the given target path.
@@ -260,11 +295,24 @@ program
     }
   });
 
-// This allows the CLI to be executed directly, but also to be imported for testing
+/**
+ * Integration command for existing MCP servers.
+ * 
+ * Adds BEEP payment tools to projects that already have MCP server infrastructure.
+ * This is useful when you want to add payment capabilities to an existing agent/tool setup.
+ * 
+ * What it does:
+ * - Copies BEEP tool templates to your tools/ directory
+ * - Provides the BEEP SDK package for local installation
+ * - Gives integration instructions for your existing server
+ * 
+ * Note: This command doesn't modify existing files - you'll need to manually
+ * integrate the tools into your server's tool registry.
+ */
 if (require.main === module) {
   program
     .command('integrate <path>')
-    .description('Integrate BEEP MCP into an existing project')
+    .description('Add BEEP payment tools to an existing MCP project')
     .action(async (targetPath) => {
       /**
        * Integrate helper files into an existing project:

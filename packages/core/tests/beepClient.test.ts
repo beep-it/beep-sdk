@@ -52,7 +52,10 @@ describe.skip('BeepClient', () => {
     // Call the method being tested
     const result = await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     // Assertions
@@ -87,7 +90,10 @@ describe.skip('BeepClient', () => {
 
     const result = await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     expect(result).toBeDefined();
@@ -108,7 +114,10 @@ describe.skip('BeepClient', () => {
 
     await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     // Verify the request was made with USDT token
@@ -123,7 +132,10 @@ describe.skip('BeepClient', () => {
     await expect(
       client.payments.requestAndPurchaseAsset({
         paymentReference: 'pay_ref_123',
-        assetIds: ['asset_1', 'asset_2'],
+        assets: [
+          { assetId: 'asset_1', quantity: 1 },
+          { assetId: 'asset_2', quantity: 1 },
+        ],
       }),
     ).rejects.toThrow();
   });
@@ -134,7 +146,10 @@ describe.skip('BeepClient', () => {
     await expect(
       client.payments.requestAndPurchaseAsset({
         paymentReference: 'pay_ref_123',
-        assetIds: ['asset_1', 'asset_2'],
+        assets: [
+          { assetId: 'asset_1', quantity: 1 },
+          { assetId: 'asset_2', quantity: 1 },
+        ],
       }),
     ).rejects.toThrow('No data returned from payment request');
   });
@@ -152,7 +167,10 @@ describe.skip('BeepClient', () => {
     // Test USDT (6 decimals)
     await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     const requestData = JSON.parse(mockAxios.history.post[0].data);
@@ -173,7 +191,10 @@ describe.skip('BeepClient', () => {
     // Test USDT (6 decimals)
     await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     const requestData = JSON.parse(mockAxios.history.post[0].data);
@@ -190,7 +211,10 @@ describe.skip('BeepClient', () => {
 
     await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     const requestData = JSON.parse(mockAxios.history.post[0].data);
@@ -206,7 +230,10 @@ describe.skip('BeepClient', () => {
 
     await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     const requestData = JSON.parse(mockAxios.history.post[0].data);
@@ -222,7 +249,10 @@ describe.skip('BeepClient', () => {
 
     await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
       // description omitted
     });
 
@@ -239,7 +269,10 @@ describe.skip('BeepClient', () => {
 
     // Test with a large amount (1000 USDT)
     await client.payments.requestAndPurchaseAsset({
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     const requestData = JSON.parse(mockAxios.history.post[0].data);
