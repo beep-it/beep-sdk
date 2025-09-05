@@ -1,11 +1,11 @@
-import { BeepClient } from '@beep/sdk-core';
+import { BeepClient } from '@beep-it/sdk-core';
 import '@testing-library/jest-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CheckoutWidget } from '../src/CheckoutWidget';
 
 // Mock the BeepClient
-jest.mock('@beep/sdk-core');
+jest.mock('@beep-it/sdk-core');
 const MockedBeepClient = BeepClient as jest.MockedClass<typeof BeepClient>;
 
 describe('CheckoutWidget', () => {
@@ -40,7 +40,8 @@ describe('CheckoutWidget', () => {
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
-      paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
+      paymentUrl:
+        'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
       amount: 2550000,
       splTokenAddress: 'test-token',
       expiresAt: new Date(),
@@ -58,7 +59,8 @@ describe('CheckoutWidget', () => {
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
-      paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
+      paymentUrl:
+        'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
       amount: 2550000,
       splTokenAddress: 'test-token',
       expiresAt: new Date(),
@@ -94,7 +96,8 @@ describe('CheckoutWidget', () => {
       qrCode: 'data:image/png;base64,mockqrcode',
       invoiceId: 'test-invoice',
       referenceKey: 'test-ref',
-      paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
+      paymentUrl:
+        'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
       amount: 2550000,
       splTokenAddress: 'test-token',
       expiresAt: new Date(),

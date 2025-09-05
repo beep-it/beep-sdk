@@ -4,13 +4,13 @@ module.exports = {
   testMatch: ['**/tests/**/*.test.tsx'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   moduleNameMapper: {
-    '^@beep/sdk-core$': '<rootDir>/../core/src/index.ts',
+    '^@beep-it/sdk-core$': '<rootDir>/../core/src/index.ts',
     '\\.svg$': '<rootDir>/tests/__mocks__/svg.js'
   },
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest'
   },
   transformIgnorePatterns: [
-    'node_modules/(?!@beep/)'
+    'node_modules/(?!@beep-it/)'
   ]
 };

@@ -1,4 +1,4 @@
-import { BeepClient } from '@beep/sdk-core';
+import { BeepClient } from '@beep-it/sdk-core';
 import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-qr-code';
 import beepLogo from './beep_logo_mega.svg';
@@ -130,13 +130,13 @@ const styles: Record<string, React.CSSProperties> = {
 
 /**
  * CheckoutWidget - A complete Solana payment interface
- * 
+ *
  * Features:
  * - Generates QR codes for mobile wallet scanning
  * - Shows copyable wallet addresses for desktop users
  * - Polls payment status every 15 seconds
  * - Displays success state when payment is confirmed
- * 
+ *
  * The widget handles both customer-to-merchant payments via Solana Pay.
  * Styling uses inline styles for easy embedding without CSS conflicts.
  */

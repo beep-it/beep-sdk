@@ -15,7 +15,7 @@
     "outDir": "./dist",
     "jsx": "react-jsx",
     "paths": {
-      "@beep/sdk-core": ["../core/src"]
+      "@beep-it/sdk-core": ["../core/src"]
     }
   },
   "include": ["src/**/*"],

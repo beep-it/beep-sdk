@@ -8,7 +8,7 @@
     "start": "node dist/mcp-server.js"
   },
   "dependencies": {
-    "@beep/sdk-core": "file:beep-sdk-core-0.1.0.tgz",
+    "@beep-it/sdk-core": "file:beep-sdk-core-0.1.0.tgz",
     "@modelcontextprotocol/sdk": "^0.6.0",
     "dotenv": "^16.4.5",
     "zod": "^3.22.4",

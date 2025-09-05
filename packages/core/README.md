@@ -27,7 +27,7 @@ This is probably easier than picking an Instagram filter. No cap.
 In your project's command line thingy (the black box where you type stuff), paste this:
 
 ```bash
-npm install @beep/sdk-core
+npm install @beep-it/sdk-core
 ```
 This basically downloads our toolkit and puts it in your project's folder.
 
@@ -43,7 +43,7 @@ Time to write, like, one line of code. This tells your project to start using th
 
 ```typescript
 // This line just says, "Hey, I wanna use that beep-sdk thing I just downloaded."
-import { BeepClient, SupportedToken } from '@beep/sdk-core';
+import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
 
 // This line creates your BEEP-Bot. It's now ready for your commands.
 const beep = new BeepClient({
@@ -193,7 +193,7 @@ Our shiny new enum for supported tokens! Way easier than remembering addresses.
 
 ```typescript
 // Import it like this
-import { SupportedToken } from '@beep/sdk-core';
+import { SupportedToken } from '@beep-it/sdk-core';
 
 // Use it like this
 const token = SupportedToken.USDT; // Currently supported
@@ -332,7 +332,7 @@ const signedTx = await beep.payments.signSolanaTransaction({
 For the super nerds who want to play with token addresses:
 
 ```typescript
-import { TokenUtils, SupportedToken } from '@beep/sdk-core';
+import { TokenUtils, SupportedToken } from '@beep-it/sdk-core';
 
 // Get the address from a token enum
 const address = TokenUtils.getTokenAddress(SupportedToken.USDT);

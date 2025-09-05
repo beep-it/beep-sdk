@@ -1,4 +1,4 @@
-import { BeepClient } from '@beep/sdk-core';
+import { BeepClient } from '@beep-it/sdk-core';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { MCPToolDefinition } from '../mcp-server';

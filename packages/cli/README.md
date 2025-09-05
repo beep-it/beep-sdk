@@ -23,10 +23,10 @@ Once this CLI is published to npm, you can install it globally:
 
 ```bash
 # Using npm
-npm install -g @beep/cli
+npm install -g @beep-it/cli
 
 # Or with pnpm
-pnpm add -g @beep/cli
+pnpm add -g @beep-it/cli
 
 # Verify
 beep --help
@@ -66,7 +66,7 @@ pnpm prepack && npm pack
 ```json
 {
   "devDependencies": {
-    "@beep/cli": "file:../path/to/beep-sdk/packages/cli/beep-cli-0.1.0.tgz"
+    "@beep-it/cli": "file:../path/to/beep-sdk/packages/cli/beep-cli-0.1.0.tgz"
   },
   "scripts": {
     "beep": "beep"
@@ -173,7 +173,7 @@ Next steps:
 
 1. Add the BEEP SDK dependency to your project.
    In your package.json, add the following to your 'dependencies':
-   '@beep/sdk-core': 'file:beep-sdk-core-0.1.0.tgz'
+   '@beep-it/sdk-core': 'file:beep-sdk-core-0.1.0.tgz'
 
 2. Run 'npm install' or 'pnpm install' to install the new dependency.
 

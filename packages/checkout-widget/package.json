@@ -1,5 +1,5 @@
 {
-  "name": "@beep/checkout-widget",
+  "name": "@beep-it/checkout-widget",
   "version": "0.1.0",
   "description": "React component for BEEP merchant payments with QR code display",
   "main": "./dist/index.js",
@@ -31,12 +31,23 @@
   ],
   "author": "BEEP Engineering",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/beep-it/beep-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/beep-it/beep-sdk/issues"
+  },
+  "homepage": "https://github.com/beep-it/beep-sdk",
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "react": ">=16.8.0",
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@beep/sdk-core": "workspace:*",
+    "@beep-it/sdk-core": "workspace:*",
     "qrcode": "^1.5.3",
     "react-qr-code": "^2.0.18"
   },
