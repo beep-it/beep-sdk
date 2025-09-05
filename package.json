@@ -4,7 +4,10 @@
   "scripts": {
     "build": "pnpm --filter @beep-it/sdk-core build && pnpm --filter \"./packages/*\" build",
     "test": "pnpm --filter \"./packages/*\" test",
-    "build:cli": "pnpm --filter @beep-it/sdk-core build && pnpm --filter @beep-it/sdk-core run pack && pnpm --filter @beep-it/cli build"
+    "build:cli": "pnpm --filter @beep-it/sdk-core build && pnpm --filter @beep-it/sdk-core run pack && pnpm --filter @beep-it/cli build",
+    "release": "node scripts/prepare-release.js",
+    "lint": "pnpm --filter \"./packages/*\" run lint",
+    "dev": "pnpm --filter \"./packages/*\" run dev --parallel"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
