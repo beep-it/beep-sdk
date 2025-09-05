@@ -21,13 +21,13 @@ import * as readline from 'readline';
  * @example CLI usage
  * ```bash
  * # Create new MCP server with HTTPS transport
- * npx @beep/cli init-mcp --mode https --path ./my-payment-server
+ * npx @beep-it/cli init-mcp --mode https --path ./my-payment-server
  * 
  * # Create MCP server with stdio transport (for Claude Desktop)
- * npx @beep/cli init-mcp --mode stdio
+ * npx @beep-it/cli init-mcp --mode stdio
  * 
  * # Add BEEP tools to existing MCP server
- * npx @beep/cli integrate ./existing-mcp-project
+ * npx @beep-it/cli integrate ./existing-mcp-project
  * ```
  */
 
@@ -350,7 +350,7 @@ if (require.main === module) {
         console.log('\nNext steps:');
         console.log('\n1. Add the BEEP SDK dependency to your project.');
         console.log('   In your package.json, add the following to your \'dependencies\':');
-        console.log('   \'@beep/sdk-core\': \'file:beep-sdk-core-0.1.0.tgz\'');
+        console.log('   \'@beep-it/sdk-core\': \'file:beep-sdk-core-0.1.0.tgz\'');
         console.log('\n2. Run \'npm install\' or \'pnpm install\' to install the new dependency.');
         console.log('\n3. Integrate the BEEP tool into your server file:');
         console.log('   import { checkBeepApi } from \'./tools/checkBeepApi\'; // Adjust path if needed');

@@ -3,7 +3,7 @@
  * 
  * @example Basic usage
  * ```tsx
- * import { CheckoutWidget } from '@beep/checkout-widget';
+ * import { CheckoutWidget } from '@beep-it/checkout-widget';
  * 
  * function App() {
  *   return (

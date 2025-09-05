@@ -1,4 +1,4 @@
-import { BeepPurchaseAsset } from '@beep/sdk-core';
+import { BeepPurchaseAsset } from '@beep-it/sdk-core';
 
 /**
  * Props for the CheckoutWidget component.

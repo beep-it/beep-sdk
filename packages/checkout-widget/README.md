@@ -1,18 +1,18 @@
-# @beep/checkout-widget
+# @beep-it/checkout-widget
 
 A React component for displaying BEEP merchant payment widgets with QR code functionality.
 
 ## Installation
 
 ```bash
-npm install @beep/checkout-widget @beep/sdk-core
+npm install @beep-it/checkout-widget @beep-it/sdk-core
 ```
 
 ## Usage
 
 ```tsx
 import React from 'react';
-import { MerchantWidget } from '@beep/checkout-widget';
+import { MerchantWidget } from '@beep-it/checkout-widget';
 
 function App() {
   return (

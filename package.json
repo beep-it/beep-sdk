@@ -2,9 +2,9 @@
   "name": "beep-sdk-monorepo",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter @beep/sdk-core build && pnpm --filter \"./packages/*\" build",
+    "build": "pnpm --filter @beep-it/sdk-core build && pnpm --filter \"./packages/*\" build",
     "test": "pnpm --filter \"./packages/*\" test",
-    "build:cli": "pnpm --filter @beep/sdk-core build && pnpm --filter @beep/sdk-core run pack && pnpm --filter @beep/cli build"
+    "build:cli": "pnpm --filter @beep-it/sdk-core build && pnpm --filter @beep-it/sdk-core run pack && pnpm --filter @beep-it/cli build"
   },
   "devDependencies": {
     "typescript": "^5.0.0",

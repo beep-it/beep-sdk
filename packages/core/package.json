@@ -1,5 +1,5 @@
 {
-  "name": "@beep/sdk-core",
+  "name": "@beep-it/sdk-core",
   "version": "0.1.0",
   "description": "Official TypeScript SDK for the BEEP Payment and Invoice Server",
   "main": "./dist/index.js",
@@ -39,12 +39,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/beep/beep-sdk.git"
+    "url": "https://github.com/beep-it/beep-sdk.git"
   },
   "bugs": {
-    "url": "https://github.com/beep/beep-sdk/issues"
+    "url": "https://github.com/beep-it/beep-sdk/issues"
   },
-  "homepage": "https://github.com/beep/beep-sdk",
+  "homepage": "https://github.com/beep-it/beep-sdk",
   "publishConfig": {
     "access": "public"
   },

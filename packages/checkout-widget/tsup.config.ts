@@ -12,5 +12,5 @@ export default defineConfig({
   // Ensure we don't try to bundle Node.js modules
   platform: 'browser',
   // External dependencies that should not be bundled
-  noExternal: ['react', 'react-dom', '@beep/sdk-core', 'qrcode'],
+  noExternal: ['react', 'react-dom', '@beep-it/sdk-core', 'qrcode'],
 })

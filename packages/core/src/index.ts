@@ -26,7 +26,7 @@ export interface BeepClientOptions {
  *
  * @example
  * ```typescript
- * import { BeepClient, SupportedToken } from '@beep/sdk-core';
+ * import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
  *
  * const beep = new BeepClient({
  *   apiKey: 'your_api_key_here'
