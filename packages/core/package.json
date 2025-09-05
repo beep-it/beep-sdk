@@ -12,7 +12,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && tsup src/index.ts --format cjs,esm --no-dts",
+    "build": "tsc --project tsconfig.build.json --emitDeclarationOnly && tsup src/index.ts --format cjs,esm --no-dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "eslint . --ext .ts",
     "test": "jest",
