@@ -27,7 +27,7 @@ importers:
   packages/checkout-widget:
     dependencies:
       '@beep-it/sdk-core':
-        specifier: workspace:*
+        specifier: ^0.1.0-beta.0
         version: link:../core
       qrcode:
         specifier: ^1.5.3
