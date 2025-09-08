@@ -173,8 +173,9 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
   }, [assets]);
 
   // Helper function to determine if assets are CreateProductPayload or BeepPurchaseAsset
-  const isCreateProductPayload = (asset: any): asset is CreateProductPayload => {
-    return 'name' in asset && 'price' in asset;
+  const isCreateProductPayload = (asset: CreateProductPayload | BeepPurchaseAsset): boolean => {
+    const result = 'name' in asset && 'price' in asset;
+    return result;
   };
 
   // Convert CreateProductPayload to BeepPurchaseAsset by creating products on-the-fly
@@ -183,21 +184,22 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
 
     for (const asset of assets) {
       if (isCreateProductPayload(asset)) {
+        const newAsset = asset as CreateProductPayload;
         try {
           // Create product on-the-fly
-          const product = await client.products.createProduct(asset);
+          const product = await client.products.createProduct(newAsset);
           processedAssets.push({ assetId: product.id, quantity: 1 });
         } catch (error) {
           // Throw a more specific error for product creation failures
           const errorMessage =
             error instanceof Error
-              ? `Failed to create product "${asset.name}": ${error.message}`
-              : `Failed to create product "${asset.name}": Unknown error`;
+              ? `Failed to create product "${newAsset.name}": ${error.message}`
+              : `Failed to create product "${newAsset.name}": Unknown error`;
           throw new Error(errorMessage);
         }
       } else {
         // Already a BeepPurchaseAsset
-        processedAssets.push(asset);
+        processedAssets.push(asset as BeepPurchaseAsset);
       }
     }
 
