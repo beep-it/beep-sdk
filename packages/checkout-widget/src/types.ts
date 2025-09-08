@@ -23,7 +23,7 @@ export interface MerchantWidgetProps {
   /** Optional custom server URL (defaults to Beep production) */
   serverUrl?: string;
   /** Assets to purchase - drives pricing and QR generation */
-  assets: BeepPurchaseAsset;
+  assets: BeepPurchaseAsset[];
 }
 
 /**
