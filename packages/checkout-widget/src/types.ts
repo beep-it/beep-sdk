@@ -1,4 +1,4 @@
-import { BeepPurchaseAsset } from '@beep-it/sdk-core';
+import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
 
 /**
  * Props for the CheckoutWidget component.
@@ -9,8 +9,6 @@ import { BeepPurchaseAsset } from '@beep-it/sdk-core';
  * 3. Polls for payment completion
  */
 export interface MerchantWidgetProps {
-  /** Payment amount in USD (e.g., 25.50) */
-  amount: number;
   /** Hex color for theming the widget border (#007bff) */
   primaryColor: string;
   /** Customizable text labels */
@@ -22,8 +20,8 @@ export interface MerchantWidgetProps {
   apiKey: string;
   /** Optional custom server URL (defaults to Beep production) */
   serverUrl?: string;
-  /** Assets to purchase - drives pricing and QR generation */
-  assets: BeepPurchaseAsset[];
+  /** Assets to purchase - either existing product references or new product definitions */
+  assets: (BeepPurchaseAsset | CreateProductPayload)[];
 }
 
 /**

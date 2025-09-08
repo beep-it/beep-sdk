@@ -1,4 +1,4 @@
-import { BeepClient } from '@beep-it/sdk-core';
+import { BeepClient, BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
 import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-qr-code';
 import beepLogo from './beep_logo_mega.svg';
@@ -141,7 +141,6 @@ const styles: Record<string, React.CSSProperties> = {
  * Styling uses inline styles for easy embedding without CSS conflicts.
  */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
-  amount,
   primaryColor,
   labels,
   apiKey,
@@ -157,6 +156,54 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     paymentSuccess: false,
   });
 
+  // Cache processed assets to avoid recreating products during polling
+  const [processedAssets, setProcessedAssets] = useState<BeepPurchaseAsset[]>([]);
+
+  // Calculate total amount from assets
+  const totalAmount = useMemo(() => {
+    return assets.reduce((total, asset) => {
+      if ('assetId' in asset) {
+        // BeepPurchaseAsset - can't calculate total without product data
+        return total;
+      } else {
+        // CreateProductPayload - calculate from price * quantity (assuming quantity is 1)
+        return total + parseFloat(asset.price);
+      }
+    }, 0);
+  }, [assets]);
+
+  // Helper function to determine if assets are CreateProductPayload or BeepPurchaseAsset
+  const isCreateProductPayload = (asset: any): asset is CreateProductPayload => {
+    return 'name' in asset && 'price' in asset;
+  };
+
+  // Convert CreateProductPayload to BeepPurchaseAsset by creating products on-the-fly
+  const processAssets = async (client: BeepClient): Promise<BeepPurchaseAsset[]> => {
+    const processedAssets: BeepPurchaseAsset[] = [];
+
+    for (const asset of assets) {
+      if (isCreateProductPayload(asset)) {
+        try {
+          // Create product on-the-fly
+          const product = await client.products.createProduct(asset);
+          processedAssets.push({ assetId: product.id, quantity: 1 });
+        } catch (error) {
+          // Throw a more specific error for product creation failures
+          const errorMessage =
+            error instanceof Error
+              ? `Failed to create product "${asset.name}": ${error.message}`
+              : `Failed to create product "${asset.name}": Unknown error`;
+          throw new Error(errorMessage);
+        }
+      } else {
+        // Already a BeepPurchaseAsset
+        processedAssets.push(asset);
+      }
+    }
+
+    return processedAssets;
+  };
+
   // Initial payment setup - generates QR code and payment URL
   useEffect(() => {
     const fetchPaymentData = async () => {
@@ -168,8 +215,12 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
           serverUrl: serverUrl,
         });
 
+        // Process assets - create products on-the-fly if needed
+        const processed = await processAssets(client);
+        setProcessedAssets(processed); // Cache for polling
+
         const paymentResponse = await client.payments.requestAndPurchaseAsset({
-          assets,
+          assets: processed,
           generateQrCode: true,
         });
 
@@ -194,7 +245,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     };
 
     fetchPaymentData();
-  }, [amount, apiKey, serverUrl]);
+  }, [assets, apiKey, serverUrl]);
 
   // Payment status polling - checks every 15 seconds for completion
   useEffect(() => {
@@ -210,8 +261,9 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
           serverUrl: serverUrl,
         });
 
+        // Use cached processed assets to avoid recreating products during polling
         const response = await client.payments.requestAndPurchaseAsset({
-          assets,
+          assets: processedAssets,
           paymentReference: state.referenceKey!,
           generateQrCode: false,
         });
@@ -230,7 +282,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
   }, [state.referenceKey, state.paymentSuccess, assets, apiKey, serverUrl]);
 
   // Extract wallet address from Solana Pay URI for display
-  const recepientWallet = useMemo(
+  const recipientWallet = useMemo(
     () => (state.paymentUrl ? parseSolanaPayURI(state.paymentUrl)?.recipient : ''),
     [state.paymentUrl],
   );
@@ -354,7 +406,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     <div style={cardStyles}>
       <div style={mainContentStyles}>
         <p style={labelStyles}>Amount due</p>
-        <h1 style={amountStyles}>${amount}</h1>
+        <h1 style={amountStyles}>${totalAmount.toFixed(2)}</h1>
       </div>
       {state.paymentSuccess ? (
         <div style={{ textAlign: 'center', padding: '32px', color: '#10b981' }}>
@@ -374,7 +426,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
               margin: '30px auto 32px auto',
             }}
           >
-            <WalletAddressLabel walletAddress={recepientWallet} />
+            <WalletAddressLabel walletAddress={recipientWallet} />
           </div>
         </>
       )}
