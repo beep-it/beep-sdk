@@ -1,8 +1,9 @@
-import { BeepClient, BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import QRCode from 'react-qr-code';
 import beepLogo from './beep_logo_mega.svg';
-import { MerchantWidgetProps, MerchantWidgetState } from './types';
+import { usePaymentSetup, usePaymentStatus } from './hooks';
+import { QueryProvider } from './QueryProvider';
+import { MerchantWidgetProps } from './types';
 
 /**
  * Parses a Solana Pay URI to extract payment parameters.
@@ -140,24 +141,34 @@ const styles: Record<string, React.CSSProperties> = {
  * The widget handles both customer-to-merchant payments via Solana Pay.
  * Styling uses inline styles for easy embedding without CSS conflicts.
  */
-export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
+const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   primaryColor,
   labels,
   apiKey,
   serverUrl,
   assets,
 }) => {
-  const [state, setState] = useState<MerchantWidgetState>({
-    qrCode: null,
-    loading: true,
-    error: null,
-    referenceKey: null,
-    paymentUrl: null,
-    paymentSuccess: false,
+  // Setup query - runs once to create products and generate QR code
+  const setupQuery = usePaymentSetup({
+    assets,
+    apiKey,
+    serverUrl,
   });
 
-  // Cache processed assets to avoid recreating products during polling
-  const [processedAssets, setProcessedAssets] = useState<BeepPurchaseAsset[]>([]);
+  // Status query - polls for payment completion
+  const statusQuery = usePaymentStatus({
+    referenceKey: setupQuery.data?.referenceKey || null,
+    processedAssets: setupQuery.data?.processedAssets || [],
+    apiKey,
+    serverUrl,
+    enabled: !!setupQuery.data?.referenceKey,
+  });
+
+  // Derive state from queries
+  const isLoading = setupQuery.isLoading;
+  const paymentError = setupQuery.error || statusQuery.error;
+  const paymentData = setupQuery.data;
+  const isPaymentComplete = statusQuery.data === true;
 
   // Calculate total amount from assets
   const totalAmount = useMemo(() => {
@@ -172,121 +183,10 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     }, 0);
   }, [assets]);
 
-  // Helper function to determine if assets are CreateProductPayload or BeepPurchaseAsset
-  const isCreateProductPayload = (asset: CreateProductPayload | BeepPurchaseAsset): boolean => {
-    const result = 'name' in asset && 'price' in asset;
-    return result;
-  };
-
-  // Convert CreateProductPayload to BeepPurchaseAsset by creating products on-the-fly
-  const processAssets = async (client: BeepClient): Promise<BeepPurchaseAsset[]> => {
-    const processedAssets: BeepPurchaseAsset[] = [];
-
-    for (const asset of assets) {
-      if (isCreateProductPayload(asset)) {
-        const newAsset = asset as CreateProductPayload;
-        try {
-          // Create product on-the-fly
-          const product = await client.products.createProduct(newAsset);
-          processedAssets.push({ assetId: product.id, quantity: 1 });
-        } catch (error) {
-          // Throw a more specific error for product creation failures
-          const errorMessage =
-            error instanceof Error
-              ? `Failed to create product "${newAsset.name}": ${error.message}`
-              : `Failed to create product "${newAsset.name}": Unknown error`;
-          throw new Error(errorMessage);
-        }
-      } else {
-        // Already a BeepPurchaseAsset
-        processedAssets.push(asset as BeepPurchaseAsset);
-      }
-    }
-
-    return processedAssets;
-  };
-
-  // Initial payment setup - generates QR code and payment URL
-  useEffect(() => {
-    const fetchPaymentData = async () => {
-      try {
-        setState((prev) => ({ ...prev, loading: true, error: null }));
-
-        const client = new BeepClient({
-          apiKey,
-          serverUrl: serverUrl,
-        });
-
-        // Process assets - create products on-the-fly if needed
-        const processed = await processAssets(client);
-        setProcessedAssets(processed); // Cache for polling
-
-        const paymentResponse = await client.payments.requestAndPurchaseAsset({
-          assets: processed,
-          generateQrCode: true,
-        });
-
-        setState({
-          qrCode: paymentResponse?.qrCode || null,
-          loading: false,
-          error: null,
-          referenceKey: paymentResponse?.referenceKey || null,
-          paymentUrl: paymentResponse?.paymentUrl || null,
-          paymentSuccess: false,
-        });
-      } catch (error) {
-        setState({
-          qrCode: null,
-          loading: false,
-          error: error instanceof Error ? error.message : 'Failed to load payment data',
-          referenceKey: null,
-          paymentUrl: null,
-          paymentSuccess: false,
-        });
-      }
-    };
-
-    fetchPaymentData();
-  }, [assets, apiKey, serverUrl]);
-
-  // Payment status polling - checks every 15 seconds for completion
-  useEffect(() => {
-    if (!state.referenceKey || state.paymentSuccess) {
-      return;
-    }
-
-    const pollPaymentStatus = async () => {
-      console.log('polling...');
-      try {
-        const client = new BeepClient({
-          apiKey,
-          serverUrl: serverUrl,
-        });
-
-        // Use cached processed assets to avoid recreating products during polling
-        const response = await client.payments.requestAndPurchaseAsset({
-          assets: processedAssets,
-          paymentReference: state.referenceKey!,
-          generateQrCode: false,
-        });
-        if (!response?.referenceKey) {
-          setState((prev) => ({ ...prev, paymentSuccess: true }));
-          return;
-        }
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
-    };
-
-    const interval = setInterval(pollPaymentStatus, 15000);
-
-    return () => clearInterval(interval);
-  }, [state.referenceKey, state.paymentSuccess, assets, apiKey, serverUrl]);
-
   // Extract wallet address from Solana Pay URI for display
   const recipientWallet = useMemo(
-    () => (state.paymentUrl ? parseSolanaPayURI(state.paymentUrl)?.recipient : ''),
-    [state.paymentUrl],
+    () => (paymentData?.paymentUrl ? parseSolanaPayURI(paymentData?.paymentUrl)?.recipient : ''),
+    [paymentData?.paymentUrl],
   );
 
   const containerStyle: React.CSSProperties = {
@@ -388,7 +288,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     gap: '4px',
   };
 
-  if (state.loading) {
+  if (isLoading) {
     return (
       <div style={containerStyle}>
         <div style={loadingStyle}>Loading payment...</div>
@@ -396,10 +296,10 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
     );
   }
 
-  if (state.error) {
+  if (paymentError) {
     return (
       <div style={containerStyle}>
-        <div style={errorStyle}>Error: {state.error}</div>
+        <div style={errorStyle}>Error: {paymentError.message}</div>
       </div>
     );
   }
@@ -410,7 +310,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
         <p style={labelStyles}>Amount due</p>
         <h1 style={amountStyles}>${totalAmount.toFixed(2)}</h1>
       </div>
-      {state.paymentSuccess ? (
+      {isPaymentComplete ? (
         <div style={{ textAlign: 'center', padding: '32px', color: '#10b981' }}>
           <div style={{ fontSize: '24px', marginBottom: '8px' }}>✓</div>
           <div style={{ fontSize: '18px', fontWeight: 'bold' }}>Payment Successfully Processed</div>
@@ -418,9 +318,9 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
       ) : (
         <>
           <div style={labelStyle}>{labels.scanQr ?? 'Scan with your phone or copy address'}</div>
-          {state.paymentUrl && (
+          {paymentData?.paymentUrl && (
             <div style={qrStyle}>
-              <QRCode value={state.paymentUrl} size={200} />
+              <QRCode value={paymentData.paymentUrl} size={200} />
             </div>
           )}
           <div
@@ -442,5 +342,14 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
         </div>
       </div>
     </div>
+  );
+};
+
+// Export wrapped version with QueryProvider
+export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
+  return (
+    <QueryProvider>
+      <CheckoutWidgetInner {...props} />
+    </QueryProvider>
   );
 };

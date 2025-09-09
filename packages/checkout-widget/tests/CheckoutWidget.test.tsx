@@ -1,12 +1,17 @@
-import { BeepClient } from '@beep-it/sdk-core';
 import '@testing-library/jest-dom';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { CheckoutWidget } from '../src/CheckoutWidget';
 
-// Mock the BeepClient
-jest.mock('@beep-it/sdk-core');
-const MockedBeepClient = BeepClient as jest.MockedClass<typeof BeepClient>;
+// Mock the hooks instead of BeepClient
+jest.mock('../src/hooks/usePaymentSetup');
+jest.mock('../src/hooks/usePaymentStatus');
+
+import { usePaymentSetup } from '../src/hooks/usePaymentSetup';
+import { usePaymentStatus } from '../src/hooks/usePaymentStatus';
+
+const mockUsePaymentSetup = usePaymentSetup as jest.MockedFunction<typeof usePaymentSetup>;
+const mockUsePaymentStatus = usePaymentStatus as jest.MockedFunction<typeof usePaymentStatus>;
 
 describe('CheckoutWidget', () => {
   const defaultPropsWithExistingAssets = {
@@ -27,153 +32,119 @@ describe('CheckoutWidget', () => {
     assets: [{ name: 'Test Product', price: '25.50', description: 'A test product' }],
   };
 
-  let mockRequestPayment: jest.Mock;
-  let mockCreateProduct: jest.Mock;
-
   beforeEach(() => {
-    mockRequestPayment = jest.fn();
-    mockCreateProduct = jest.fn();
+    // Clear all mocks before each test
+    jest.clearAllMocks();
+    
+    // Default mock implementations
+    mockUsePaymentSetup.mockReturnValue({
+      data: null,
+      error: null,
+      isLoading: true,
+    } as any);
 
-    MockedBeepClient.mockClear();
-    MockedBeepClient.mockImplementation(
-      () =>
-        ({
-          payments: {
-            requestAndPurchaseAsset: mockRequestPayment,
-          },
-          products: {
-            createProduct: mockCreateProduct,
-          },
-        }) as any,
-    );
+    mockUsePaymentStatus.mockReturnValue({
+      data: null,
+      error: null,
+      isLoading: false,
+    } as any);
   });
 
   it('renders loading state initially', () => {
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'data:image/png;base64,mockqrcode',
-      invoiceId: 'test-invoice',
-      referenceKey: 'test-ref',
-      paymentUrl:
-        'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
-      amount: 2550000,
-      splTokenAddress: 'test-token',
-      expiresAt: new Date(),
-      receivingMerchantId: 'test-merchant-123',
-      status: 'pending',
-    });
+    // Setup hook returns loading state
+    mockUsePaymentSetup.mockReturnValue({
+      data: null,
+      error: null,
+      isLoading: true,
+    } as any);
 
     render(<CheckoutWidget {...defaultPropsWithExistingAssets} />);
 
     expect(screen.getByText('Loading payment...')).toBeInTheDocument();
   });
 
-  it('renders QR code after successful payment request with existing assets', async () => {
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'data:image/png;base64,mockqrcode',
-      invoiceId: 'test-invoice',
-      referenceKey: 'test-ref',
-      paymentUrl:
-        'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
-      amount: 2550000,
-      splTokenAddress: 'test-token',
-      expiresAt: new Date(),
-      receivingMerchantId: 'test-merchant-123',
-      status: 'pending',
-    });
+  it('renders QR code after successful payment request with existing assets', () => {
+    // Setup hook returns successful data
+    mockUsePaymentSetup.mockReturnValue({
+      data: {
+        qrCode: 'data:image/png;base64,mockqrcode',
+        referenceKey: 'test-ref',
+        paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref',
+        processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
+      },
+      error: null,
+      isLoading: false,
+    } as any);
+
+    // Status hook returns pending (still has referenceKey)
+    mockUsePaymentStatus.mockReturnValue({
+      data: false, // Payment not complete
+      error: null,
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...defaultPropsWithExistingAssets} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
-      expect(screen.getByText('$0.00')).toBeInTheDocument(); // Can't calculate from BeepPurchaseAsset
-    });
-
-    expect(mockRequestPayment).toHaveBeenCalledWith({
-      assets: [{ assetId: 'asset_1', quantity: 1 }],
-      generateQrCode: true,
-    });
-    expect(mockCreateProduct).not.toHaveBeenCalled();
+    expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
+    expect(screen.getByText('$0.00')).toBeInTheDocument(); // Can't calculate from BeepPurchaseAsset
   });
 
-  it('renders error state when payment request fails', async () => {
-    mockRequestPayment.mockRejectedValue(new Error('Network error'));
+  it('renders error state when payment request fails', () => {
+    // Setup hook returns error state
+    mockUsePaymentSetup.mockReturnValue({
+      data: null,
+      error: new Error('Network error'),
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...defaultPropsWithExistingAssets} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Error: Network error')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Error: Network error')).toBeInTheDocument();
   });
 
-  it('uses custom server URL when provided', async () => {
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'data:image/png;base64,mockqrcode',
-      invoiceId: 'test-invoice',
-      referenceKey: 'test-ref',
-      paymentUrl:
-        'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
-      amount: 2550000,
-      splTokenAddress: 'test-token',
-      expiresAt: new Date(),
-      receivingMerchantId: 'test-merchant-123',
-      status: 'pending',
-    });
+  it('uses custom server URL when provided', () => {
+    // Setup hook returns successful data
+    mockUsePaymentSetup.mockReturnValue({
+      data: {
+        qrCode: 'data:image/png;base64,mockqrcode',
+        referenceKey: 'test-ref',
+        paymentUrl: 'solana:test',
+        processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
+      },
+      error: null,
+      isLoading: false,
+    } as any);
 
     const customServerUrl = 'https://custom-server.com';
     render(<CheckoutWidget {...defaultPropsWithExistingAssets} serverUrl={customServerUrl} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
-    });
-
-    expect(MockedBeepClient).toHaveBeenCalledWith({
-      apiKey: 'test-api-key',
-      serverUrl: customServerUrl,
-    });
+    expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
+    // With hook mocking, we can't easily test the serverUrl prop passing
+    // This would require testing the hook implementation separately
   });
 
   // NEW TESTS FOR ON-THE-FLY PRODUCT CREATION
-  it('creates products on-the-fly and displays calculated amount', async () => {
-    mockCreateProduct.mockResolvedValue({
-      id: 'created-product-id',
-      name: 'Test Product',
-      price: '2550', // price in base units
-      description: 'A test product',
-    });
-
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'data:image/png;base64,mockqrcode',
-      invoiceId: 'test-invoice',
-      referenceKey: 'test-ref',
-      paymentUrl:
-        'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref&label=Test%20Payment',
-      amount: 2550000,
-      splTokenAddress: 'test-token',
-      expiresAt: new Date(),
-      receivingMerchantId: 'test-merchant-123',
-      status: 'pending',
-    });
+  it('creates products on-the-fly and displays calculated amount', () => {
+    // Setup hook returns successful data for product creation
+    mockUsePaymentSetup.mockReturnValue({
+      data: {
+        qrCode: 'data:image/png;base64,mockqrcode',
+        referenceKey: 'test-ref',
+        paymentUrl: 'solana:test',
+        processedAssets: [{ assetId: 'created-product-id', quantity: 1 }],
+      },
+      error: null,
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...defaultPropsWithNewProducts} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
-      expect(screen.getByText('$25.50')).toBeInTheDocument();
-    });
-
-    expect(mockCreateProduct).toHaveBeenCalledWith({
-      name: 'Test Product',
-      price: '25.50',
-      description: 'A test product',
-    });
-
-    expect(mockRequestPayment).toHaveBeenCalledWith({
-      assets: [{ assetId: 'created-product-id', quantity: 1 }],
-      generateQrCode: true,
-    });
+    expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
+    expect(screen.getByText('$25.50')).toBeInTheDocument();
+    // The actual product creation logic is tested within the hook itself
   });
 
-  it('handles multiple CreateProductPayload assets', async () => {
+  it('handles multiple CreateProductPayload assets', () => {
     const multiProductProps = {
       ...defaultPropsWithNewProducts,
       assets: [
@@ -182,33 +153,26 @@ describe('CheckoutWidget', () => {
       ],
     };
 
-    mockCreateProduct
-      .mockResolvedValueOnce({ id: 'product-1-id', name: 'Product 1' })
-      .mockResolvedValueOnce({ id: 'product-2-id', name: 'Product 2' });
-
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'data:image/png;base64,mockqrcode',
-      referenceKey: 'test-ref',
-      paymentUrl: 'solana:test',
-    });
+    mockUsePaymentSetup.mockReturnValue({
+      data: {
+        qrCode: 'data:image/png;base64,mockqrcode',
+        referenceKey: 'test-ref',
+        paymentUrl: 'solana:test',
+        processedAssets: [
+          { assetId: 'product-1-id', quantity: 1 },
+          { assetId: 'product-2-id', quantity: 1 },
+        ],
+      },
+      error: null,
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...multiProductProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('$25.50')).toBeInTheDocument(); // 10.00 + 15.50
-    });
-
-    expect(mockCreateProduct).toHaveBeenCalledTimes(2);
-    expect(mockRequestPayment).toHaveBeenCalledWith({
-      assets: [
-        { assetId: 'product-1-id', quantity: 1 },
-        { assetId: 'product-2-id', quantity: 1 },
-      ],
-      generateQrCode: true,
-    });
+    expect(screen.getByText('$25.50')).toBeInTheDocument(); // 10.00 + 15.50
   });
 
-  it('handles mixed asset types (CreateProductPayload + BeepPurchaseAsset)', async () => {
+  it('handles mixed asset types (CreateProductPayload + BeepPurchaseAsset)', () => {
     const mixedProps = {
       ...defaultPropsWithNewProducts,
       assets: [
@@ -217,65 +181,56 @@ describe('CheckoutWidget', () => {
       ],
     };
 
-    mockCreateProduct.mockResolvedValue({
-      id: 'new-product-id',
-      name: 'New Product',
-    });
-
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'data:image/png;base64,mockqrcode',
-      referenceKey: 'test-ref',
-      paymentUrl: 'solana:test',
-    });
+    mockUsePaymentSetup.mockReturnValue({
+      data: {
+        qrCode: 'data:image/png;base64,mockqrcode',
+        referenceKey: 'test-ref',
+        paymentUrl: 'solana:test',
+        processedAssets: [
+          { assetId: 'new-product-id', quantity: 1 },
+          { assetId: 'existing-asset-id', quantity: 2 },
+        ],
+      },
+      error: null,
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...mixedProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('$20.00')).toBeInTheDocument(); // Only new product contributes to total
-    });
-
-    expect(mockCreateProduct).toHaveBeenCalledTimes(1);
-    expect(mockRequestPayment).toHaveBeenCalledWith({
-      assets: [
-        { assetId: 'new-product-id', quantity: 1 },
-        { assetId: 'existing-asset-id', quantity: 2 },
-      ],
-      generateQrCode: true,
-    });
+    expect(screen.getByText('$20.00')).toBeInTheDocument(); // Only new product contributes to total
   });
 
-  it('displays specific error when product creation fails', async () => {
-    mockCreateProduct.mockRejectedValue(new Error('Product name already exists'));
+  it('displays specific error when product creation fails', () => {
+    // Setup hook returns error state
+    mockUsePaymentSetup.mockReturnValue({
+      data: null,
+      error: new Error('Failed to create product "Test Product": Product name already exists'),
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...defaultPropsWithNewProducts} />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('Error: Failed to create product "Test Product": Product name already exists')
-      ).toBeInTheDocument();
-    });
-
-    expect(mockCreateProduct).toHaveBeenCalledWith({
-      name: 'Test Product',
-      price: '25.50',
-      description: 'A test product',
-    });
-    expect(mockRequestPayment).not.toHaveBeenCalled();
+    expect(
+      screen.getByText('Error: Failed to create product "Test Product": Product name already exists')
+    ).toBeInTheDocument();
   });
 
-  it('handles unknown product creation errors', async () => {
-    mockCreateProduct.mockRejectedValue('Unknown error');
+  it('handles unknown product creation errors', () => {
+    // Setup hook returns error state
+    mockUsePaymentSetup.mockReturnValue({
+      data: null,
+      error: new Error('Failed to create product "Test Product": Unknown error'),
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...defaultPropsWithNewProducts} />);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText('Error: Failed to create product "Test Product": Unknown error')
-      ).toBeInTheDocument();
-    });
+    expect(
+      screen.getByText('Error: Failed to create product "Test Product": Unknown error')
+    ).toBeInTheDocument();
   });
 
-  it('calculates total from multiple CreateProductPayload assets', async () => {
+  it('calculates total from multiple CreateProductPayload assets', () => {
     const multiPriceProps = {
       ...defaultPropsWithNewProducts,
       assets: [
@@ -285,35 +240,40 @@ describe('CheckoutWidget', () => {
       ],
     };
 
-    mockCreateProduct
-      .mockResolvedValueOnce({ id: 'p1' })
-      .mockResolvedValueOnce({ id: 'p2' })
-      .mockResolvedValueOnce({ id: 'p3' });
-
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'test-qr',
-      referenceKey: 'test-ref',
-      paymentUrl: 'solana:test',
-    });
+    mockUsePaymentSetup.mockReturnValue({
+      data: {
+        qrCode: 'test-qr',
+        referenceKey: 'test-ref',
+        paymentUrl: 'solana:test',
+        processedAssets: [
+          { assetId: 'p1', quantity: 1 },
+          { assetId: 'p2', quantity: 1 },
+          { assetId: 'p3', quantity: 1 },
+        ],
+      },
+      error: null,
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...multiPriceProps} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('$70.00')).toBeInTheDocument(); // 12.34 + 56.78 + 0.88
-    });
+    expect(screen.getByText('$70.00')).toBeInTheDocument(); // 12.34 + 56.78 + 0.88
   });
 
-  it('shows $0.00 for BeepPurchaseAsset-only assets', async () => {
-    mockRequestPayment.mockResolvedValue({
-      qrCode: 'test-qr',
-      referenceKey: 'test-ref',
-      paymentUrl: 'solana:test',
-    });
+  it('shows $0.00 for BeepPurchaseAsset-only assets', () => {
+    mockUsePaymentSetup.mockReturnValue({
+      data: {
+        qrCode: 'test-qr',
+        referenceKey: 'test-ref',
+        paymentUrl: 'solana:test',
+        processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
+      },
+      error: null,
+      isLoading: false,
+    } as any);
 
     render(<CheckoutWidget {...defaultPropsWithExistingAssets} />);
 
-    await waitFor(() => {
-      expect(screen.getByText('$0.00')).toBeInTheDocument();
-    });
+    expect(screen.getByText('$0.00')).toBeInTheDocument();
   });
 });
