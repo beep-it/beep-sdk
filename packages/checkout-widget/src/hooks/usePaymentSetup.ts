@@ -29,7 +29,7 @@ export const usePaymentSetup = ({ assets, apiKey, serverUrl }: UsePaymentSetupPa
       if (isCreateProductPayload(asset)) {
         try {
           const product = await client.products.createProduct(asset);
-          processedAssets.push({ assetId: product.id, quantity: 1 });
+          processedAssets.push({ assetId: product.uuid, quantity: 1 });
         } catch (error) {
           const errorMessage =
             error instanceof Error

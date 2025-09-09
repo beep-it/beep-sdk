@@ -168,7 +168,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   const isLoading = setupQuery.isLoading;
   const paymentError = setupQuery.error || statusQuery.error;
   const paymentData = setupQuery.data;
-  const isPaymentComplete = statusQuery.data === true;
+  const isPaymentComplete = Boolean(statusQuery.data === true);
 
   // Calculate total amount from assets
   const totalAmount = useMemo(() => {
