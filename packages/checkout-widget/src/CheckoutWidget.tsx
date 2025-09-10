@@ -72,16 +72,42 @@ function parseSolanaPayURI(uri: string) {
 }
 
 /**
- * CheckoutWidget - A complete Solana payment interface
+ * CheckoutWidget - A complete Solana payment interface for BEEP payment system
  *
- * Features:
- * - Generates QR codes for mobile wallet scanning
- * - Shows copyable wallet addresses for desktop users
- * - Polls payment status every 15 seconds
- * - Displays success state when payment is confirmed
+ * This widget provides a full checkout experience supporting both existing product
+ * references and on-the-fly product creation. It handles the complete payment flow
+ * from product pricing calculation through payment confirmation.
  *
- * The widget handles both customer-to-merchant payments via Solana Pay.
- * Styling uses inline styles for easy embedding without CSS conflicts.
+ * Key Features:
+ * - Asset-based pricing with automatic total calculation
+ * - Solana Pay QR code generation with custom labels
+ * - Real-time payment status polling (15-second intervals)
+ * - Support for mixed asset types (existing + dynamic products)
+ * - Comprehensive error handling with isolated error boundaries
+ * - Responsive design with customizable theming
+ * - Zero CSS dependencies (inline styles prevent conflicts)
+ *
+ * Payment Flow:
+ * 1. Setup: Processes assets, calculates totals, generates Solana Pay URL
+ * 2. Display: Shows QR code, amount, and wallet address to user
+ * 3. Poll: Continuously monitors payment status every 15 seconds
+ * 4. Complete: Displays success state when payment confirmed on-chain
+ *
+ * @example
+ * ```tsx
+ * <CheckoutWidget
+ *   apiKey="your-api-key"
+ *   primaryColor="#007bff"
+ *   labels={{
+ *     scanQr: "Scan to Pay",
+ *     paymentLabel: "My Store"
+ *   }}
+ *   assets={[
+ *     { assetId: "product-uuid", quantity: 2 },
+ *     { name: "Rush Delivery", price: "15.00", quantity: 1, token: "USDC" }
+ *   ]}
+ * />
+ * ```
  */
 const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   primaryColor = '#007bff',
