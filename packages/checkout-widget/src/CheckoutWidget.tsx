@@ -1,133 +1,69 @@
-import React, { useMemo, useState } from 'react';
-import QRCode from 'react-qr-code';
-import beepLogo from './beep_logo_mega.svg';
+import React, { useMemo } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+import { ConfigurationError, LoadingState, PaymentError, PaymentSuccess, WalletAddressLabel } from './components';
+import { ComponentErrorBoundary } from './components/ComponentErrorBoundary';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { usePaymentSetup, usePaymentStatus } from './hooks';
 import { QueryProvider } from './QueryProvider';
+import {
+  amountStyles,
+  cardStyles,
+  footerContentStyles,
+  footerStyles,
+  labelStyle,
+  labelStyles,
+  logoContainerStyles,
+  mainContentStyles,
+  poweredByTextStyles,
+  qrStyle,
+} from './styles';
 import { MerchantWidgetProps } from './types';
+
+// Safe logo import with fallback
+import beepLogoUrl from './beep_logo_mega.svg';
+
+const beepLogo =
+  beepLogoUrl ||
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCA0MCAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzMzMzMzMyI+QkVFUDwvdGV4dD4KPHN2Zz4K';
 
 /**
  * Parses a Solana Pay URI to extract payment parameters.
  * Expected format: solana:recipient?amount=X&reference=Y&label=Z
  */
 function parseSolanaPayURI(uri: string) {
-  const url = new URL(uri);
+  try {
+    if (!uri || typeof uri !== 'string') {
+      return {
+        recipient: '',
+        amount: null,
+        splToken: null,
+        reference: null,
+        label: null,
+        message: null,
+      };
+    }
+    const url = new URL(uri);
 
-  return {
-    recipient: url.pathname,
-    amount: url.searchParams.get('amount'),
-    splToken: url.searchParams.get('spl-token'),
-    reference: url.searchParams.get('reference'),
-    label: url.searchParams.get('label'),
-    message: url.searchParams.get('message'),
-  };
+    return {
+      recipient: url.pathname || '',
+      amount: url.searchParams.get('amount'),
+      splToken: url.searchParams.get('spl-token'),
+      reference: url.searchParams.get('reference'),
+      label: url.searchParams.get('label'),
+      message: url.searchParams.get('message'),
+    };
+  } catch (error) {
+    console.error('Failed to parse Solana Pay URI:', error);
+    return {
+      recipient: '',
+      amount: null,
+      splToken: null,
+      reference: null,
+      label: null,
+      message: null,
+    };
+  }
 }
-
-const WalletAddressLabel = ({ walletAddress = '0x1234567890121234567890121234567890120611' }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(walletAddress);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy: ', err);
-    }
-  };
-
-  const truncateAddress = (address: string) => {
-    if (address.length <= 20) {
-      return address;
-    }
-    return `${address.slice(0, 12)}...${address.slice(-4)}`;
-  };
-
-  return (
-    <div style={styles.container}>
-      <div style={styles.labelContainer}>
-        <span style={styles.walletLabel}>{truncateAddress(walletAddress)}</span>
-        <button
-          onClick={handleCopy}
-          style={styles.copyButton}
-          onMouseEnter={(e) => {
-            (e.target as HTMLButtonElement).style.backgroundColor = '#f0f0f0';
-          }}
-          onMouseLeave={(e) => {
-            (e.target as HTMLButtonElement).style.backgroundColor = 'transparent';
-          }}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        </button>
-      </div>
-      {copied && <div style={styles.copyFeedback}>Copied to clipboard!</div>}
-    </div>
-  );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    position: 'relative',
-    maxWidth: '240px',
-    margin: '20px auto',
-  },
-  labelContainer: {
-    position: 'relative',
-    display: 'flex',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    borderRadius: '20px',
-    padding: '12px 16px',
-    paddingRight: '48px',
-    border: '1px solid #e0e0e0',
-    minHeight: '20px',
-  },
-  walletLabel: {
-    flex: 1,
-    fontSize: '14px',
-    color: '#666',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    userSelect: 'none',
-  },
-  copyButton: {
-    position: 'absolute',
-    right: '8px',
-    background: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    padding: '8px',
-    borderRadius: '8px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    color: '#666',
-    transition: 'background-color 0.2s ease',
-  },
-  copyFeedback: {
-    position: 'absolute',
-    top: '-35px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    backgroundColor: '#333',
-    color: 'white',
-    padding: '6px 12px',
-    borderRadius: '6px',
-    fontSize: '12px',
-    whiteSpace: 'nowrap',
-    zIndex: 1000,
-  },
-};
 
 /**
  * CheckoutWidget - A complete Solana payment interface
@@ -142,214 +78,184 @@ const styles: Record<string, React.CSSProperties> = {
  * Styling uses inline styles for easy embedding without CSS conflicts.
  */
 const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
-  primaryColor,
-  labels,
+  primaryColor = '#007bff',
+  labels = { scanQr: 'Scan with your phone or copy address' },
   apiKey,
   serverUrl,
-  assets,
+  assets = [],
 }) => {
+  // Input validation
+  if (!apiKey || typeof apiKey !== 'string') {
+    console.error('[CheckoutWidget] Missing or invalid API key:', apiKey);
+    return <ConfigurationError title="Configuration Error" message="API key is required" primaryColor={primaryColor} />;
+  }
+
+  if (!Array.isArray(assets) || assets.length === 0) {
+    return (
+      <ConfigurationError title="Configuration Error" message="At least one asset is required" primaryColor={primaryColor} />
+    );
+  }
   // Setup query - runs once to create products and generate QR code
-  const setupQuery = usePaymentSetup({
+  const {
+    data: paymentSetupData,
+    error: paymentSetupError,
+    isLoading: paymentSetupLoading,
+  } = usePaymentSetup({
     assets,
     apiKey,
     serverUrl,
   });
 
   // Status query - polls for payment completion
-  const statusQuery = usePaymentStatus({
-    referenceKey: setupQuery.data?.referenceKey || null,
-    processedAssets: setupQuery.data?.processedAssets || [],
+  const {
+    data: paymentStatusData,
+    error: paymentStatusError,
+    isLoading: paymentStatusLoading,
+  } = usePaymentStatus({
+    referenceKey: paymentSetupData?.referenceKey || null,
+    processedAssets: paymentSetupData?.processedAssets || [],
     apiKey,
     serverUrl,
-    enabled: !!setupQuery.data?.referenceKey,
+    enabled: !!paymentSetupData?.referenceKey,
   });
 
   // Derive state from queries
-  const isLoading = setupQuery.isLoading;
-  const paymentError = setupQuery.error || statusQuery.error;
-  const paymentData = setupQuery.data;
-  const isPaymentComplete = Boolean(statusQuery.data === true);
+  const isLoading = paymentSetupLoading || paymentStatusLoading;
+  const paymentError = paymentSetupError || paymentStatusError;
+  const isPaymentComplete = Boolean(paymentStatusData === true);
 
-  // Calculate total amount from assets
-  const totalAmount = useMemo(() => {
-    return assets.reduce((total, asset) => {
-      if ('assetId' in asset) {
-        // BeepPurchaseAsset - can't calculate total without product data
-        return total;
-      } else {
-        // CreateProductPayload - calculate from price * quantity (assuming quantity is 1)
-        return total + parseFloat(asset.price);
-      }
-    }, 0);
-  }, [assets]);
+  // Get total amount from payment setup data (calculated from actual product pricing)
+  const totalAmount = paymentSetupData?.totalAmount ?? 0;
 
   // Extract wallet address from Solana Pay URI for display
-  const recipientWallet = useMemo(
-    () => (paymentData?.paymentUrl ? parseSolanaPayURI(paymentData?.paymentUrl)?.recipient : ''),
-    [paymentData?.paymentUrl],
-  );
-
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '20px',
-    border: `2px solid ${primaryColor}`,
-    borderRadius: '8px',
-    maxWidth: '300px',
-    fontFamily: 'Arial, sans-serif',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    color: '#96969B',
-    fontSize: '14px',
-    fontWeight: 500,
-    marginBottom: '16px',
-    textAlign: 'center',
-    opacity: 0.7,
-  };
-
-  const qrStyle: React.CSSProperties = {
-    maxWidth: '200px',
-    maxHeight: '200px',
-    border: '4px solid #373737',
-    borderRadius: '17px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: '0 auto 32px auto',
-    padding: '16px',
-  };
-
-  const errorStyle: React.CSSProperties = {
-    color: '#dc3545',
-    fontSize: '14px',
-    textAlign: 'center',
-  };
-
-  const loadingStyle: React.CSSProperties = {
-    color: primaryColor,
-    fontSize: '14px',
-  };
-
-  const cardStyles: React.CSSProperties = {
-    width: '100%',
-    maxWidth: '400px',
-    minWidth: '300px',
-    margin: '0 auto',
-    backgroundColor: 'white',
-    borderRadius: '16px',
-    boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-    overflow: 'hidden',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-  };
-
-  const mainContentStyles: React.CSSProperties = {
-    padding: '48px 32px',
-    textAlign: 'center',
-  };
-
-  const labelStyles: React.CSSProperties = {
-    color: '#6b7280',
-    fontSize: '14px',
-    marginBottom: '8px',
-    fontWeight: '400',
-  };
-
-  const amountStyles: React.CSSProperties = {
-    fontSize: '36px',
-    fontWeight: 'bold',
-    color: '#111827',
-    margin: '0',
-  };
-
-  const footerStyles: React.CSSProperties = {
-    backgroundColor: '#f9fafb',
-    padding: '16px 24px',
-    textAlign: 'center',
-    borderTop: '1px solid #f3f4f6',
-  };
-
-  const footerContentStyles: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '8px',
-  };
-
-  const poweredByTextStyles: React.CSSProperties = {
-    color: '#9ca3af',
-    fontSize: '14px',
-  };
-
-  const logoContainerStyles: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
-  };
+  const recipientWallet = useMemo(() => {
+    try {
+      if (!paymentSetupData?.paymentUrl) return '';
+      const parsed = parseSolanaPayURI(paymentSetupData.paymentUrl);
+      return parsed?.recipient || '';
+    } catch (error) {
+      console.error('Error parsing recipient wallet:', error);
+      return '';
+    }
+  }, [paymentSetupData?.paymentUrl]);
 
   if (isLoading) {
-    return (
-      <div style={containerStyle}>
-        <div style={loadingStyle}>Loading payment...</div>
-      </div>
-    );
+    return <LoadingState primaryColor={primaryColor} />;
   }
 
   if (paymentError) {
-    return (
-      <div style={containerStyle}>
-        <div style={errorStyle}>Error: {paymentError.message}</div>
-      </div>
-    );
+    return <PaymentError error={paymentError} primaryColor={primaryColor} />;
   }
 
   return (
-    <div style={cardStyles}>
-      <div style={mainContentStyles}>
-        <p style={labelStyles}>Amount due</p>
-        <h1 style={amountStyles}>${totalAmount.toFixed(2)}</h1>
-      </div>
-      {isPaymentComplete ? (
-        <div style={{ textAlign: 'center', padding: '32px', color: '#10b981' }}>
-          <div style={{ fontSize: '24px', marginBottom: '8px' }}>✓</div>
-          <div style={{ fontSize: '18px', fontWeight: 'bold' }}>Payment Successfully Processed</div>
-        </div>
-      ) : (
-        <>
-          <div style={labelStyle}>{labels.scanQr ?? 'Scan with your phone or copy address'}</div>
-          {paymentData?.paymentUrl && (
-            <div style={qrStyle}>
-              <QRCode value={paymentData.paymentUrl} size={200} />
+    <ComponentErrorBoundary componentName="TopLevel">
+      <div style={cardStyles({ primaryColor })}>
+        <ComponentErrorBoundary componentName="AmountDisplay">
+          <div style={mainContentStyles}>
+            <p style={labelStyles}>Amount due</p>
+            <h1 style={amountStyles}>${totalAmount > 0 ? totalAmount.toFixed(2) : '...'}</h1>
+          </div>
+        </ComponentErrorBoundary>
+        {isPaymentComplete ? (
+          <ComponentErrorBoundary componentName="PaymentSuccess">
+            <PaymentSuccess />
+          </ComponentErrorBoundary>
+        ) : (
+          <ComponentErrorBoundary componentName="PaymentInterface">
+            {paymentSetupData && (
+              <>
+                <ComponentErrorBoundary componentName="InstructionLabel">
+                  <div style={labelStyle}>
+                    {labels?.scanQr ?? 'Scan with your phone or copy address'}
+                  </div>
+                </ComponentErrorBoundary>
+
+                {paymentSetupData.paymentUrl && (
+                  <ComponentErrorBoundary
+                    componentName="QRCodeDisplay"
+                    fallback={
+                      <div
+                        style={{
+                          width: '200px',
+                          height: '200px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#f5f5f5',
+                          border: '2px dashed #ccc',
+                          borderRadius: '8px',
+                          color: '#666',
+                          fontSize: '14px',
+                          margin: '0 auto 32px auto',
+                        }}
+                      >
+                        QR Code Failed
+                      </div>
+                    }
+                  >
+                    <div style={qrStyle({ primaryColor })}>
+                      {QRCodeSVG ? (
+                        <QRCodeSVG value={paymentSetupData.paymentUrl} size={168} />
+                      ) : (
+                        <div style={{ color: 'red', padding: '20px' }}>
+                          QRCode component not available
+                        </div>
+                      )}
+                    </div>
+                  </ComponentErrorBoundary>
+                )}
+
+                <ComponentErrorBoundary componentName="WalletAddress">
+                  <div style={{ margin: '30px auto 32px auto' }}>
+                    <WalletAddressLabel walletAddress={recipientWallet} />
+                  </div>
+                </ComponentErrorBoundary>
+              </>
+            )}
+          </ComponentErrorBoundary>
+        )}
+        {/* Footer */}
+        <ComponentErrorBoundary componentName="Footer">
+          <div style={footerStyles}>
+            <div style={footerContentStyles}>
+              <span style={poweredByTextStyles}>Powered by</span>
+              <ComponentErrorBoundary
+                componentName="Logo"
+                fallback={<span style={{ fontSize: '12px', fontWeight: 'bold' }}>BEEP</span>}
+              >
+                <div style={logoContainerStyles}>
+                  <img
+                    src={beepLogo}
+                    alt="Beep"
+                    style={{ height: '16px', width: 'auto' }}
+                    onError={(e) => {
+                      console.error('[CheckoutWidget] Logo failed to load:', beepLogo);
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = document.createElement('span');
+                      fallback.textContent = 'BEEP';
+                      fallback.style.fontSize = '12px';
+                      fallback.style.fontWeight = 'bold';
+                      target.parentNode?.appendChild(fallback);
+                    }}
+                  />
+                </div>
+              </ComponentErrorBoundary>
             </div>
-          )}
-          <div
-            style={{
-              margin: '30px auto 32px auto',
-            }}
-          >
-            <WalletAddressLabel walletAddress={recipientWallet} />
           </div>
-        </>
-      )}
-      {/* Footer */}
-      <div style={footerStyles}>
-        <div style={footerContentStyles}>
-          <span style={poweredByTextStyles}>Powered by</span>
-          <div style={logoContainerStyles}>
-            <img src={beepLogo} alt="Beep" className="h-4 w-auto" />
-          </div>
-        </div>
+        </ComponentErrorBoundary>
       </div>
-    </div>
+    </ComponentErrorBoundary>
   );
 };
 
-// Export wrapped version with QueryProvider
+// Export wrapped version with QueryProvider and ErrorBoundary
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
   return (
-    <QueryProvider>
-      <CheckoutWidgetInner {...props} />
-    </QueryProvider>
+    <ErrorBoundary>
+      <QueryProvider>
+        <CheckoutWidgetInner {...props} />
+      </QueryProvider>
+    </ErrorBoundary>
   );
 };

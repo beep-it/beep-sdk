@@ -34,7 +34,6 @@ const ShowcasePage: React.FC = () => {
         <div style={{ textAlign: 'center' }}>
           <h3 style={{ marginBottom: '20px', color: '#666' }}>Default Theme</h3>
           <CheckoutWidget
-            amount={25.99}
             primaryColor="#007bff"
             labels={{
               scanQr: 'Scan with your phone or copy address',

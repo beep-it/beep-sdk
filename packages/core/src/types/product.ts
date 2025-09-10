@@ -7,6 +7,8 @@ import { SupportedToken } from './token';
 export interface Product {
   /** Unique identifier for this product */
   id: string;
+  /** UUID identifier for this product (preferred for API calls) */
+  uuid: string;
   /** ID of the merchant who owns this product */
   merchantId: string;
   /** Display name for the product */

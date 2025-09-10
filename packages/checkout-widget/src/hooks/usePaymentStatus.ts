@@ -33,7 +33,7 @@ export const usePaymentStatus = ({
 
         // Return true if payment complete (no referenceKey), false if still pending
         return !response?.referenceKey;
-      } catch (error: any) {
+      } catch (error) {
         // 402 responses or other errors mean payment is still pending
         console.error(error);
         return false;
