@@ -1,6 +1,12 @@
-import React, { useMemo } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { ConfigurationError, LoadingState, PaymentError, PaymentSuccess, WalletAddressLabel } from './components';
+import React, { useMemo } from 'react';
+import {
+  ConfigurationError,
+  LoadingState,
+  PaymentError,
+  PaymentSuccess,
+  WalletAddressLabel,
+} from './components';
 import { ComponentErrorBoundary } from './components/ComponentErrorBoundary';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { usePaymentSetup, usePaymentStatus } from './hooks';
@@ -79,7 +85,7 @@ function parseSolanaPayURI(uri: string) {
  */
 const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   primaryColor = '#007bff',
-  labels = { scanQr: 'Scan with your phone or copy address' },
+  labels = { scanQr: 'Scan with your phone or copy address', paymentLabel: 'Beep Checkout' },
   apiKey,
   serverUrl,
   assets = [],
@@ -87,12 +93,22 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   // Input validation
   if (!apiKey || typeof apiKey !== 'string') {
     console.error('[CheckoutWidget] Missing or invalid API key:', apiKey);
-    return <ConfigurationError title="Configuration Error" message="API key is required" primaryColor={primaryColor} />;
+    return (
+      <ConfigurationError
+        title="Configuration Error"
+        message="API key is required"
+        primaryColor={primaryColor}
+      />
+    );
   }
 
   if (!Array.isArray(assets) || assets.length === 0) {
     return (
-      <ConfigurationError title="Configuration Error" message="At least one asset is required" primaryColor={primaryColor} />
+      <ConfigurationError
+        title="Configuration Error"
+        message="At least one asset is required"
+        primaryColor={primaryColor}
+      />
     );
   }
   // Setup query - runs once to create products and generate QR code
@@ -104,6 +120,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     assets,
     apiKey,
     serverUrl,
+    paymentLabel: labels?.paymentLabel,
   });
 
   // Status query - polls for payment completion
@@ -114,6 +131,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   } = usePaymentStatus({
     referenceKey: paymentSetupData?.referenceKey || null,
     processedAssets: paymentSetupData?.processedAssets || [],
+    paymentLabel: labels?.paymentLabel,
     apiKey,
     serverUrl,
     enabled: !!paymentSetupData?.referenceKey,

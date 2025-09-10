@@ -5,6 +5,7 @@ import { useBeepClient } from './useBeepClient';
 interface UsePaymentStatusParams {
   referenceKey: string | null;
   processedAssets: BeepPurchaseAsset[];
+  paymentLabel?: string;
   apiKey: string;
   serverUrl?: string;
   enabled: boolean;
@@ -13,6 +14,7 @@ interface UsePaymentStatusParams {
 export const usePaymentStatus = ({
   referenceKey,
   processedAssets,
+  paymentLabel,
   apiKey,
   serverUrl,
   enabled,
@@ -28,6 +30,7 @@ export const usePaymentStatus = ({
         const response = await client.payments.requestAndPurchaseAsset({
           assets: processedAssets,
           paymentReference: referenceKey,
+          paymentLabel,
           generateQrCode: false,
         });
 

@@ -33,6 +33,7 @@ interface PaymentSetupData {
   qrCode: string | null;
   referenceKey: string | null;
   paymentUrl: string | null;
+  paymentLabel?: string;
   processedAssets: BeepPurchaseAsset[];
   processedAssetsWithProducts: ProcessedAssetWithProduct[];
   totalAmount: number;
@@ -42,9 +43,15 @@ interface UsePaymentSetupParams {
   assets: (CreateProductPayload | BeepPurchaseAsset)[];
   apiKey: string;
   serverUrl?: string;
+  paymentLabel?: string;
 }
 
-export const usePaymentSetup = ({ assets, apiKey, serverUrl }: UsePaymentSetupParams) => {
+export const usePaymentSetup = ({
+  assets,
+  apiKey,
+  serverUrl,
+  paymentLabel,
+}: UsePaymentSetupParams) => {
   const client = useBeepClient({ apiKey, serverUrl });
 
   const isCreateProductPayload = (
@@ -57,13 +64,20 @@ export const usePaymentSetup = ({ assets, apiKey, serverUrl }: UsePaymentSetupPa
   const calculateProductAmount = (product: ProductWithPrices, quantity: number): number => {
     if (product.prices && product.prices.length > 0) {
       const price = product.prices[0]; // Use first price entry
-      const unitAmount = parseFloat(price.amount);
+      // Convert from base units (6 decimals) back to dollars for display
+      // e.g., "9990000" -> 9.99
+      const unitAmountInBaseUnits = parseFloat(price.amount);
+      const unitAmount = unitAmountInBaseUnits / 10 ** 6; // Convert from base units to dollars
       return unitAmount * quantity;
     }
     return 0;
   };
 
-  const processAssets = async (): Promise<{ processedAssets: BeepPurchaseAsset[]; processedAssetsWithProducts: ProcessedAssetWithProduct[]; totalAmount: number }> => {
+  const processAssets = async (): Promise<{
+    processedAssets: BeepPurchaseAsset[];
+    processedAssetsWithProducts: ProcessedAssetWithProduct[];
+    totalAmount: number;
+  }> => {
     const processedAssets: BeepPurchaseAsset[] = [];
     const processedAssetsWithProducts: ProcessedAssetWithProduct[] = [];
     let totalAmount = 0;
@@ -71,11 +85,33 @@ export const usePaymentSetup = ({ assets, apiKey, serverUrl }: UsePaymentSetupPa
     for (const asset of assets) {
       let product: ProductWithPrices;
       let quantity: number;
+      let productName: string;
 
       if (isCreateProductPayload(asset)) {
         try {
-          product = await client.products.createProduct(asset) as ProductWithPrices;
-          quantity = 1; // Default quantity for new products
+          // Convert input price to base units for comparison (same as createProduct does)
+          const priceValue =
+            typeof asset.price === 'string' ? parseFloat(asset.price) : asset.price;
+          const priceInBaseUnits = Math.round(priceValue * 10 ** 6); // USDT has 6 decimals
+          const priceInBaseUnitsString = priceInBaseUnits.toString();
+
+          // first check if product with same name and price already exists to avoid duplicates
+          const existingProducts: ProductWithPrices[] = await client.products.listProducts();
+          const matchedProduct = existingProducts.find(
+            (p) =>
+              p.name === asset.name &&
+              p.prices?.some((price) => price.amount === priceInBaseUnitsString),
+          );
+          if (matchedProduct) {
+            product = matchedProduct as ProductWithPrices;
+            quantity = asset.quantity || 1; // Default quantity for existing products
+            productName = asset.name;
+          } else {
+            // Create product if it doesn't exist
+            product = (await client.products.createProduct(asset)) as ProductWithPrices;
+            quantity = asset.quantity || 1; // Default quantity for new products
+            productName = asset.name;
+          }
         } catch (error) {
           const errorMessage =
             error instanceof Error
@@ -84,15 +120,16 @@ export const usePaymentSetup = ({ assets, apiKey, serverUrl }: UsePaymentSetupPa
           throw new Error(errorMessage);
         }
       } else {
-        product = await client.products.getProduct(asset.assetId) as ProductWithPrices;
+        product = (await client.products.getProduct(asset.assetId)) as ProductWithPrices;
         quantity = asset.quantity;
+        productName = product.name;
       }
 
       const assetData = { assetId: product.uuid, quantity };
-      
+
       processedAssets.push(assetData);
       processedAssetsWithProducts.push({ asset: assetData, product });
-      
+
       // Calculate and add amount to total
       totalAmount += calculateProductAmount(product, quantity);
     }
@@ -108,6 +145,7 @@ export const usePaymentSetup = ({ assets, apiKey, serverUrl }: UsePaymentSetupPa
       const paymentResponse = await client.payments.requestAndPurchaseAsset({
         assets: processedAssets,
         generateQrCode: true,
+        paymentLabel,
       });
 
       return {

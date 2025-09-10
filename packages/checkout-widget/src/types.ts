@@ -2,7 +2,7 @@ import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
 
 /**
  * Props for the CheckoutWidget component.
- * 
+ *
  * This widget handles the complete payment flow:
  * 1. Generates QR code for Solana Pay
  * 2. Displays payment amount and wallet address
@@ -15,6 +15,8 @@ export interface MerchantWidgetProps {
   labels: {
     /** Text shown above QR code (default: "Scan with your phone or copy address") */
     scanQr: string;
+    /** Text shown above wallet address (default: "Beep Checkout") */
+    paymentLabel?: string;
   };
   /** Beep API key for authentication */
   apiKey: string;
@@ -26,7 +28,7 @@ export interface MerchantWidgetProps {
 
 /**
  * Internal state management for the CheckoutWidget.
- * 
+ *
  * Tracks the payment lifecycle from initial load through completion.
  */
 export interface MerchantWidgetState {
