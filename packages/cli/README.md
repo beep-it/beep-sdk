@@ -6,14 +6,14 @@ That's where the BEEP CLI comes in. Think of it as your personal assistant, a co
 
 ## 🤔 What Is This Thing, Exactly?
 
-This is the official BEEP Command-Line Interface (CLI). It's a small, powerful tool that helps you do two main things, and do them *fast*:
+This is the official BEEP Command-Line Interface (CLI). It's a small, powerful tool that helps you do two main things, and do them _fast_:
 
 1.  **Scaffold a brand-new MCP Server**: Build a production-ready BEEP server from scratch in seconds.
 2.  **Integrate BEEP into an existing project**: Add BEEP's payment tools to a server you've already built.
 
 Basically, it's the ultimate shortcut to getting your BEEP integration up and running.
 
---- 
+---
 
 ## 🚀 Installation
 
@@ -54,14 +54,14 @@ This makes the `beep` command available anywhere on your system.
 
 #### B2 — Use inside an external app (as a devDependency)
 
-1) Pack the CLI once:
+1. Pack the CLI once:
 
 ```bash
 cd beep-sdk/packages/cli
 pnpm prepack && npm pack
 ```
 
-2) In your external app's `package.json`, add:
+2. In your external app's `package.json`, add:
 
 ```json
 {
@@ -74,14 +74,14 @@ pnpm prepack && npm pack
 }
 ```
 
-3) Install and run:
+3. Install and run:
 
 ```bash
 pnpm install
 pnpm beep --help   # or: npx beep --help
 ```
 
---- 
+---
 
 ## The Commands (aka The Magic Wands ✨)
 
@@ -99,21 +99,21 @@ beep init-mcp [options]
 
 #### Options Explained
 
-*   `--path <directory>`: This tells the CLI *where* to create your new server. If you don't specify a path, it'll create it in your current directory.
+- `--path <directory>`: This tells the CLI _where_ to create your new server. If you don't specify a path, it'll create it in your current directory.
 
-    ```bash
-    # Creates a server in a new folder called 'my-beep-server'
-    beep init-mcp --path ./my-beep-server
-    ```
+  ```bash
+  # Creates a server in a new folder called 'my-beep-server'
+  beep init-mcp --path ./my-beep-server
+  ```
 
-*   `--mode <stdio|https>`: This is the communication protocol your server will use to talk to BEEP. (Don't worry, you can change this later).
-    *   `stdio`: Your server will communicate over standard input/output. This is great for local development or if you're running the server as a child process.
-    *   `https`: Your server will run as a standard web server, communicating over HTTPS. This is the way to go for most production deployments.
+- `--mode <stdio|https>`: This is the communication protocol your server will use to talk to BEEP. (Don't worry, you can change this later).
+  - `stdio`: Your server will communicate over standard input/output. This is great for local development or if you're running the server as a child process.
+  - `https`: Your server will run as a standard web server, communicating over HTTPS. This is the way to go for most production deployments.
 
-    ```bash
-    # Creates an stdio-based server
-    beep init-mcp --mode stdio
-    ```
+  ```bash
+  # Creates an stdio-based server
+  beep init-mcp --mode stdio
+  ```
 
 #### Example: Putting it all together
 
@@ -190,7 +190,13 @@ Next steps:
 
 Now, all you have to do is follow the printed instructions to add the SDK to your `package.json`, install it, and import the tool into your main server file. It's the safest, easiest way to give your existing project BEEP superpowers.
 
---- 
+---
+
+## Resources
+
+[Beep llms.txt](https://www.justbeep.it/llms.txt)
+
+---
 
 ## License
 
