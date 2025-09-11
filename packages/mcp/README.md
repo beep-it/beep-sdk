@@ -142,3 +142,9 @@ Please respect the standard server's rate limits of **1000 requests per 15 minut
 ## Support
 
 For technical support and API documentation, contact the Beep platform team.
+
+---
+
+## Resources
+
+[Beep llms.txt](https://www.justbeep.it/llms.txt)
