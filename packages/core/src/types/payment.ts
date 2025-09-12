@@ -3,6 +3,8 @@ import { SupportedToken } from './token';
 export interface BeepPurchaseAsset {
   assetId: string;
   quantity: number;
+  name?: string;
+  description?: string;
 }
 
 /**
@@ -16,6 +18,8 @@ export interface RequestAndPurchaseAssetRequestParams {
   paymentReference?: string;
   /** Generates a QR code if true. */
   generateQrCode?: boolean;
+  /** Label to display on the payment request (e.g., merchant name) */
+  paymentLabel?: string;
 }
 
 /**

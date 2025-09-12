@@ -1,6 +1,6 @@
 {
   "name": "@beep-it/checkout-widget",
-  "version": "0.1.0",
+  "version": "0.1.0-beta.26",
   "description": "React component for BEEP merchant payments with QR code display",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -12,7 +12,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --no-dts",
+    "build": "tsup --config tsup.lib.config.ts",
     "build:showcase": "tsup --config tsup.config.ts",
     "dev": "npm run build:showcase && npx serve . -p 8090",
     "dev:watch": "tsup src/index.ts --format cjs,esm --dts --watch",
@@ -47,13 +47,15 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@beep-it/sdk-core": "workspace:*",
+    "@beep-it/sdk-core": "^0.1.0-beta.4",
+    "@tanstack/react-query": "^5.87.1",
     "qrcode": "^1.5.3",
-    "react-qr-code": "^2.0.18"
+    "qrcode.react": "^4.2.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^14.0.0",
+    "@testing-library/react-hooks": "^8.0.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.14.10",
     "@types/qrcode": "^1.5.5",

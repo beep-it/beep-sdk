@@ -107,7 +107,7 @@ export class BeepClient {
 // Main client class is already exported above
 
 // Essential types for payment operations
-export type { PaymentRequestData, RequestPaymentPayload } from './types/payment';
+export type { BeepPurchaseAsset, PaymentRequestData, RequestPaymentPayload } from './types/payment';
 
 // Invoice management types
 export type {

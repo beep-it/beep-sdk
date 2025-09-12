@@ -7,14 +7,14 @@ import { SupportedToken } from './token';
 export interface Product {
   /** Unique identifier for this product */
   id: string;
+  /** UUID identifier for this product (preferred for API calls) */
+  uuid: string;
   /** ID of the merchant who owns this product */
   merchantId: string;
   /** Display name for the product */
   name: string;
   /** Optional description explaining what the product is */
   description: string | null;
-  /** Price in base units as a string (e.g., "1000000" for 1.0 USDT) */
-  price: string;
   /** SPL token address for payments */
   splTokenAddress: string;
   /** Token type for this product (derived from splTokenAddress) */
@@ -36,26 +36,31 @@ export interface CreateProductPayload {
   name: string;
   /** Optional description of what the product provides */
   description?: string | null;
-  /** 
+  /**
    * Price as a string in decimal format (e.g., "10.50")
    * Will be converted to base units internally
    */
   price: string;
-  /** 
+  /**
    * Custom SPL token address (optional if token is provided)
    * @remarks Use this for tokens not in the SupportedToken enum
    */
   splTokenAddress?: string;
-  /** 
+  /**
    * Supported token type (optional if splTokenAddress is provided)
    * @remarks Preferred over splTokenAddress when available
    */
   token?: SupportedToken;
-  /** 
+  /**
    * Whether this product represents a subscription
    * @default false
    */
   isSubscription?: boolean;
+  /**
+   * Optional quantity for the product (default is 1)
+   * @default 1
+   */
+  quantity?: number;
 }
 
 /**
@@ -67,8 +72,6 @@ export interface UpdateProductPayload {
   name?: string;
   /** New description (can be set to null to remove) */
   description?: string | null;
-  /** New price in decimal format (e.g., "10.50") */
-  price?: string;
   /** New SPL token address */
   splTokenAddress?: string;
   /** New token type */
