@@ -1,8 +1,8 @@
-# The BEEP SDK: Turn Your Cool Sh*t into Cash 💸
+# The BEEP SDK: Turn Your Cool Sh\*t into Cash 💸
 
 Alright, let's be real. You made something awesome. A game, an app, a digital masterpiece. And now you wanna get paid for it. As you should! But dealing with payments is a whole vibe killer. That's where we come in.
 
-## 🤔 So, like, what even *is* this?
+## 🤔 So, like, what even _is_ this?
 
 Think of this SDK as your personal cheat code for money. It's a box of pre-written code that you can just drop into your project to handle all the boring payment stuff.
 
@@ -10,9 +10,9 @@ No, you don't need to know what an "SDK" is. Just know this: **this is the easy 
 
 With this, you can:
 
-*   **Give your users a "wallet"**: It's not a real wallet. It's just a secure spot online for them to keep their digital cash to pay you with. We handle all the scary security stuff.
-*   **Ask for money (nicely)**: Create an "invoice," which is just a fancy word for a bill. It's like sending a Venmo request, but for your app.
-*   **Actually get paid**: Process the payment and see the money roll in. Cha-ching.
+- **Give your users a "wallet"**: It's not a real wallet. It's just a secure spot online for them to keep their digital cash to pay you with. We handle all the scary security stuff.
+- **Ask for money (nicely)**: Create an "invoice," which is just a fancy word for a bill. It's like sending a Venmo request, but for your app.
+- **Actually get paid**: Process the payment and see the money roll in. Cha-ching.
 
 Basically, we're the ✨ unpaid intern ✨ who handles your finances so you can get back to creating.
 
@@ -29,6 +29,7 @@ In your project's command line thingy (the black box where you type stuff), past
 ```bash
 npm install @beep-it/sdk-core
 ```
+
 This basically downloads our toolkit and puts it in your project's folder.
 
 ### Step 2: Get Your Secret Handshake (aka API Key)
@@ -48,7 +49,7 @@ import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
 // This line creates your BEEP-Bot. It's now ready for your commands.
 const beep = new BeepClient({
   // Just paste that secret key you got from the dashboard right here.
-  apiKey: 'your_super_secret_api_key_goes_here'
+  apiKey: 'your_super_secret_api_key_goes_here',
 });
 
 console.log('Ok, your BEEP-Bot is ready. Slay.');
@@ -80,7 +81,7 @@ You just need to tell your BEEP-Bot how much you want to charge and in what curr
 6. **You get notified** - Either through webhooks (if you set those up) or by checking the status
 7. **Money lands in your account** - Cha-ching! 🤑
 
-Seriously, all *you* need to worry about is step 1. We handle 2-7 because we're nice like that.
+Seriously, all _you_ need to worry about is step 1. We handle 2-7 because we're nice like that.
 
 ```typescript
 // Just describe what you're charging for.
@@ -105,7 +106,6 @@ try {
   // 1. Render the `qrCode` in your UI for the user to scan.
   // 2. Redirect the user to the `paymentUrl`.
   // BEEP will handle the rest on the backend once the user approves the transaction.
-
 } catch (error) {
   console.error('Oof. Something went wrong creating the invoice:', error.message);
 }
@@ -140,7 +140,7 @@ const invoice = await beep.invoices.createInvoice({
   amount: '19.99', // Amount as string
   token: SupportedToken.USDT, // Enum magic!
   description: 'VIP Battle Pass - Summer Season',
-  payerType: 'customer_wallet' // Customer pays
+  payerType: 'customer_wallet', // Customer pays
 });
 
 // Now you have everything you need for the user to pay
@@ -210,7 +210,7 @@ const invoice = await beep.invoices.createInvoice({
   description: 'Premium service',
   amount: '29.99',
   token: SupportedToken.USDT,
-  payerType: 'customer_wallet'
+  payerType: 'customer_wallet',
 });
 
 // Get all your invoices
@@ -236,7 +236,7 @@ const product = await beep.products.createProduct({
   description: 'Gives +10 attack and looks cool as heck',
   price: '9.99', // Just regular numbers as strings
   token: SupportedToken.USDT, // So much cleaner than a crazy address
-  isSubscription: false // One-time purchase
+  isSubscription: false, // One-time purchase
 });
 
 console.log(`Created product with ID: ${product.id}`);
@@ -247,7 +247,7 @@ const subscriptionProduct = await beep.products.createProduct({
   description: 'Monthly subscription with exclusive skins and perks',
   price: '14.99', // Monthly price
   token: SupportedToken.USDT,
-  isSubscription: true // This makes it recurring - monthly subscription!
+  isSubscription: true, // This makes it recurring - monthly subscription!
 });
 
 console.log(`Created subscription with ID: ${subscriptionProduct.id}`);
@@ -258,7 +258,7 @@ const oneTimeProduct = await beep.products.createProduct({
   description: 'Credits for API calls',
   price: '0.001', // Price per credit
   token: SupportedToken.USDT,
-  isSubscription: false // One-time purchase
+  isSubscription: false, // One-time purchase
 });
 
 console.log(`Created one-time product with ID: ${oneTimeProduct.id}`);
@@ -280,7 +280,7 @@ const products = await beep.products.listProducts();
 console.log(`You have ${products.length} products`);
 
 // Loop through them if you're feeling fancy
-products.forEach(product => {
+products.forEach((product) => {
   console.log(`${product.name}: ${product.price} ${product.token || 'tokens'}`);
 });
 ```
@@ -292,7 +292,7 @@ products.forEach(product => {
 const updatedProduct = await beep.products.updateProduct('prod_123abc456def', {
   price: '14.99', // Price increase! Cha-ching!
   description: 'Now with extra sparkles ✨',
-  token: SupportedToken.USDT
+  token: SupportedToken.USDT,
 });
 
 console.log('Product updated with new price:', updatedProduct.price);
@@ -314,16 +314,16 @@ Handle low-level payment operations like asset purchasing and transaction signin
 // Request payment for assets
 const payment = await beep.payments.requestAndPurchaseAsset({
   paymentReference: 'premium_subscription_123',
-  assetIds: ['asset_1', 'asset_2']
+  assetIds: ['asset_1', 'asset_2'],
 });
 
 // Sign Solana transactions directly
 const signedTx = await beep.payments.signSolanaTransaction({
   senderAddress: 'sender_wallet_address',
-  recipientAddress: 'recipient_wallet_address', 
+  recipientAddress: 'recipient_wallet_address',
   tokenMintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
   amount: 1000000, // 1.0 USDT in base units
-  decimals: 6
+  decimals: 6,
 });
 ```
 
@@ -350,6 +350,12 @@ console.log(token); // SupportedToken.USDT
 const defaultToken = TokenUtils.getDefaultToken();
 console.log(defaultToken); // SupportedToken.USDT
 ```
+
+---
+
+## Resources
+
+[Beep llms.txt](https://www.justbeep.it/llms.txt)
 
 ---
 

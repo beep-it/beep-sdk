@@ -6,14 +6,14 @@ That's where the BEEP CLI comes in. Think of it as your personal assistant, a co
 
 ## 🤔 What Is This Thing, Exactly?
 
-This is the official BEEP Command-Line Interface (CLI). It's a small, powerful tool that helps you do two main things, and do them *fast*:
+This is the official BEEP Command-Line Interface (CLI). It's a small, powerful tool that helps you do two main things, and do them _fast_:
 
 1.  **Scaffold a brand-new MCP Server**: Build a production-ready BEEP server from scratch in seconds.
 2.  **Integrate BEEP into an existing project**: Add BEEP's payment tools to a server you've already built.
 
 Basically, it's the ultimate shortcut to getting your BEEP integration up and running.
 
---- 
+---
 
 ## 🚀 Installation
 
@@ -28,7 +28,7 @@ beep --help
 
 That's it! The `beep` command is now available anywhere on your system.
 
---- 
+---
 
 ## The Commands (aka The Magic Wands ✨)
 
@@ -46,21 +46,21 @@ beep init-mcp [options]
 
 #### Options Explained
 
-*   `--path <directory>`: This tells the CLI *where* to create your new server. If you don't specify a path, it'll create it in your current directory.
+- `--path <directory>`: This tells the CLI _where_ to create your new server. If you don't specify a path, it'll create it in your current directory.
 
-    ```bash
-    # Creates a server in a new folder called 'my-beep-server'
-    beep init-mcp --path ./my-beep-server
-    ```
+  ```bash
+  # Creates a server in a new folder called 'my-beep-server'
+  beep init-mcp --path ./my-beep-server
+  ```
 
-*   `--mode <stdio|https>`: This is the communication protocol your server will use to talk to BEEP. (Don't worry, you can change this later).
-    *   `stdio`: Your server will communicate over standard input/output. This is great for local development or if you're running the server as a child process.
-    *   `https`: Your server will run as a standard web server, communicating over HTTPS. This is the way to go for most production deployments.
+- `--mode <stdio|https>`: This is the communication protocol your server will use to talk to BEEP. (Don't worry, you can change this later).
+  - `stdio`: Your server will communicate over standard input/output. This is great for local development or if you're running the server as a child process.
+  - `https`: Your server will run as a standard web server, communicating over HTTPS. This is the way to go for most production deployments.
 
-    ```bash
-    # Creates an stdio-based server
-    beep init-mcp --mode stdio
-    ```
+  ```bash
+  # Creates an stdio-based server
+  beep init-mcp --mode stdio
+  ```
 
 #### Example: Putting it all together
 
@@ -77,7 +77,7 @@ The CLI will work its magic and you'll see output like this:
 ✅ Dependencies installed successfully
 
 🔑 Setting up your environment...
-Enter your BEEP API key (or press Enter to skip): 
+Enter your BEEP API key (or press Enter to skip):
 
 ✅ BEEP MCP server created at: /path/to/your/project/my-awesome-mcp
 
@@ -147,30 +147,39 @@ Next steps:
 
 No more guessing where to put things! The CLI gives you exact file paths and context-specific integration instructions.
 
---- 
+---
 
 ## 🧠 Smart Integration Features
 
 The BEEP CLI doesn't just drop files and leave you hanging. It's smart about understanding your project:
 
 ### 🔍 **Auto-Detection**
+
 - Scans for common server patterns: `server/index.ts`, `src/server.js`, etc.
 - Identifies Express servers, MCP setups, and existing tool registrations
 - Adapts instructions based on what it finds
 
 ### 💡 **Context-Aware Hints**
+
 - **"Found tools array"** → Points you to the exact spot to add BEEP tools
-- **"MCP server detected"** → Gives MCP-specific integration advice  
+- **"MCP server detected"** → Gives MCP-specific integration advice
 - **"Express server detected"** → Shows how to use BEEP in API endpoints
 
 ### ⚡ **Zero-Config Experience**
+
 - Automatically installs all dependencies (no more `npm install` guesswork)
 - Works with npm, pnpm, or yarn - whatever you've got
 - Handles peer dependencies behind the scenes
 
 The goal? You run one command, follow the specific instructions, and you're payment-ready. No documentation diving required.
 
---- 
+---
+
+## Resources
+
+[Beep llms.txt](https://www.justbeep.it/llms.txt)
+
+---
 
 ## License
 

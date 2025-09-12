@@ -20,16 +20,16 @@ function App() {
       apiKey="your-api-key"
       primaryColor="#007bff"
       labels={{
-        scanQr: "Scan QR Code to Pay",
-        paymentLabel: "My Store Checkout"
+        scanQr: 'Scan QR Code to Pay',
+        paymentLabel: 'My Store Checkout',
       }}
       assets={[
         {
-          assetId: "product-uuid-123",
+          assetId: 'product-uuid-123',
           quantity: 2,
-          name: "Premium Coffee",
-          description: "Fresh roasted arabica beans"
-        }
+          name: 'Premium Coffee',
+          description: 'Fresh roasted arabica beans',
+        },
       ]}
       serverUrl="https://your-beep-server.com" // optional
     />
@@ -48,11 +48,11 @@ Reference pre-created products by their ID:
 ```tsx
 const assets = [
   {
-    assetId: "product-uuid-123",
+    assetId: 'product-uuid-123',
     quantity: 1,
-    name: "Coffee", // optional override
-    description: "Premium blend" // optional override  
-  }
+    name: 'Coffee', // optional override
+    description: 'Premium blend', // optional override
+  },
 ];
 ```
 
@@ -63,54 +63,55 @@ Create products dynamically during checkout:
 ```tsx
 const assets = [
   {
-    name: "Custom Item",
-    price: "25.50",
+    name: 'Custom Item',
+    price: '25.50',
     quantity: 2,
-    description: "Custom product description",
-    token: "USDC", // or provide splTokenAddress
-    isSubscription: false
-  }
+    description: 'Custom product description',
+    token: 'USDC', // or provide splTokenAddress
+    isSubscription: false,
+  },
 ];
 ```
 
 ## Props
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `apiKey` | `string` | ✅ | BEEP API key for authentication |
-| `primaryColor` | `string` | ✅ | Primary color for styling (hex format, e.g., "#007bff") |
-| `labels` | `object` | ✅ | Customizable text labels |
-| `labels.scanQr` | `string` | ✅ | Text shown above QR code |
-| `labels.paymentLabel` | `string` | ❌ | Label displayed in Solana Pay wallets (default: "Beep Checkout") |
-| `assets` | `(BeepPurchaseAsset \| CreateProductPayload)[]` | ✅ | Items to purchase |
-| `serverUrl` | `string` | ❌ | Custom BEEP server URL (defaults to production) |
+| Prop                  | Type                                            | Required | Description                                                      |
+| --------------------- | ----------------------------------------------- | -------- | ---------------------------------------------------------------- |
+| `apiKey`              | `string`                                        | ✅       | BEEP API key for authentication                                  |
+| `primaryColor`        | `string`                                        | ✅       | Primary color for styling (hex format, e.g., "#007bff")          |
+| `labels`              | `object`                                        | ✅       | Customizable text labels                                         |
+| `labels.scanQr`       | `string`                                        | ✅       | Text shown above QR code                                         |
+| `labels.paymentLabel` | `string`                                        | ❌       | Label displayed in Solana Pay wallets (default: "Beep Checkout") |
+| `assets`              | `(BeepPurchaseAsset \| CreateProductPayload)[]` | ✅       | Items to purchase                                                |
+| `serverUrl`           | `string`                                        | ❌       | Custom BEEP server URL (defaults to production)                  |
 
 ### Asset Props
 
 #### BeepPurchaseAsset
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `assetId` | `string` | ✅ | UUID of existing product |
-| `quantity` | `number` | ✅ | Number of items |
-| `name` | `string` | ❌ | Override product name |
-| `description` | `string` | ❌ | Override product description |
+| Prop          | Type     | Required | Description                  |
+| ------------- | -------- | -------- | ---------------------------- |
+| `assetId`     | `string` | ✅       | UUID of existing product     |
+| `quantity`    | `number` | ✅       | Number of items              |
+| `name`        | `string` | ❌       | Override product name        |
+| `description` | `string` | ❌       | Override product description |
 
 #### CreateProductPayload
 
-| Prop | Type | Required | Description |
-|------|------|----------|-------------|
-| `name` | `string` | ✅ | Product display name |
-| `price` | `string` | ✅ | Price in decimal format (e.g., "25.50") |
-| `quantity` | `number` | ❌ | Number of items (default: 1) |
-| `description` | `string` | ❌ | Product description |
-| `token` | `SupportedToken` | ❌ | Token type (USDC, USDT, etc.) |
-| `splTokenAddress` | `string` | ❌ | Custom SPL token address |
-| `isSubscription` | `boolean` | ❌ | Whether this is a subscription (default: false) |
+| Prop              | Type             | Required | Description                                     |
+| ----------------- | ---------------- | -------- | ----------------------------------------------- |
+| `name`            | `string`         | ✅       | Product display name                            |
+| `price`           | `string`         | ✅       | Price in decimal format (e.g., "25.50")         |
+| `quantity`        | `number`         | ❌       | Number of items (default: 1)                    |
+| `description`     | `string`         | ❌       | Product description                             |
+| `token`           | `SupportedToken` | ❌       | Token type (USDC, USDT, etc.)                   |
+| `splTokenAddress` | `string`         | ❌       | Custom SPL token address                        |
+| `isSubscription`  | `boolean`        | ❌       | Whether this is a subscription (default: false) |
 
 ## Features
 
 ### Core Functionality
+
 - **Solana Pay Integration**: Generates standards-compliant Solana Pay QR codes
 - **Real-time Status Polling**: Automatically checks payment status every 15 seconds
 - **Flexible Asset Support**: Mix existing products with on-the-fly creations
@@ -118,6 +119,7 @@ const assets = [
 - **Wallet Address Display**: Shows copyable recipient address for desktop users
 
 ### User Experience
+
 - **Loading States**: Smooth loading indicators during setup and polling
 - **Error Handling**: Comprehensive error boundaries and user-friendly error messages
 - **Success Animation**: Clear payment confirmation state
@@ -125,6 +127,7 @@ const assets = [
 - **Customizable Theming**: Primary color theming throughout the widget
 
 ### Developer Experience
+
 - **TypeScript Support**: Full type safety with comprehensive interfaces
 - **Zero CSS Dependencies**: Inline styles prevent conflicts with host applications
 - **Error Boundaries**: Isolated error handling prevents widget crashes from affecting host app
@@ -138,12 +141,12 @@ const assets = [
 <CheckoutWidget
   apiKey="your-api-key"
   primaryColor="#10b981"
-  labels={{ scanQr: "Pay with Crypto" }}
+  labels={{ scanQr: 'Pay with Crypto' }}
   assets={[
     {
-      assetId: "coffee-product-uuid",
-      quantity: 1
-    }
+      assetId: 'coffee-product-uuid',
+      quantity: 1,
+    },
   ]}
 />
 ```
@@ -155,20 +158,20 @@ const assets = [
   apiKey="your-api-key"
   primaryColor="#3b82f6"
   labels={{
-    scanQr: "Scan to complete your order",
-    paymentLabel: "Coffee Shop - Downtown"
+    scanQr: 'Scan to complete your order',
+    paymentLabel: 'Coffee Shop - Downtown',
   }}
   assets={[
     {
-      assetId: "coffee-uuid",
+      assetId: 'coffee-uuid',
       quantity: 2,
-      name: "Espresso"
+      name: 'Espresso',
     },
     {
-      assetId: "pastry-uuid", 
+      assetId: 'pastry-uuid',
       quantity: 1,
-      name: "Croissant"
-    }
+      name: 'Croissant',
+    },
   ]}
 />
 ```
@@ -180,17 +183,17 @@ const assets = [
   apiKey="your-api-key"
   primaryColor="#ef4444"
   labels={{
-    scanQr: "Pay for custom service",
-    paymentLabel: "Consulting Services"
+    scanQr: 'Pay for custom service',
+    paymentLabel: 'Consulting Services',
   }}
   assets={[
     {
-      name: "1-Hour Consultation",
-      price: "150.00",
+      name: '1-Hour Consultation',
+      price: '150.00',
       quantity: 1,
-      description: "Professional consulting session",
-      token: "USDC"
-    }
+      description: 'Professional consulting session',
+      token: 'USDC',
+    },
   ]}
 />
 ```
@@ -201,20 +204,20 @@ const assets = [
 <CheckoutWidget
   apiKey="your-api-key"
   primaryColor="#8b5cf6"
-  labels={{ scanQr: "Complete your purchase" }}
+  labels={{ scanQr: 'Complete your purchase' }}
   assets={[
     // Existing product
     {
-      assetId: "existing-product-uuid",
-      quantity: 1
+      assetId: 'existing-product-uuid',
+      quantity: 1,
     },
     // Dynamic product
     {
-      name: "Rush Delivery",
-      price: "15.00",
+      name: 'Rush Delivery',
+      price: '15.00',
       quantity: 1,
-      token: "USDC"
-    }
+      token: 'USDC',
+    },
   ]}
 />
 ```
@@ -238,6 +241,7 @@ The widget includes comprehensive error handling:
 ## Solana Pay Integration
 
 The widget generates Solana Pay URLs with:
+
 - **Recipient**: Merchant's Solana wallet address
 - **Amount**: Total calculated from all assets
 - **SPL Token**: Token address for payment
@@ -254,7 +258,7 @@ pnpm install
 # Run tests
 pnpm test
 
-# Build the package  
+# Build the package
 pnpm build
 
 # Run tests in watch mode
@@ -275,16 +279,9 @@ The widget respects these environment variables:
 Full TypeScript support with exported interfaces:
 
 ```tsx
-import { 
-  CheckoutWidget, 
-  MerchantWidgetProps,
-  MerchantWidgetState 
-} from '@beep-it/checkout-widget';
+import { CheckoutWidget, MerchantWidgetProps, MerchantWidgetState } from '@beep-it/checkout-widget';
 
-import { 
-  BeepPurchaseAsset, 
-  CreateProductPayload 
-} from '@beep-it/sdk-core';
+import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
 ```
 
 ## Browser Compatibility
