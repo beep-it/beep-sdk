@@ -107,7 +107,7 @@ importers:
         version: 12.0.0
     devDependencies:
       '@beep-it/sdk-core':
-        specifier: workspace:*
+        specifier: 0.1.0-beta.4
         version: link:../core
       '@types/jest':
         specifier: ^29.5.14
