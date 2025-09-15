@@ -293,7 +293,48 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   );
 };
 
-// Export wrapped version with QueryProvider and ErrorBoundary
+/**
+ * CheckoutWidget - Complete Solana payment interface for BEEP merchants
+ * 
+ * A React component that provides a complete Solana-based payment interface with QR code generation,
+ * payment status tracking, and customizable theming. Supports both existing product references and
+ * dynamic product creation with automatic total calculation.
+ * 
+ * @example
+ * ```tsx
+ * import { CheckoutWidget } from '@beep-it/checkout-widget';
+ * 
+ * function PaymentPage() {
+ *   return (
+ *     <CheckoutWidget
+ *       apiKey="beep_live_your_api_key"
+ *       primaryColor="#3b82f6"
+ *       labels={{
+ *         scanQr: "Scan to complete your purchase",
+ *         paymentLabel: "Coffee Shop Downtown"
+ *       }}
+ *       assets={[
+ *         {
+ *           assetId: "coffee-product-uuid",
+ *           quantity: 2,
+ *           name: "Premium Espresso"
+ *         }
+ *       ]}
+ *       serverUrl="https://your-beep-server.com"
+ *     />
+ *   );
+ * }
+ * ```
+ * 
+ * @param props - Configuration for the checkout widget
+ * @param props.apiKey - BEEP API key for merchant authentication
+ * @param props.primaryColor - Hex color for theming widget elements
+ * @param props.labels - Customizable text labels for the interface
+ * @param props.assets - Array of products/services to purchase
+ * @param props.serverUrl - Optional custom BEEP server URL
+ * 
+ * @returns A fully functional Solana payment widget with QR code and status tracking
+ */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
   return (
     <ErrorBoundary>

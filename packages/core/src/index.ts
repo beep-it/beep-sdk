@@ -16,7 +16,7 @@ export interface BeepClientOptions {
   apiKey: string;
   /**
    * Optional server URL override for development/testing
-   * @default 'https://api.beep.com'
+   * @default 'https://api.justbeep.it'
    */
   serverUrl?: string;
 }
@@ -64,7 +64,7 @@ export class BeepClient {
     }
 
     this.client = axios.create({
-      baseURL: options.serverUrl || 'https://api.beep.com',
+      baseURL: options.serverUrl || 'https://api.justbeep.it',
       headers: {
         Authorization: `Bearer ${options.apiKey}`,
         'Content-Type': 'application/json',
