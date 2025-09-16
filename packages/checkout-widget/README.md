@@ -67,8 +67,6 @@ const assets = [
     price: '25.50',
     quantity: 2,
     description: 'Custom product description',
-    token: 'USDC', // or provide splTokenAddress
-    isSubscription: false,
   },
 ];
 ```
@@ -78,7 +76,7 @@ const assets = [
 | Prop                  | Type                                            | Required | Description                                                      |
 | --------------------- | ----------------------------------------------- | -------- | ---------------------------------------------------------------- |
 | `apiKey`              | `string`                                        | ✅       | BEEP API key for authentication                                  |
-| `primaryColor`        | `string`                                        | ✅       | Primary color for styling (hex format, e.g., "#007bff")          |
+| `primaryColor`        | `string`                                        | ❌       | Primary color for styling (hex format, e.g., "#007bff")          |
 | `labels`              | `object`                                        | ✅       | Customizable text labels                                         |
 | `labels.scanQr`       | `string`                                        | ✅       | Text shown above QR code                                         |
 | `labels.paymentLabel` | `string`                                        | ❌       | Label displayed in Solana Pay wallets (default: "Beep Checkout") |
@@ -98,15 +96,12 @@ const assets = [
 
 #### CreateProductPayload
 
-| Prop              | Type             | Required | Description                                     |
-| ----------------- | ---------------- | -------- | ----------------------------------------------- |
-| `name`            | `string`         | ✅       | Product display name                            |
-| `price`           | `string`         | ✅       | Price in decimal format (e.g., "25.50")         |
-| `quantity`        | `number`         | ❌       | Number of items (default: 1)                    |
-| `description`     | `string`         | ❌       | Product description                             |
-| `token`           | `SupportedToken` | ❌       | Token type (USDC, USDT, etc.)                   |
-| `splTokenAddress` | `string`         | ❌       | Custom SPL token address                        |
-| `isSubscription`  | `boolean`        | ❌       | Whether this is a subscription (default: false) |
+| Prop          | Type     | Required | Description                             |
+| ------------- | -------- | -------- | --------------------------------------- |
+| `name`        | `string` | ✅       | Product display name                    |
+| `price`       | `string` | ✅       | Price in decimal format (e.g., "25.50") |
+| `quantity`    | `number` | ❌       | Number of items (default: 1)            |
+| `description` | `string` | ❌       | Product description                     |
 
 ## Features
 
@@ -192,7 +187,6 @@ const assets = [
       price: '150.00',
       quantity: 1,
       description: 'Professional consulting session',
-      token: 'USDC',
     },
   ]}
 />
@@ -216,7 +210,6 @@ const assets = [
       name: 'Rush Delivery',
       price: '15.00',
       quantity: 1,
-      token: 'USDC',
     },
   ]}
 />

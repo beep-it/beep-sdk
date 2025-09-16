@@ -48,49 +48,49 @@ import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
  * ```
  */
 export interface MerchantWidgetProps {
-  /** 
+  /**
    * Hex color code for theming widget elements (borders, highlights, etc.)
    * @example "#007bff", "#10b981", "#ef4444"
    */
-  primaryColor: string;
-  
-  /** 
-   * Customizable text labels for user interface elements 
+  primaryColor?: string;
+
+  /**
+   * Customizable text labels for user interface elements
    */
   labels: {
-    /** 
+    /**
      * Text displayed above QR code to instruct users
      * @default "Scan with your phone or copy address"
      */
     scanQr: string;
-    
-    /** 
+
+    /**
      * Label shown in Solana Pay wallets and transaction descriptions
      * This appears when users scan the QR code or review the transaction
      * @default "Beep Checkout"
      */
     paymentLabel?: string;
   };
-  
-  /** 
+
+  /**
    * BEEP API key for merchant authentication
    * Format: "beep_live_..." for production, "beep_test_..." for testing
    */
   apiKey: string;
-  
-  /** 
+
+  /**
    * Custom BEEP server URL for API calls
    * @default Production BEEP server URL
    */
   serverUrl?: string;
-  
-  /** 
+
+  /**
    * Array of assets (products/services) to purchase
-   * 
+   *
    * Supports two asset types:
    * - BeepPurchaseAsset: Reference existing products by UUID
    * - CreateProductPayload: Create new products dynamically
-   * 
+   *
    * All assets must be from the same merchant and priced in the same token.
    * Total amount is automatically calculated from all asset quantities and prices.
    */
@@ -114,37 +114,37 @@ export interface MerchantWidgetProps {
  * @internal This interface is used internally by the widget and not typically needed by consumers
  */
 export interface MerchantWidgetState {
-  /** 
+  /**
    * SVG QR code data ready for display, or null during initial loading
    * Generated from the Solana Pay URL for mobile wallet scanning
    */
   qrCode: string | null;
-  
-  /** 
+
+  /**
    * True while making API calls (setup, status polling, etc.)
    * Used to display loading indicators to users
    */
   loading: boolean;
-  
-  /** 
+
+  /**
    * Human-readable error message if any operation fails
    * Includes setup errors, network failures, payment errors, etc.
    */
   error: string | null;
-  
-  /** 
+
+  /**
    * Unique payment reference key for tracking this specific payment
    * Used to poll payment status and link blockchain transactions to the payment
    */
   referenceKey: string | null;
-  
-  /** 
+
+  /**
    * Complete Solana Pay URI containing payment details
    * Format: solana:<recipient>?amount=<amount>&spl-token=<token>&reference=<ref>&label=<label>&message=<msg>
    */
   paymentUrl: string | null;
-  
-  /** 
+
+  /**
    * True when payment has been successfully confirmed on the Solana blockchain
    * Triggers the success state display in the widget
    */
