@@ -30,6 +30,8 @@ const session = await client.widget.createPaymentSession({
   paymentLabel: 'My Store',
 });
 const status = await client.widget.getPaymentStatus(session.referenceKey);
+// Or wait until paid
+const { paid } = await client.widget.waitForPaid({ referenceKey: session.referenceKey, intervalMs: 15000, timeoutMs: 300000 });
 ```
 
 Modules
