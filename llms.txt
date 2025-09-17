@@ -53,6 +53,21 @@ const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.jus
 const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
 ```
 
+402 Payment Flow (server)
+- Phase 1: Call `beep.payments.requestAndPurchaseAsset` with `assets` and optional `paymentLabel`.
+  - Server replies with HTTP 402 and a payload (SDK returns the payload) containing `referenceKey`, `paymentUrl`, optional `qrCode`.
+- Phase 2: Poll by calling the same method with `paymentReference: <referenceKey>` until the response no longer includes `referenceKey` → payment complete.
+ 
+Helper
+```ts
+const { paid } = await beep.payments.waitForPaymentCompletion({
+  assets: [{ assetId: 'uuid', quantity: 1 }],
+  paymentReference: ref,
+  intervalMs: 15000,
+  timeoutMs: 300000,
+});
+```
+
 Important Notes
 - On-the-fly items sent from the browser are persisted as products server-side (often hidden from listings by default).
 - Widget endpoints are CORS-open and CSRF-exempt; publishable keys are safe in browsers.

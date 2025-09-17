@@ -23,6 +23,15 @@ export interface RequestAndPurchaseAssetRequestParams {
 }
 
 /**
+ * 402 Flow semantics:
+ * - Phase 1 (no paymentReference): server responds with HTTP 402 Payment Required and a payload
+ *   containing referenceKey/paymentUrl/qrCode. The SDK returns that payload so callers can show
+ *   a QR or deep link to the user.
+ * - Phase 2 (with paymentReference): call again. When payment is complete, the response will NOT
+ *   include referenceKey. If referenceKey is still present (or a 402 payload is returned), keep polling.
+ */
+
+/**
  * Payload for creating a payment request
  * This interface represents the data needed to initiate a payment flow
  */

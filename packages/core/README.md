@@ -311,13 +311,29 @@ console.log('Poof! Product deleted.');
 Handle low-level payment operations like asset purchasing and transaction signing.
 
 ```typescript
-// Request payment for assets
-const payment = await beep.payments.requestAndPurchaseAsset({
-  paymentReference: 'premium_subscription_123',
-  assetIds: ['asset_1', 'asset_2'],
+// 402 Payment Required flow (two-phase)
+
+// Phase 1: request a payment for assets — server responds with HTTP 402 and a payload
+const req = await beep.payments.requestAndPurchaseAsset({
+  assets: [{ assetId: 'product-uuid', quantity: 1 }],
+  generateQrCode: true,            // optional; server may include qrCode
+  paymentLabel: 'My Store Checkout'// optional; shown in wallet
 });
 
-// Sign Solana transactions directly
+// The SDK normalizes HTTP 402 by returning the payload so you can proceed:
+// req = { referenceKey, paymentUrl, qrCode?, amount, expiresAt, status }
+// Show req.paymentUrl/req.qrCode to your user so they can pay from their wallet.
+
+// Phase 2: poll for completion using the same method with the referenceKey.
+// When payment is complete, the response will NOT include referenceKey.
+const check = await beep.payments.requestAndPurchaseAsset({
+  assets: [{ assetId: 'product-uuid', quantity: 1 }],
+  paymentReference: req?.referenceKey,
+  generateQrCode: false,
+});
+const isPaid = !check?.referenceKey;
+
+// Sign Solana transactions directly (advanced)
 const signedTx = await beep.payments.signSolanaTransaction({
   senderAddress: 'sender_wallet_address',
   recipientAddress: 'recipient_wallet_address',
@@ -325,6 +341,21 @@ const signedTx = await beep.payments.signSolanaTransaction({
   amount: 1000000, // 1.0 USDT in base units
   decimals: 6,
 });
+```
+
+#### Helper: waitForPaymentCompletion
+
+```typescript
+// Convenience helper that polls until paid or timeout
+const { paid } = await beep.payments.waitForPaymentCompletion({
+  assets: [{ assetId: 'product-uuid', quantity: 1 }],
+  paymentReference: req?.referenceKey!,
+  intervalMs: 15_000,
+  timeoutMs: 5 * 60_000,
+});
+if (paid) {
+  // unlock content
+}
 ```
 
 ### `TokenUtils`
