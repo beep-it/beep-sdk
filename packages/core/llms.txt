@@ -1,0 +1,51 @@
+# @beep-it/sdk-core — LLM Guide
+
+Purpose: TypeScript SDK for BEEP. Provides two clients:
+- BeepClient (server-side, secret key)
+- BeepPublicClient (browser, publishable key)
+
+Install
+```bash
+npm install @beep-it/sdk-core
+```
+
+Auth
+- Secret key (server only): beep_sk_…
+- Publishable key (browser): beep_pk_…
+
+Quickstarts
+- Server (full private API)
+```ts
+import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
+const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.justbeep.it' });
+const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
+```
+
+- Browser (public widget endpoints)
+```ts
+import { BeepPublicClient } from '@beep-it/sdk-core';
+const client = new BeepPublicClient({ publishableKey: 'beep_pk_…', serverUrl: 'https://api.justbeep.it' });
+const session = await client.widget.createPaymentSession({
+  assets: [ { assetId: 'uuid', quantity: 1 }, { name: 'Custom', price: '12.50', quantity: 2 } ],
+  paymentLabel: 'My Store',
+});
+const status = await client.widget.getPaymentStatus(session.referenceKey);
+```
+
+Modules
+- products: create/get/list/update/delete (server only)
+- payments: requestAndPurchaseAsset, signSolanaTransaction (server only)
+- invoices: create/get/list/delete (server only)
+- widget: createPaymentSession, getPaymentStatus (browser)
+
+Types
+- SupportedToken, TokenUtils
+- PublicPaymentSessionRequest/Response, PublicPaymentStatusResponse
+
+Notes
+- On-the-fly items in public sessions are persisted as products server-side.
+- Do not use beep_sk_* in browsers.
+
+Docs: README.md in this package
+Last updated: 2025-09-17
+

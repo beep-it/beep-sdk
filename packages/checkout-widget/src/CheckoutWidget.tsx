@@ -72,7 +72,7 @@ function parseSolanaPayURI(uri: string) {
 }
 
 /**
- * CheckoutWidget - A complete Solana payment interface for BEEP payment system
+ * CheckoutWidget - A complete Solana payment interface for the BEEP payment system
  *
  * This widget provides a full checkout experience supporting both existing product
  * references and on-the-fly product creation. It handles the complete payment flow
@@ -82,7 +82,7 @@ function parseSolanaPayURI(uri: string) {
  * - Asset-based pricing with automatic total calculation
  * - Solana Pay QR code generation with custom labels
  * - Real-time payment status polling (15-second intervals)
- * - Support for mixed asset types (existing + dynamic products)
+ * - Support for mixed asset types (existing + on-the-fly products)
  * - Comprehensive error handling with isolated error boundaries
  * - Responsive design with customizable theming
  * - Zero CSS dependencies (inline styles prevent conflicts)
@@ -93,36 +93,40 @@ function parseSolanaPayURI(uri: string) {
  * 3. Poll: Continuously monitors payment status every 15 seconds
  * 4. Complete: Displays success state when payment confirmed on-chain
  *
+ * Usage (browser-safe with publishable key):
+ *
  * @example
  * ```tsx
  * <CheckoutWidget
- *   apiKey="your-api-key"
+ *   publishableKey="beep_pk_..."
  *   primaryColor="#007bff"
- *   labels={{
- *     scanQr: "Scan to Pay",
- *     paymentLabel: "My Store"
- *   }}
+ *   labels={{ scanQr: 'Scan to Pay', paymentLabel: 'My Store' }}
  *   assets={[
- *     { assetId: "product-uuid", quantity: 2 },
- *     { name: "Rush Delivery", price: "15.00", quantity: 1, token: "USDC" }
+ *     { assetId: 'product-uuid', quantity: 2 },
+ *     { name: 'Rush Delivery', price: '15.00', quantity: 1 }
  *   ]}
+ *   serverUrl="https://api.justbeep.it" // optional override
  * />
  * ```
+ *
+ * Notes:
+ * - This widget calls the public, CORS-open widget endpoints via the SDK (no secret keys).
+ * - Items with { name, price } are created server-side as products (persisted for audit/reuse).
  */
 const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   primaryColor = '#007bff',
   labels = { scanQr: 'Scan with your phone or copy address', paymentLabel: 'Beep Checkout' },
-  apiKey,
+  publishableKey,
   serverUrl,
   assets = [],
 }) => {
   // Input validation
-  if (!apiKey || typeof apiKey !== 'string') {
-    console.error('[CheckoutWidget] Missing or invalid API key:', apiKey);
+  if (!publishableKey || typeof publishableKey !== 'string') {
+    console.error('[CheckoutWidget] Missing or invalid publishable key:', publishableKey);
     return (
       <ConfigurationError
         title="Configuration Error"
-        message="API key is required"
+        message="Publishable key is required"
         primaryColor={primaryColor}
       />
     );
@@ -144,7 +148,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     isLoading: paymentSetupLoading,
   } = usePaymentSetup({
     assets,
-    apiKey,
+    publishableKey,
     serverUrl,
     paymentLabel: labels?.paymentLabel,
   });
@@ -156,9 +160,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     isLoading: paymentStatusLoading,
   } = usePaymentStatus({
     referenceKey: paymentSetupData?.referenceKey || null,
-    processedAssets: paymentSetupData?.processedAssets || [],
-    paymentLabel: labels?.paymentLabel,
-    apiKey,
+    publishableKey,
     serverUrl,
     enabled: !!paymentSetupData?.referenceKey,
   });

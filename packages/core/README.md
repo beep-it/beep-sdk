@@ -119,7 +119,7 @@ And that's literally it. Once the user pays, the money appears in your account. 
 
 If you're the type of person who likes to take things apart just so you can put them back together, this is for you. Here are the technical specs. Everyone else, you can ignore this.
 
-### `BeepClient`
+### `BeepClient` (server-side, secret key)
 
 Initializes the client. Takes an `options` object.
 
@@ -349,6 +349,34 @@ console.log(token); // SupportedToken.USDT
 // Get the default token if none specified
 const defaultToken = TokenUtils.getDefaultToken();
 console.log(defaultToken); // SupportedToken.USDT
+```
+
+### `BeepPublicClient` (browser, publishable key)
+
+Use this in browsers or anywhere you can’t safely keep a secret key. It talks only to the public, CORS-open widget endpoints.
+
+```typescript
+import { BeepPublicClient } from '@beep-it/sdk-core';
+
+const publicClient = new BeepPublicClient({
+  publishableKey: 'beep_pk_...',
+  serverUrl: 'https://api.justbeep.it', // optional
+});
+
+// Create a payment session with mixed assets (existing + ephemeral)
+const session = await publicClient.widget.createPaymentSession({
+  assets: [
+    { assetId: 'existing-product-uuid', quantity: 1 },
+    { name: 'Custom Item', price: '12.50', quantity: 2, description: 'On-the-fly item' },
+  ],
+  paymentLabel: 'My Store',
+});
+
+console.log(session.paymentUrl, session.referenceKey);
+
+// Poll payment status
+const status = await publicClient.widget.getPaymentStatus(session.referenceKey);
+console.log('paid:', status.paid);
 ```
 
 ---

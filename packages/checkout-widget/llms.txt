@@ -1,0 +1,40 @@
+# @beep-it/checkout-widget — LLM Guide
+
+Purpose: React checkout component for BEEP. Browser-only, uses publishable key and public endpoints.
+
+Install
+```bash
+npm install @beep-it/checkout-widget @beep-it/sdk-core
+```
+
+Props
+- publishableKey: string (beep_pk_…)
+- labels: { scanQr: string; paymentLabel?: string }
+- assets: Array< { assetId: string; quantity: number } | { name: string; price: string; quantity?: number; description?: string } >
+- serverUrl?: string (defaults to production)
+- primaryColor?: string
+
+Usage
+```tsx
+import { CheckoutWidget } from '@beep-it/checkout-widget';
+
+<CheckoutWidget
+  publishableKey="beep_pk_…"
+  labels={{ scanQr: 'Scan to pay', paymentLabel: 'My Store' }}
+  assets={[ { assetId: 'uuid', quantity: 1 }, { name: 'Custom', price: '12.50' } ]}
+  serverUrl="https://api.justbeep.it"
+/>
+```
+
+Behavior
+- Calls POST /v1/widget/payment-session and GET /v1/widget/payment-status/:referenceKey behind the scenes via @beep-it/sdk-core BeepPublicClient.
+- Items with { name, price } are created as products server-side (persisted).
+- Endpoints are CORS-open; no server proxy required.
+
+Notes
+- Never use beep_sk_* in props. Only beep_pk_*.
+- Mixed assets (existing + on-the-fly) must share the same merchant and token.
+
+Docs: README.md in this package
+Last updated: 2025-09-17
+

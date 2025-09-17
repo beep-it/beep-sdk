@@ -19,7 +19,7 @@ describe('CheckoutWidget', () => {
     labels: {
       scanQr: 'Scan QR Code to Pay',
     },
-    apiKey: 'test-api-key',
+    publishableKey: 'beep_pk_test',
     assets: [{ assetId: 'asset_1', quantity: 1 }],
   };
 
@@ -28,7 +28,7 @@ describe('CheckoutWidget', () => {
     labels: {
       scanQr: 'Scan QR Code to Pay',
     },
-    apiKey: 'test-api-key',
+    publishableKey: 'beep_pk_test',
     assets: [{ name: 'Test Product', price: '25.50', description: 'A test product' }],
   };
 
@@ -71,7 +71,6 @@ describe('CheckoutWidget', () => {
         referenceKey: 'test-ref',
         paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref',
         processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
-        processedAssetsWithProducts: [],
         totalAmount: 1.156188, // Amount from the product pricing
       },
       error: null,
@@ -112,7 +111,6 @@ describe('CheckoutWidget', () => {
         referenceKey: 'test-ref',
         paymentUrl: 'solana:test',
         processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
-        processedAssetsWithProducts: [],
         totalAmount: 0,
       },
       error: null,
@@ -136,7 +134,6 @@ describe('CheckoutWidget', () => {
         referenceKey: 'test-ref',
         paymentUrl: 'solana:test',
         processedAssets: [{ assetId: 'created-product-id', quantity: 1 }],
-        processedAssetsWithProducts: [],
         totalAmount: 25.50, // Amount calculated from product pricing
       },
       error: null,
@@ -168,7 +165,6 @@ describe('CheckoutWidget', () => {
           { assetId: 'product-1-id', quantity: 1 },
           { assetId: 'product-2-id', quantity: 1 },
         ],
-        processedAssetsWithProducts: [],
         totalAmount: 25.50, // 10.00 + 15.50
       },
       error: null,
@@ -198,7 +194,6 @@ describe('CheckoutWidget', () => {
           { assetId: 'new-product-id', quantity: 1 },
           { assetId: 'existing-asset-id', quantity: 2 },
         ],
-        processedAssetsWithProducts: [],
         totalAmount: 30.00, // Assume existing product contributes 10.00 (5.00 × 2)
       },
       error: null,
@@ -260,7 +255,6 @@ describe('CheckoutWidget', () => {
           { assetId: 'p2', quantity: 1 },
           { assetId: 'p3', quantity: 1 },
         ],
-        processedAssetsWithProducts: [],
         totalAmount: 70.00, // 12.34 + 56.78 + 0.88
       },
       error: null,
@@ -279,7 +273,6 @@ describe('CheckoutWidget', () => {
         referenceKey: 'test-ref',
         paymentUrl: 'solana:test',
         processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
-        processedAssetsWithProducts: [],
         totalAmount: 1.156188, // Amount calculated from fetched product data
       },
       error: null,

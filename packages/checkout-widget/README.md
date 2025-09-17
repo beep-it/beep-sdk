@@ -17,7 +17,7 @@ import { CheckoutWidget } from '@beep-it/checkout-widget';
 function App() {
   return (
     <CheckoutWidget
-      apiKey="your-api-key"
+      publishableKey="your-publishable-key"
       primaryColor="#007bff"
       labels={{
         scanQr: 'Scan QR Code to Pay',
@@ -58,7 +58,7 @@ const assets = [
 
 ### 2. On-the-Fly Product Creation (`CreateProductPayload`)
 
-Create products dynamically during checkout:
+Create products dynamically during checkout. These items are created as products in your merchant account on the server (persisted for audit and reuse). They may be hidden from public listings by default.
 
 ```tsx
 const assets = [
@@ -75,7 +75,7 @@ const assets = [
 
 | Prop                  | Type                                            | Required | Description                                                      |
 | --------------------- | ----------------------------------------------- | -------- | ---------------------------------------------------------------- |
-| `apiKey`              | `string`                                        | ✅       | BEEP API key for authentication                                  |
+| `publishableKey`      | `string`                                        | ✅       | BEEP publishable key for browser-safe authentication              |
 | `primaryColor`        | `string`                                        | ❌       | Primary color for styling (hex format, e.g., "#007bff")          |
 | `labels`              | `object`                                        | ✅       | Customizable text labels                                         |
 | `labels.scanQr`       | `string`                                        | ✅       | Text shown above QR code                                         |
@@ -109,7 +109,7 @@ const assets = [
 
 - **Solana Pay Integration**: Generates standards-compliant Solana Pay QR codes
 - **Real-time Status Polling**: Automatically checks payment status every 15 seconds
-- **Flexible Asset Support**: Mix existing products with on-the-fly creations
+- **Flexible Asset Support**: Mix existing products with on-the-fly product creation (persisted)
 - **Payment Label Support**: Custom labels appear in wallet interfaces
 - **Wallet Address Display**: Shows copyable recipient address for desktop users
 
@@ -134,7 +134,7 @@ const assets = [
 
 ```tsx
 <CheckoutWidget
-  apiKey="your-api-key"
+  publishableKey="your-publishable-key"
   primaryColor="#10b981"
   labels={{ scanQr: 'Pay with Crypto' }}
   assets={[
@@ -150,7 +150,7 @@ const assets = [
 
 ```tsx
 <CheckoutWidget
-  apiKey="your-api-key"
+  publishableKey="your-publishable-key"
   primaryColor="#3b82f6"
   labels={{
     scanQr: 'Scan to complete your order',
@@ -175,7 +175,7 @@ const assets = [
 
 ```tsx
 <CheckoutWidget
-  apiKey="your-api-key"
+  publishableKey="your-publishable-key"
   primaryColor="#ef4444"
   labels={{
     scanQr: 'Pay for custom service',

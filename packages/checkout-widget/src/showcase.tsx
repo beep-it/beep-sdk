@@ -39,7 +39,7 @@ const ShowcasePage: React.FC = () => {
               scanQr: 'Scan with your phone or copy address',
             }}
             assets={[{ assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 }]}
-            apiKey="beep_sk_-axb-Nz13wfxMjYAlIy2PfGOc1lg60F9mhJ6Y9QnYI0"
+            publishableKey="beep_pk_demo_publishable_key"
             serverUrl="http://localhost:4070"
           />
         </div>
@@ -111,13 +111,16 @@ const ShowcasePage: React.FC = () => {
           }}
         >
           {`interface MerchantWidgetProps {
-  merchantId: string;        // Unique merchant identifier
-  amount: number;           // Payment amount in USD
-  primaryColor: string;     // Hex color for theming
+  publishableKey: string;   // Browser-safe publishable key
+  primaryColor?: string;    // Hex color for theming
   labels: {
     scanQr: string;        // Text displayed above QR code
+    paymentLabel?: string; // Optional label visible in wallets
   };
-  apiKey: string;          // API key for authentication
+  assets: Array<
+    { assetId: string; quantity: number } |
+    { name: string; price: string; quantity?: number; description?: string }
+  >;
   serverUrl?: string;      // Optional server URL (defaults to production)
 }`}
         </pre>

@@ -1,108 +1,67 @@
-# BEEP Payment Platform
+# BEEP SDK Monorepo — LLM Guide
 
-> BEEP is a financial technology platform that provides blockchain-based payment infrastructure for businesses, agents, and consumers, enabling seamless stablecoin multi-chain transactions and yield optimization.
+Goal: Give coding agents a compact, canonical map for integrating BEEP with SDKs and the Checkout Widget. Use this file for quick orientation; follow links for details.
 
-Key features:
+Packages (beep-sdk/packages)
+- core (@beep-it/sdk-core): TypeScript SDK for Node/browsers.
+- checkout-widget (@beep-it/checkout-widget): React drop-in payment UI.
+- cli (@beep-it/cli): Scaffolding and integration helpers.
+- mcp (@beep-it/mcp): Model Context Protocol server package.
 
-- Non-custodial wallet infrastructure
-- Multi-chain stablecoin payment processing with automated fee handling
-- Real-time transaction monitoring and analytics
-- Multi-transport MCP (Model Context Protocol) server integration
-- SDKs and CLI tools for easy integration
-- Drop-in checkout widget for merchants
+Auth Model
+- Secret API key (server only): beep_sk_… — grants access to private endpoints (/v1/products, /v1/payment/*, etc.). Do not ship to browsers.
+- Publishable key (browser-safe): beep_pk_… — for public widget endpoints (CORS-open). Safe for client apps and the Checkout Widget.
 
-## Payment Flows
+Public Widget Endpoints (CORS-open)
+- POST /v1/widget/payment-session
+  - Body: { publishableKey, assets, paymentLabel?, generateQrCode? }
+  - assets accepts a mix of:
+    - { assetId: string, quantity: number } // existing product UUID
+    - { name: string, price: string, quantity?: number, token?: 'USDT'|'USDC', description?: string } // on-the-fly product (server persists product)
+  - Response: { referenceKey, paymentUrl, qrCode?, amount, expiresAt, status }
 
-BEEP supports various payment flows to cater to different use cases:
+- GET /v1/widget/payment-status/:referenceKey
+  - Response: { paid: boolean, status?: string }
 
-### Customer to Merchant Payments
+SDK Quickstarts
+1) Browser — public client
+```ts
+import { BeepPublicClient } from '@beep-it/sdk-core';
+const client = new BeepPublicClient({ publishableKey: 'beep_pk_…', serverUrl: 'https://api.justbeep.it' });
+const session = await client.widget.createPaymentSession({
+  assets: [ { assetId: 'existing-uuid', quantity: 1 }, { name: 'Tip', price: '1.00' } ],
+  paymentLabel: 'My Store',
+});
+const status = await client.widget.getPaymentStatus(session.referenceKey);
+```
 
-The C2M payment flow enables direct customer-to-merchant transactions. Customers can pay merchants directly from their own wallets through:
+2) React — Checkout Widget
+```tsx
+import { CheckoutWidget } from '@beep-it/checkout-widget';
+<CheckoutWidget
+  publishableKey="beep_pk_…"
+  labels={{ scanQr: 'Scan to pay', paymentLabel: 'My Store' }}
+  assets={[ { assetId: 'uuid', quantity: 1 }, { name: 'Custom', price: '12.50' } ]}
+  serverUrl="https://api.justbeep.it"
+/>
+```
 
-- **Beep Pay Integration**: QR code-based payments that work with any wallet
-- **Invoice Management**: Automated invoice generation and tracking with line item support
-- **Real-time Settlement**: Instant on-chain transactions with transparent fee structures
-- **Multi-Chain and Multi-token Support**: Support for various chains and tokens including Solana, SUI, Ethereum Base and USDC, USDT, SOL, SUI
-- **Merchant Dashboard**: Comprehensive dashboard for transaction history, analytics, and payout management
-- **Payment Verification**: Automated payment confirmation and merchant notifications
+3) Server — secret client
+```ts
+import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
+const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.justbeep.it' });
+const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
+```
 
-### Agent 2 Agent Payments
+Important Notes
+- On-the-fly items sent from the browser are persisted as products server-side (often hidden from listings by default).
+- Widget endpoints are CORS-open and CSRF-exempt; publishable keys are safe in browsers.
+- Secret keys must never be embedded in client apps.
 
-The A2A payment system enables pre-authorized, on-chain transfers between AI agents and merchants when invoking paid tools via the MCP protocol:
+Links
+- Core README: packages/core/README.md
+- Checkout Widget README: packages/checkout-widget/README.md
+- CLI README: packages/cli/README.md
+- MCP README: packages/mcp/README.md
 
-- **Pre-authorized Transactions**: Agents can execute payments on behalf of users with proper authorization
-- **MCP Protocol Integration**: Seamless integration with Model Context Protocol for tool-based payments
-- **Policy Engine**: Internal authorization service that validates A2A payment requests
-- **Tool-based Monetization**: Enable agents to access paid resources and tools automatically
-- **Streaming Payments**: Support for continuous payment streams for ongoing services
-
-## Treasury Management
-
-### Yield Optimization
-
-BEEP's treasury management system optimizes idle funds through various DeFi yield-generating strategies:
-
-- **Multi-strategy Allocation**: Automatic allocation across different vaults
-- **ERC4626 Vault Integration**: Standardized vault interface for yield-bearing assets
-- **Dynamic Rebalancing**: Automated rebalancing based on yield performance and risk metrics
-- **Treasury Analytics**: Real-time tracking of yield performance and allocation efficiency
-- **Risk Management**: Built-in safeguards and withdrawal mechanisms for fund protection
-
-## MCP Server
-
-The BEEP MCP (Model Context Protocol) server provides a standardized interface for AI agents to interact with payment systems. Built with TypeScript and Express, it offers multi-transport communication support.
-
-**Key Features:**
-
-- Multi-transport support (HTTP, SSE, stdio)
-- OAuth 2.1 compliance with dynamic client registration
-- Tool-based payment processing for AI agents
-- Session management with unique client identification
-- Production-ready with comprehensive security measures
-
-**Documentation**: [MCP Server Docs](https://raw.githubusercontent.com/beep-it/beep-sdk/refs/heads/dev/packages/mcp/README.md)
-
-## SDK
-
-The BEEP SDK provides comprehensive tooling for developers to integrate payment functionality into their applications.
-
-**Core Package (@beep-it/sdk-core)**:
-
-- TypeScript-first development experience
-- Comprehensive API client for all BEEP services
-- Built-in authentication and session management
-- Type-safe interfaces for all payment operations
-
-**Documentation**: [SDK Docs](https://raw.githubusercontent.com/beep-it/beep-sdk/refs/heads/dev/packages/core/README.md)
-
-**CLI Package (@beep-it/cli)**:
-
-- Scaffold new MCP servers in seconds
-- Integrate BEEP into existing Node.js projects
-- Pre-configured templates with best practices
-- Support for both stdio and HTTPS communication modes
-
-**Documentation**: [CLI Docs](https://raw.githubusercontent.com/beep-it/beep-sdk/refs/heads/dev/packages/cli/README.md)
-
-## Checkout Widget
-
-The BEEP checkout widget provides a drop-in React component for merchant payment processing with QR code functionality.
-
-**Features:**
-
-- Automatic QR code generation for crypto wallet payments
-- Responsive design with customizable styling themes
-- Loading states and comprehensive error handling
-- TypeScript support with full type definitions
-- Real-time payment status updates
-
-**Installation:**
-\`\`\`bash
-npm install @beep-it/checkout-widget @beep-it/sdk-core
-\`\`\`
-
-**Documentation**: [Checkout Widget Docs](https://raw.githubusercontent.com/beep-it/beep-sdk/refs/heads/dev/packages/checkout-widget/README.md)
-
----
-
-_For technical support and integration assistance, please refer to the individual component documentation or contact the BEEP support team at [support@justbeep.it](mailto:support@justbeep.it)._
+Last updated: 2025-09-17
