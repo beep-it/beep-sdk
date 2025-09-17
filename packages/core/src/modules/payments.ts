@@ -1,5 +1,6 @@
 import { AxiosError, AxiosInstance } from 'axios';
 import { RequestAndPurchaseAssetResponse, SignSolanaTransactionResponse } from '../types';
+import { InvoiceStatus } from '../types/invoice';
 import {
   BeepPurchaseAsset,
   PaymentRequestData,
@@ -33,7 +34,8 @@ export class PaymentsModule {
     onUpdate?: (response: PaymentRequestData | null) => void;
     onError?: (error: unknown) => void;
   }): Promise<{ paid: boolean; last?: PaymentRequestData | null }> {
-    let intervalMs = options.intervalMs ?? 15_000;
+    const baseIntervalMs = options.intervalMs ?? 15_000;
+    let currentIntervalMs = baseIntervalMs;
     const timeoutMs = options.timeoutMs ?? 5 * 60_000;
     const deadline = Date.now() + timeoutMs;
 
@@ -70,26 +72,27 @@ export class PaymentsModule {
             }
             // Transient: 429/5xx/network ⇒ backoff and continue
             options.onError?.(err);
-            // Exponential backoff with cap at 60s
-            intervalMs = Math.min(Math.ceil(intervalMs * 1.5), 60_000);
+            // Exponential backoff with cap at 60s (do not mutate base interval)
+            currentIntervalMs = Math.min(Math.ceil(currentIntervalMs * 1.5), 60_000);
             last = last ?? null;
           }
         }
         options.onUpdate?.(last);
         // Abort if server indicates expired/failed
-        const statusStr = (last as any)?.status as string | undefined;
-        if (statusStr && (statusStr === 'expired' || statusStr === 'failed')) {
+        if (last?.status === InvoiceStatus.EXPIRED || last?.status === InvoiceStatus.FAILED) {
           return { paid: false, last };
         }
         const paid = !last?.referenceKey;
         if (paid) return { paid: true, last };
+        // Reset interval on a successful round-trip
+        currentIntervalMs = baseIntervalMs;
       } catch (e) {
         // Unknown error – treat as transient
         options.onError?.(e);
-        intervalMs = Math.min(Math.ceil(intervalMs * 1.5), 60_000);
+        currentIntervalMs = Math.min(Math.ceil(currentIntervalMs * 1.5), 60_000);
       }
       if (Date.now() >= deadline) return { paid: false, last };
-      await new Promise((r) => setTimeout(r, intervalMs));
+      await new Promise((r) => setTimeout(r, currentIntervalMs));
     }
   }
 
