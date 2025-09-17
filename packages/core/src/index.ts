@@ -7,6 +7,7 @@ import axios, { AxiosInstance } from 'axios';
 import { InvoicesModule } from './modules/invoices';
 import { PaymentsModule } from './modules/payments';
 import { ProductsModule } from './modules/products';
+import { WidgetModule } from './modules/widget';
 
 /**
  * Configuration options for initializing the BeepClient
@@ -127,3 +128,43 @@ export { SupportedToken, TokenUtils } from './types/token';
 
 // Core response types that consumers might need
 export type { BeepResponse } from './types';
+
+// ------------------------------
+// Public, browser-safe client
+// ------------------------------
+
+export interface BeepPublicClientOptions {
+  /** Publishable key for browser access; safe to embed in clients */
+  publishableKey: string;
+  /** Optional server URL override */
+  serverUrl?: string;
+}
+
+export class BeepPublicClient {
+  private client: AxiosInstance;
+  /** Access to public widget endpoints */
+  public readonly widget: WidgetModule;
+
+  constructor(options: BeepPublicClientOptions) {
+    if (!options.publishableKey) {
+      throw new Error('publishableKey is required to initialize BeepPublicClient');
+    }
+
+    this.client = axios.create({
+      baseURL: options.serverUrl || 'https://api.justbeep.it',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Beep-Client': 'beep-sdk',
+      },
+    });
+
+    this.widget = new WidgetModule(this.client, options.publishableKey);
+  }
+}
+
+export type {
+  PublicPaymentSessionRequest,
+  PublicPaymentSessionResponse,
+  PublicPaymentStatusResponse,
+  EphemeralItem,
+} from './types/public';

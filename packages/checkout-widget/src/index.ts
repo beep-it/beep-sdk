@@ -11,7 +11,7 @@
  * function App() {
  *   return (
  *     <CheckoutWidget
- *       apiKey="beep_live_your_api_key"
+ *       publishableKey="beep_pk_your_key"
  *       primaryColor="#007bff"
  *       labels={{
  *         scanQr: "Scan to pay with Solana wallet",
@@ -35,7 +35,7 @@
  * function DynamicCheckout() {
  *   return (
  *     <CheckoutWidget
- *       apiKey="beep_live_your_api_key"
+ *       publishableKey="beep_pk_your_key"
  *       primaryColor="#10b981"
  *       labels={{
  *         scanQr: "Complete your order",

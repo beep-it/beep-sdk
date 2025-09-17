@@ -1,6 +1,6 @@
 {
   "name": "@beep-it/checkout-widget",
-  "version": "0.1.1",
+  "version": "0.1.1-beta.0",
   "description": "React component for BEEP merchant payments with QR code display",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -47,7 +47,7 @@
     "react-dom": ">=16.8.0"
   },
   "dependencies": {
-    "@beep-it/sdk-core": "^0.1.0",
+    "@beep-it/sdk-core": "^0.1.1-beta.0",
     "@tanstack/react-query": "^5.87.1",
     "qrcode": "^1.5.3",
     "qrcode.react": "^4.2.0"

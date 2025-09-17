@@ -112,17 +112,17 @@ function parseSolanaPayURI(uri: string) {
 const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   primaryColor = '#007bff',
   labels = { scanQr: 'Scan with your phone or copy address', paymentLabel: 'Beep Checkout' },
-  apiKey,
+  publishableKey,
   serverUrl,
   assets = [],
 }) => {
   // Input validation
-  if (!apiKey || typeof apiKey !== 'string') {
-    console.error('[CheckoutWidget] Missing or invalid API key:', apiKey);
+  if (!publishableKey || typeof publishableKey !== 'string') {
+    console.error('[CheckoutWidget] Missing or invalid publishable key:', publishableKey);
     return (
       <ConfigurationError
         title="Configuration Error"
-        message="API key is required"
+        message="Publishable key is required"
         primaryColor={primaryColor}
       />
     );
@@ -144,7 +144,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     isLoading: paymentSetupLoading,
   } = usePaymentSetup({
     assets,
-    apiKey,
+    publishableKey,
     serverUrl,
     paymentLabel: labels?.paymentLabel,
   });
@@ -156,9 +156,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     isLoading: paymentStatusLoading,
   } = usePaymentStatus({
     referenceKey: paymentSetupData?.referenceKey || null,
-    processedAssets: paymentSetupData?.processedAssets || [],
-    paymentLabel: labels?.paymentLabel,
-    apiKey,
+    publishableKey,
     serverUrl,
     enabled: !!paymentSetupData?.referenceKey,
   });

@@ -73,10 +73,10 @@ export interface MerchantWidgetProps {
   };
 
   /**
-   * BEEP API key for merchant authentication
-   * Format: "beep_live_..." for production, "beep_test_..." for testing
+   * BEEP publishable key for browser-safe authentication
+   * Format: "beep_pk_...". Safe to embed in client apps.
    */
-  apiKey: string;
+  publishableKey: string;
 
   /**
    * Custom BEEP server URL for API calls
