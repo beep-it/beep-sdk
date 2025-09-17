@@ -22,7 +22,7 @@ import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
  * ```tsx
  * // Mixed asset types with custom theming
  * <CheckoutWidget
- *   apiKey="beep_live_..."
+ *   publishableKey="beep_pk_..."
  *   primaryColor="#3b82f6"
  *   labels={{
  *     scanQr: "Complete your order",
@@ -40,7 +40,7 @@ import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
  *       name: "Express Delivery",
  *       price: "5.99",
  *       quantity: 1,
- *       token: "USDC"
+ *       // note: on-the-fly items are persisted server-side as products
  *     }
  *   ]}
  *   serverUrl="https://api.yourstore.com"
