@@ -38,6 +38,22 @@ Modules
 - invoices: create/get/list/delete (server only)
 - widget: createPaymentSession, getPaymentStatus (browser)
 
+402 Payment Flow (server)
+- Phase 1: Call `beep.payments.requestAndPurchaseAsset` with `assets` (and optional `paymentLabel`).
+  - Server replies with HTTP 402; the SDK returns the payload `{ referenceKey, paymentUrl, qrCode?, ... }`.
+  - Show `paymentUrl/qrCode` to the user for wallet payment.
+- Phase 2: Poll by calling the same method with `paymentReference: <referenceKey>` until the response no longer includes `referenceKey` → payment complete.
+
+Helper (polling)
+```ts
+const { paid } = await beep.payments.waitForPaymentCompletion({
+  assets: [{ assetId: 'uuid', quantity: 1 }],
+  paymentReference: ref,
+  intervalMs: 15000,
+  timeoutMs: 300000,
+});
+```
+
 Types
 - SupportedToken, TokenUtils
 - PublicPaymentSessionRequest/Response, PublicPaymentStatusResponse
@@ -48,4 +64,3 @@ Notes
 
 Docs: README.md in this package
 Last updated: 2025-09-17
-
