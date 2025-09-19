@@ -12,9 +12,7 @@ const pauseStreamingInputSchema = z.object({
 export type PauseStreamingApiParams = z.infer<typeof pauseStreamingInputSchema>;
 
 export async function pauseStreaming(params: PauseStreamingApiParams): Promise<any> {
-  const { invoiceId } = params as {
-    invoiceId: string;
-  };
+  const invoiceId = params.invoiceId;
 
   const payload: PauseStreamingPayload = {
     apiKey: process.env.BEEP_API_KEY!,
