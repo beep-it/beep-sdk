@@ -40,6 +40,14 @@ Use this command when you're starting a new project and want a dedicated server 
 
 **When to use it**: You're building a new app, or you want to run your BEEP logic on a separate microservice.
 
+MCP Roles in templates
+- Buying agent (mcp-client): initiates tool calls and pays invoices.
+- Selling agent (mcp-server): exposes paid tools and creates invoices; gates execution until paid.
+
+Important
+- Do not combine buying and selling agents within the same application. Choose one role per deployment.
+- The generated server template is a selling agent. It includes tools that create invoices via `POST /v1/payments/request` (HTTP 402 pattern) and may use `issuePayment` where appropriate. These are server-side only and must not be invoked from browsers.
+
 ```bash
 beep init-mcp [options]
 ```
@@ -144,6 +152,12 @@ Next steps:
 3.  **Auto-Install**: Automatically installed the BEEP SDK (`@beep-it/sdk-core`) as a dependency
 4.  **Code Analysis**: Read your server file to understand your existing tool patterns
 5.  **Tailored Guidance**: Provided specific hints like "Found tools array - add checkBeepApi there"
+
+Invoice creation flow (what the template demonstrates)
+- Create invoice: `POST /v1/payments/request` with `assets` (and optional `paymentLabel`). No charge occurs at this step.
+- If unpaid: server responds 402 with `{ referenceKey, paymentUrl, qrCode? }` (show to the buying agent).
+- Poll: re-call the same route with `paymentReference: <referenceKey>` until 200 with `{ receipt, txSignature }`.
+- Execute: once paid, the tool performs its action and returns the result.
 
 No more guessing where to put things! The CLI gives you exact file paths and context-specific integration instructions.
 

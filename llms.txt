@@ -54,9 +54,10 @@ const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', 
 ```
 
 402 Payment Flow (server)
-- Phase 1: Call `beep.payments.requestAndPurchaseAsset` with `assets` and optional `paymentLabel`.
-  - Server replies with HTTP 402 and a payload (SDK returns the payload) containing `referenceKey`, `paymentUrl`, optional `qrCode`.
-- Phase 2: Poll by calling the same method with `paymentReference: <referenceKey>` until the response no longer includes `referenceKey` → payment complete.
+- Invoice creation pattern (HTTP 402)
+  - Create invoice: Call `beep.payments.requestAndPurchaseAsset` with `assets` and optional `paymentLabel`.
+    - If unpaid, server responds HTTP 402 with `{ referenceKey, paymentUrl, qrCode? }` (invoice created; no charge performed).
+  - Poll status: Call the same method with `paymentReference: <referenceKey>` until it returns 200 (paid) without `referenceKey`.
  
 Helper
 ```ts
@@ -78,6 +79,12 @@ Links
 - Checkout Widget README: packages/checkout-widget/README.md
 - CLI README: packages/cli/README.md
 - MCP README: packages/mcp/README.md
- - Server streaming map: ../beep-server/README.md (Streaming Payments — Implementation Map)
+MCP Roles (templates)
+- mcp-client (buying agent): initiates tool calls and pays invoices.
+- mcp-server (selling agent): exposes paid tools and creates invoices via the 402 pattern and issuePayment.
+
+Routes reference
+- Widget (non-streaming): `POST /v1/widget/payment-session`, `GET /v1/widget/payment-status/:referenceKey`.
+- Paid tools (server-side): `POST /v1/payments/request` (creates invoice; 402 when unpaid, returns paymentUrl/qrCode), optional `POST /v1/payments/confirm`.
 
 Last updated: 2025-09-17
