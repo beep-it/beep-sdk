@@ -5,7 +5,15 @@ import {
   RequestAndPurchaseAssetRequestParams,
   SignSolanaTransactionData,
   SignSolanaTransactionParams,
-} from '../types/payment';
+  IssuePaymentPayload,
+  IssuePaymentResponse,
+  StartStreamingPayload,
+  StartStreamingResponse,
+  PauseStreamingPayload,
+  PauseStreamingResponse,
+  StopStreamingPayload,
+  StopStreamingResponse,
+} from '../types';
 
 /**
  * Module for handling payment operations including asset purchases and Solana transactions
@@ -113,5 +121,42 @@ export class PaymentsModule {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to sign solana transaction: ${errorMessage}`);
     }
+  }
+
+  // --- Streaming Payment Methods ---
+
+  /**
+   * Issue a payment request for streaming with asset chunk details.
+   */
+  async issuePayment(payload: IssuePaymentPayload): Promise<IssuePaymentResponse> {
+    const response = await this.client.post<IssuePaymentResponse>(
+      '/v1/invoices/issue-payment',
+      payload,
+    );
+    return response.data;
+  }
+
+  /**
+   * Start a streaming session for the provided invoice.
+   */
+  async startStreaming(payload: StartStreamingPayload): Promise<StartStreamingResponse> {
+    const response = await this.client.post<StartStreamingResponse>('/v1/invoices/start', payload);
+    return response.data;
+  }
+
+  /**
+   * Pause streaming on the provided invoice.
+   */
+  async pauseStreaming(payload: PauseStreamingPayload): Promise<PauseStreamingResponse> {
+    const response = await this.client.post<PauseStreamingResponse>('/v1/invoices/pause', payload);
+    return response.data;
+  }
+
+  /**
+   * Stop streaming and close the provided invoice.
+   */
+  async stopStreaming(payload: StopStreamingPayload): Promise<StopStreamingResponse> {
+    const response = await this.client.post<StopStreamingResponse>('/v1/invoices/stop', payload);
+    return response.data;
   }
 }

@@ -23,6 +23,86 @@ export interface RequestAndPurchaseAssetRequestParams {
 }
 
 /**
+ * Payload for issuing a payment request
+ */
+export interface IssuePaymentPayload {
+  /** API key for authentication */
+  apiKey: string;
+  /** Asset chunks to purchase */
+  assetChunks: BeepPurchaseAsset[];
+  /** The paying merchant ID */
+  payingMerchantId: string;
+  /** The existing invoice id (optional) */
+  invoiceId?: string;
+}
+
+/**
+ * Response from issuing a payment
+ */
+export interface IssuePaymentResponse {
+  /** Reference key for the generated streaming payment */
+  referenceKey: string;
+  /** Invoice ID for the generated streaming payment */
+  invoiceId: string;
+}
+
+/**
+ * Payload for starting a streaming session
+ */
+export interface StartStreamingPayload {
+  /** API key for authentication */
+  apiKey: string;
+  /** ID of the invoice to start streaming for */
+  invoiceId: string;
+}
+
+/**
+ * Response from starting a streaming session
+ */
+export interface StartStreamingResponse {
+  /** The UUID of the streaming invoice */
+  invoiceId: string;
+}
+
+/**
+ * Payload for pausing streaming
+ */
+export interface PauseStreamingPayload {
+  /** API key for authentication */
+  apiKey: string;
+  /** ID of the invoice to pause streaming for */
+  invoiceId: string;
+}
+
+/**
+ * Response from pausing streaming
+ */
+export interface PauseStreamingResponse {
+  /** Whether the streaming was successfully paused */
+  success: boolean;
+}
+
+/**
+ * Payload for stopping streaming
+ */
+export interface StopStreamingPayload {
+  /** API key for authentication */
+  apiKey: string;
+  /** ID of the invoice to stop streaming for */
+  invoiceId: string;
+}
+
+/**
+ * Response from stopping streaming
+ */
+export interface StopStreamingResponse {
+  /** The ID of the invoice that was stopped */
+  invoiceId: string;
+  /** List of reference keys associated with the streaming payments */
+  referenceKeys: string[];
+}
+
+/**
  * Payload for creating a payment request
  * This interface represents the data needed to initiate a payment flow
  */

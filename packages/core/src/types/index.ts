@@ -1,8 +1,8 @@
 // Re-export all type definitions for convenient importing
 export * from './invoice';
+export * from './payment';
 export * from './product';
 export * from './token';
-export * from './payment';
 
 /**
  * Standard response wrapper for BEEP API endpoints
