@@ -47,5 +47,5 @@ export const stopStreamingTool: MCPToolDefinition = {
   name: 'stopStreamingTool',
   description: 'Stops the streaming for the given invoice',
   inputSchema: zodToJsonSchema(stopStreamingInputSchema),
-  handler: startStreaming,
+  handler: stopStreaming,
 };
