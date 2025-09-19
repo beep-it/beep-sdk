@@ -1,0 +1,15 @@
+# @beep-it/mcp — LLM Guide
+
+Purpose: Model Context Protocol (MCP) server implementation for BEEP, enabling tool-based payments and multi-transport communication.
+
+Features
+- HTTP/SSE/stdio transports
+- OAuth 2.1 compliance
+- Tool-based payment hooks
+
+Quickstart
+- See README for setup instructions, environment variables, and transport configuration.
+
+Docs: README.md in this package
+Last updated: 2025-09-17
+

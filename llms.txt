@@ -1,0 +1,67 @@
+# BEEP SDK Monorepo — LLM Guide
+
+Goal: Give coding agents a compact, canonical map for integrating BEEP with SDKs and the Checkout Widget. Use this file for quick orientation; follow links for details.
+
+Packages (beep-sdk/packages)
+- core (@beep-it/sdk-core): TypeScript SDK for Node/browsers.
+- checkout-widget (@beep-it/checkout-widget): React drop-in payment UI.
+- cli (@beep-it/cli): Scaffolding and integration helpers.
+- mcp (@beep-it/mcp): Model Context Protocol server package.
+
+Auth Model
+- Secret API key (server only): beep_sk_… — grants access to private endpoints (/v1/products, /v1/payment/*, etc.). Do not ship to browsers.
+- Publishable key (browser-safe): beep_pk_… — for public widget endpoints (CORS-open). Safe for client apps and the Checkout Widget.
+
+Public Widget Endpoints (CORS-open)
+- POST /v1/widget/payment-session
+  - Body: { publishableKey, assets, paymentLabel?, generateQrCode? }
+  - assets accepts a mix of:
+    - { assetId: string, quantity: number } // existing product UUID
+    - { name: string, price: string, quantity?: number, token?: 'USDT'|'USDC', description?: string } // on-the-fly product (server persists product)
+  - Response: { referenceKey, paymentUrl, qrCode?, amount, expiresAt, status }
+
+- GET /v1/widget/payment-status/:referenceKey
+  - Response: { paid: boolean, status?: string }
+
+SDK Quickstarts
+1) Browser — public client
+```ts
+import { BeepPublicClient } from '@beep-it/sdk-core';
+const client = new BeepPublicClient({ publishableKey: 'beep_pk_…', serverUrl: 'https://api.justbeep.it' });
+const session = await client.widget.createPaymentSession({
+  assets: [ { assetId: 'existing-uuid', quantity: 1 }, { name: 'Tip', price: '1.00' } ],
+  paymentLabel: 'My Store',
+});
+const status = await client.widget.getPaymentStatus(session.referenceKey);
+```
+
+2) React — Checkout Widget
+```tsx
+import { CheckoutWidget } from '@beep-it/checkout-widget';
+<CheckoutWidget
+  publishableKey="beep_pk_…"
+  labels={{ scanQr: 'Scan to pay', paymentLabel: 'My Store' }}
+  assets={[ { assetId: 'uuid', quantity: 1 }, { name: 'Custom', price: '12.50' } ]}
+  serverUrl="https://api.justbeep.it"
+/>
+```
+
+3) Server — secret client
+```ts
+import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
+const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.justbeep.it' });
+const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
+```
+
+Important Notes
+- On-the-fly items sent from the browser are persisted as products server-side (often hidden from listings by default).
+- Widget endpoints are CORS-open and CSRF-exempt; publishable keys are safe in browsers.
+- Secret keys must never be embedded in client apps.
+
+Links
+- Core README: packages/core/README.md
+- Checkout Widget README: packages/checkout-widget/README.md
+- CLI README: packages/cli/README.md
+- MCP README: packages/mcp/README.md
+
+Last updated: 2025-09-17

@@ -19,21 +19,19 @@ describe('Payments Module', () => {
   });
 
   describe('requestAndPurchaseAsset', () => {
-    it('returns null when no paymentReference and no assetIds provided', async () => {
+    it('returns null when no paymentReference and no assets provided', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
 
-      const result = await client.payments.requestAndPurchaseAsset({});
+      const result = await client.payments.requestAndPurchaseAsset({ assets: [] });
 
       expect(result).toBeNull();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'One of paymentReference or assetIds is required',
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('One of paymentReference or assets is required');
       expect(mockAxios.history.post.length).toBe(0); // No API call should be made
 
       consoleErrorSpy.mockRestore();
     });
 
-    it('calls endpoint and returns mocked data when paymentReference provided but no assetIds', async () => {
+    it('calls endpoint and returns mocked data when paymentReference provided but no assets', async () => {
       const mockProduct = {
         id: 'prod_test123',
         name: 'Test Product',
@@ -50,6 +48,10 @@ describe('Payments Module', () => {
 
       const result = await client.payments.requestAndPurchaseAsset({
         paymentReference: 'pay_ref_123',
+        assets: [
+          { assetId: 'asset_1', quantity: 1 },
+          { assetId: 'asset_2', quantity: 1 },
+        ],
       });
 
       expect(result).toEqual(mockProduct);
@@ -57,7 +59,7 @@ describe('Payments Module', () => {
       expect(mockAxios.history.post[0].url).toBe('/v1/payment/request-payment');
     });
 
-    it('calls endpoint and returns mocked data when assetIds provided but no paymentReference', async () => {
+    it('calls endpoint and returns mocked data when assets provided but no paymentReference', async () => {
       const mockProduct = {
         id: 'prod_test456',
         name: 'Asset Product',
@@ -73,7 +75,10 @@ describe('Payments Module', () => {
       mockAxios.onPost('/v1/payment/request-payment').reply(200, mockResponse);
 
       const result = await client.payments.requestAndPurchaseAsset({
-        assetIds: ['asset_1', 'asset_2'],
+        assets: [
+          { assetId: 'asset_1', quantity: 1 },
+          { assetId: 'asset_2', quantity: 1 },
+        ],
       });
 
       expect(result).toEqual(mockProduct);

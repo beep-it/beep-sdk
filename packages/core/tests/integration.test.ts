@@ -27,7 +27,10 @@ describe.skip('Integration Tests', () => {
   it('requestAndPurchaseAsset creates a valid invoice', async () => {
     const result = await client.payments.requestAndPurchaseAsset({
       paymentReference: 'pay_ref_123',
-      assetIds: ['asset_1', 'asset_2'],
+      assets: [
+        { assetId: 'asset_1', quantity: 1 },
+        { assetId: 'asset_2', quantity: 1 },
+      ],
     });
 
     expect(result).toBeDefined();

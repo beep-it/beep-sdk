@@ -1,8 +1,8 @@
-# The BEEP SDK: Turn Your Cool Sh*t into Cash 💸
+# The BEEP SDK: Turn Your Cool Sh\*t into Cash 💸
 
 Alright, let's be real. You made something awesome. A game, an app, a digital masterpiece. And now you wanna get paid for it. As you should! But dealing with payments is a whole vibe killer. That's where we come in.
 
-## 🤔 So, like, what even *is* this?
+## 🤔 So, like, what even _is_ this?
 
 Think of this SDK as your personal cheat code for money. It's a box of pre-written code that you can just drop into your project to handle all the boring payment stuff.
 
@@ -10,9 +10,9 @@ No, you don't need to know what an "SDK" is. Just know this: **this is the easy 
 
 With this, you can:
 
-*   **Give your users a "wallet"**: It's not a real wallet. It's just a secure spot online for them to keep their digital cash to pay you with. We handle all the scary security stuff.
-*   **Ask for money (nicely)**: Create an "invoice," which is just a fancy word for a bill. It's like sending a Venmo request, but for your app.
-*   **Actually get paid**: Process the payment and see the money roll in. Cha-ching.
+- **Give your users a "wallet"**: It's not a real wallet. It's just a secure spot online for them to keep their digital cash to pay you with. We handle all the scary security stuff.
+- **Ask for money (nicely)**: Create an "invoice," which is just a fancy word for a bill. It's like sending a Venmo request, but for your app.
+- **Actually get paid**: Process the payment and see the money roll in. Cha-ching.
 
 Basically, we're the ✨ unpaid intern ✨ who handles your finances so you can get back to creating.
 
@@ -27,8 +27,9 @@ This is probably easier than picking an Instagram filter. No cap.
 In your project's command line thingy (the black box where you type stuff), paste this:
 
 ```bash
-npm install beep-sdk
+npm install @beep-it/sdk-core
 ```
+
 This basically downloads our toolkit and puts it in your project's folder.
 
 ### Step 2: Get Your Secret Handshake (aka API Key)
@@ -43,12 +44,12 @@ Time to write, like, one line of code. This tells your project to start using th
 
 ```typescript
 // This line just says, "Hey, I wanna use that beep-sdk thing I just downloaded."
-import { BeepClient, SupportedToken } from 'beep-sdk';
+import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
 
 // This line creates your BEEP-Bot. It's now ready for your commands.
 const beep = new BeepClient({
   // Just paste that secret key you got from the dashboard right here.
-  apiKey: 'your_super_secret_api_key_goes_here'
+  apiKey: 'your_super_secret_api_key_goes_here',
 });
 
 console.log('Ok, your BEEP-Bot is ready. Slay.');
@@ -68,7 +69,7 @@ You just need to tell your BEEP-Bot how much you want to charge and in what curr
 
 #### The Whole Payment Flow Explained (as if you were 5... but like, a cool 5-year-old)
 
-1. **You call `requestPayment`** - This is literally just you telling our servers "hey, I want $X for Y reason"
+1. **You create an invoice** - This is literally just you telling our servers "hey, I want $X for Y reason"
 2. **We create an invoice** - Think of this as a digital receipt that says "pay this amount pls"
 3. **We give you back payment details** - This includes:
    - A `paymentUrl` (a link you can send to your customer)
@@ -80,36 +81,33 @@ You just need to tell your BEEP-Bot how much you want to charge and in what curr
 6. **You get notified** - Either through webhooks (if you set those up) or by checking the status
 7. **Money lands in your account** - Cha-ching! 🤑
 
-Seriously, all *you* need to worry about is step 1. We handle 2-7 because we're nice like that.
+Seriously, all _you_ need to worry about is step 1. We handle 2-7 because we're nice like that.
 
 ```typescript
 // Just describe what you're charging for.
-const chargeDetails = {
-  // You can just use normal dollar/decimal amounts now! We handle the conversion.
-  amount: 5.00,
-  // We've made it easier - just use our token enum instead of that crazy address!
-  token: SupportedToken.USDT, // Much cleaner than a long address, right?
-  // or if you're old-school, you can still use the raw address:
-  // splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // This is USDT
+const invoiceDetails = {
   description: 'A pack of 100 magic crystals',
+  amount: '5.00', // Amount as string
+  token: SupportedToken.USDT, // Much cleaner than a long address, right?
+  payerType: 'customer_wallet' as const, // Who's paying
 };
 
 try {
-  // Tell your BEEP-Bot to request the payment.
+  // Tell your BEEP-Bot to create an invoice for payment.
   // This creates a bill and gets everything ready behind the scenes.
-  const paymentDetails = await beep.requestPayment(chargeDetails);
+  const invoice = await beep.invoices.createInvoice(invoiceDetails);
 
   // Now you have everything you need to get paid!
-  console.log('QR Code:', paymentDetails.qrCode);
-  console.log('Payment Link:', paymentDetails.paymentUrl);
+  console.log('QR Code:', invoice.qrCode);
+  console.log('Payment Link:', invoice.paymentUrl);
+  console.log('Reference Key:', invoice.referenceKey);
 
   // What you do next is up to you:
   // 1. Render the `qrCode` in your UI for the user to scan.
   // 2. Redirect the user to the `paymentUrl`.
   // BEEP will handle the rest on the backend once the user approves the transaction.
-
 } catch (error) {
-  console.error('Oof. Something went wrong creating the payment request:', error.message);
+  console.error('Oof. Something went wrong creating the invoice:', error.message);
 }
 ```
 
@@ -121,7 +119,7 @@ And that's literally it. Once the user pays, the money appears in your account. 
 
 If you're the type of person who likes to take things apart just so you can put them back together, this is for you. Here are the technical specs. Everyone else, you can ignore this.
 
-### `BeepClient`
+### `BeepClient` (server-side, secret key)
 
 Initializes the client. Takes an `options` object.
 
@@ -134,20 +132,21 @@ new BeepClient(options: {
 
 **High-Level Methods:**
 
-#### Payment Requests
+#### Creating Invoices for Payment
 
 ```typescript
-// The money maker - this is all you need 99% of the time!
-const invoice = await beep.requestPayment({
-  amount: 19.99, // Clean decimal amount
+// The money maker - create an invoice for payment!
+const invoice = await beep.invoices.createInvoice({
+  amount: '19.99', // Amount as string
   token: SupportedToken.USDT, // Enum magic!
-  description: 'VIP Battle Pass - Summer Season'
+  description: 'VIP Battle Pass - Summer Season',
+  payerType: 'customer_wallet', // Customer pays
 });
 
 // Now you have everything you need for the user to pay
 console.log('Payment URL:', invoice.paymentUrl);
 console.log('Reference Key:', invoice.referenceKey);
-console.log('Invoice ID:', invoice.invoiceId);
+console.log('Invoice ID:', invoice.id);
 
 // IMPORTANT PART: What to do with this info!
 // Option 1: Redirect your user to the payment page
@@ -161,7 +160,7 @@ displayToUser(`Pay here: ${invoice.paymentUrl}`);
 
 // After payment (could be seconds or minutes later):
 // Check if they've paid yet
-const updatedInvoice = await beep.payments.getInvoice(invoice.id);
+const updatedInvoice = await beep.invoices.getInvoice(invoice.id);
 
 if (updatedInvoice.status === 'paid') {
   // Woohoo! Give them their digital goodies!
@@ -181,8 +180,7 @@ if (updatedInvoice.status === 'paid') {
 ```typescript
 // Make sure our servers aren't on fire
 const health = await beep.healthCheck();
-console.log('Server status:', health.status); // Hopefully 'OK' 🤞
-console.log('Version:', health.version);
+console.log('Server health:', health); // Should return health status
 ```
 
 **Low-Level Modules:**
@@ -195,7 +193,7 @@ Our shiny new enum for supported tokens! Way easier than remembering addresses.
 
 ```typescript
 // Import it like this
-import { SupportedToken } from 'beep-sdk';
+import { SupportedToken } from '@beep-it/sdk-core';
 
 // Use it like this
 const token = SupportedToken.USDT; // Currently supported
@@ -204,69 +202,73 @@ const token = SupportedToken.USDT; // Currently supported
 
 ### `beep.invoices`
 
-This is our legacy module that's now integrated into the payments module. For all invoice operations, we recommend using `beep.payments` methods instead.
+Handle invoice operations - create, retrieve, and manage payment invoices.
 
 ```typescript
-// The old way (still works but not as cool)
-const invoices = await beep.invoices.list();
-const invoice = await beep.invoices.get('inv_123abc');
+// Create invoices for payment
+const invoice = await beep.invoices.createInvoice({
+  description: 'Premium service',
+  amount: '29.99',
+  token: SupportedToken.USDT,
+  payerType: 'customer_wallet',
+});
 
-// The new hotness - use these instead:
-const invoices = await beep.payments.listInvoices();
-const invoice = await beep.payments.getInvoice('inv_123abc');
+// Get all your invoices
+const invoices = await beep.invoices.listInvoices();
+
+// Look up a specific invoice
+const invoice = await beep.invoices.getInvoice('inv_123abc');
+
+// Delete an invoice
+await beep.invoices.deleteInvoice('inv_123abc');
 ```
 
-### `beep.payments`
+### `beep.products`
 
-All your product and invoice needs - now with that sweet, sweet token enum support! 🎉
+Manage your products - create reusable payment configurations with sweet token enum support! 🎉
 
 #### Creating Products
 
 ```typescript
 // Creating a one-time purchase product
-const product = await beep.payments.createProduct({
+const product = await beep.products.createProduct({
   name: 'Magic Sword of Destiny',
   description: 'Gives +10 attack and looks cool as heck',
   price: '9.99', // Just regular numbers as strings
-  token: SupportedToken.USD T, // So much cleaner than a crazy address
-  isSubscription: false // One-time purchase
+  token: SupportedToken.USDT, // So much cleaner than a crazy address
+  isSubscription: false, // One-time purchase
 });
 
 console.log(`Created product with ID: ${product.id}`);
 
 // Creating a subscription product
-const subscriptionProduct = await beep.payments.createProduct({
+const subscriptionProduct = await beep.products.createProduct({
   name: 'Premium Battle Pass',
   description: 'Monthly subscription with exclusive skins and perks',
   price: '14.99', // Monthly price
   token: SupportedToken.USDT,
-  isSubscription: true // This makes it recurring - monthly subscription!
+  isSubscription: true, // This makes it recurring - monthly subscription!
 });
 
 console.log(`Created subscription with ID: ${subscriptionProduct.id}`);
 
-// Creating a metered events product (pay-as-you-go)
-const meteredProduct = await beep.payments.createProduct({
-  name: 'API Usage',
-  description: 'Pay only for what you use - API calls',
-  price: '0.001', // Price per API call
+// Creating a one-time purchase product (pay-per-use)
+const oneTimeProduct = await beep.products.createProduct({
+  name: 'API Usage Credit',
+  description: 'Credits for API calls',
+  price: '0.001', // Price per credit
   token: SupportedToken.USDT,
-  isSubscription: false,
-  metadata: { // Custom metadata for metered billing
-    billingType: 'metered',
-    unitName: 'API call',
-    meterPrecision: 0 // Integer precision for counting
-  }
+  isSubscription: false, // One-time purchase
 });
 
-console.log(`Created metered product with ID: ${meteredProduct.id}`);
+console.log(`Created one-time product with ID: ${oneTimeProduct.id}`);
 ```
 
 #### Getting a Product
 
 ```typescript
 // Fetch a product by ID
-const product = await beep.payments.getProduct('prod_123abc456def');
+const product = await beep.products.getProduct('prod_123abc456def');
 console.log(`Found product: ${product.name} for ${product.price}`);
 ```
 
@@ -274,11 +276,11 @@ console.log(`Found product: ${product.name} for ${product.price}`);
 
 ```typescript
 // Get all your amazing products
-const products = await beep.payments.listProducts();
+const products = await beep.products.listProducts();
 console.log(`You have ${products.length} products`);
 
 // Loop through them if you're feeling fancy
-products.forEach(product => {
+products.forEach((product) => {
   console.log(`${product.name}: ${product.price} ${product.token || 'tokens'}`);
 });
 ```
@@ -287,10 +289,10 @@ products.forEach(product => {
 
 ```typescript
 // Change your mind about pricing? No problemo!
-const updatedProduct = await beep.payments.updateProduct('prod_123abc456def', {
+const updatedProduct = await beep.products.updateProduct('prod_123abc456def', {
   price: '14.99', // Price increase! Cha-ching!
   description: 'Now with extra sparkles ✨',
-  token: SupportedToken.USDT
+  token: SupportedToken.USDT,
 });
 
 console.log('Product updated with new price:', updatedProduct.price);
@@ -300,56 +302,29 @@ console.log('Product updated with new price:', updatedProduct.price);
 
 ```typescript
 // That product is so last season - delete it!
-await beep.payments.deleteProduct('prod_123abc456def');
+await beep.products.deleteProduct('prod_123abc456def');
 console.log('Poof! Product deleted.');
 ```
 
-#### Creating Invoices
+### `beep.payments`
+
+Handle low-level payment operations like asset purchasing and transaction signing.
 
 ```typescript
-// Method 1: Create an invoice from a product (easiest)
-const productInvoice = await beep.payments.createInvoice({
-  productId: 'prod_123abc456def',
-  payerType: 'customer_wallet' // Who's paying? The customer!
+// Request payment for assets
+const payment = await beep.payments.requestAndPurchaseAsset({
+  paymentReference: 'premium_subscription_123',
+  assetIds: ['asset_1', 'asset_2'],
 });
 
-// Method 2: Create a custom invoice (for one-offs)
-const customInvoice = await beep.payments.createInvoice({
-  description: 'Emergency dragon-slaying services',
-  amount: '49.99',
-  token: SupportedToken.USDT, // Just use the enum - way cooler
-  payerType: 'customer_wallet'
+// Sign Solana transactions directly
+const signedTx = await beep.payments.signSolanaTransaction({
+  senderAddress: 'sender_wallet_address',
+  recipientAddress: 'recipient_wallet_address',
+  tokenMintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
+  amount: 1000000, // 1.0 USDT in base units
+  decimals: 6,
 });
-
-console.log(`Invoice created with ID: ${customInvoice.id}`);
-```
-
-#### Getting an Invoice
-
-```typescript
-// Look up an invoice by ID
-const invoice = await beep.payments.getInvoice('inv_456def789ghi');
-console.log(`Invoice for ${invoice.amount} is currently ${invoice.status}`);
-```
-
-#### Listing All Invoices
-
-```typescript
-// See all those invoices (aka future money)
-const invoices = await beep.payments.listInvoices();
-console.log(`You have ${invoices.length} invoices`);
-
-// Maybe check which ones are still pending payment
-const pendingInvoices = invoices.filter(inv => inv.status === 'pending');
-console.log(`${pendingInvoices.length} invoices still waiting to be paid...`);
-```
-
-#### Deleting an Invoice
-
-```typescript
-// Changed your mind? Delete that invoice
-await beep.payments.deleteInvoice('inv_456def789ghi');
-console.log('Invoice? What invoice? It\'s gone.');
 ```
 
 ### `TokenUtils`
@@ -357,24 +332,58 @@ console.log('Invoice? What invoice? It\'s gone.');
 For the super nerds who want to play with token addresses:
 
 ```typescript
-import { TokenUtils, SupportedToken } from 'beep-sdk';
+import { TokenUtils, SupportedToken } from '@beep-it/sdk-core';
 
 // Get the address from a token enum
 const address = TokenUtils.getTokenAddress(SupportedToken.USDT);
-console.log(address); // 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+console.log(address); // 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'
 
 // Check if we support a token
 const isSupported = TokenUtils.isTokenSupported(SupportedToken.USDT); // true
 const isUsdtSupported = TokenUtils.isTokenSupported('USDT'); // false (coming soon™)
 
 // Get a token enum from an address (reverse lookup)
-const token = TokenUtils.getTokenFromAddress('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
 console.log(token); // SupportedToken.USDT
 
 // Get the default token if none specified
 const defaultToken = TokenUtils.getDefaultToken();
 console.log(defaultToken); // SupportedToken.USDT
 ```
+
+### `BeepPublicClient` (browser, publishable key)
+
+Use this in browsers or anywhere you can’t safely keep a secret key. It talks only to the public, CORS-open widget endpoints.
+
+```typescript
+import { BeepPublicClient } from '@beep-it/sdk-core';
+
+const publicClient = new BeepPublicClient({
+  publishableKey: 'beep_pk_...',
+  serverUrl: 'https://api.justbeep.it', // optional
+});
+
+// Create a payment session with mixed assets (existing + ephemeral)
+const session = await publicClient.widget.createPaymentSession({
+  assets: [
+    { assetId: 'existing-product-uuid', quantity: 1 },
+    { name: 'Custom Item', price: '12.50', quantity: 2, description: 'On-the-fly item' },
+  ],
+  paymentLabel: 'My Store',
+});
+
+console.log(session.paymentUrl, session.referenceKey);
+
+// Poll payment status
+const status = await publicClient.widget.getPaymentStatus(session.referenceKey);
+console.log('paid:', status.paid);
+```
+
+---
+
+## Resources
+
+[Beep llms.txt](https://www.justbeep.it/llms.txt)
 
 ---
 

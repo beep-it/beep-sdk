@@ -1,111 +1,348 @@
-import { BeepClient } from '@beep/sdk-core';
-import React, { useEffect, useState } from 'react';
-import { MerchantWidgetProps, MerchantWidgetState } from './types';
+import { QRCodeSVG } from 'qrcode.react';
+import React, { useMemo } from 'react';
+import {
+  ConfigurationError,
+  LoadingState,
+  PaymentError,
+  PaymentSuccess,
+  WalletAddressLabel,
+} from './components';
+import { ComponentErrorBoundary } from './components/ComponentErrorBoundary';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { usePaymentSetup, usePaymentStatus } from './hooks';
+import { QueryProvider } from './QueryProvider';
+import {
+  amountStyles,
+  cardStyles,
+  footerContentStyles,
+  footerStyles,
+  labelStyle,
+  labelStyles,
+  logoContainerStyles,
+  mainContentStyles,
+  poweredByTextStyles,
+  qrStyle,
+} from './styles';
+import { MerchantWidgetProps } from './types';
 
-export const CheckoutWidget: React.FC<MerchantWidgetProps> = ({
-  merchantId,
-  amount,
-  primaryColor,
-  labels,
-  apiKey,
-  serverUrl,
-}) => {
-  const [state, setState] = useState<MerchantWidgetState>({
-    qrCode: null,
-    loading: true,
-    error: null,
-  });
+// Safe logo import with fallback
+import beepLogoUrl from './beep_logo_mega.svg';
 
-  useEffect(() => {
-    const fetchPaymentData = async () => {
-      try {
-        setState((prev) => ({ ...prev, loading: true, error: null }));
+const beepLogo =
+  beepLogoUrl ||
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCA0MCAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzMzMzMzMyI+QkVFUDwvdGV4dD4KPHN2Zz4K';
 
-        const client = new BeepClient({
-          apiKey,
-          serverUrl: serverUrl,
-        });
+/**
+ * Parses a Solana Pay URI to extract payment parameters.
+ * Expected format: solana:recipient?amount=X&reference=Y&label=Z
+ */
+function parseSolanaPayURI(uri: string) {
+  try {
+    if (!uri || typeof uri !== 'string') {
+      return {
+        recipient: '',
+        amount: null,
+        splToken: null,
+        reference: null,
+        label: null,
+        message: null,
+      };
+    }
+    const url = new URL(uri);
 
-        const paymentResponse = await client.payments.requestAndPurchaseAsset({
-          assetIds: ['asset_1'],
-        });
-
-        setState({
-          qrCode: paymentResponse?.qrCode || null,
-          loading: false,
-          error: null,
-        });
-      } catch (error) {
-        setState({
-          qrCode: null,
-          loading: false,
-          error: error instanceof Error ? error.message : 'Failed to load payment data',
-        });
-      }
+    return {
+      recipient: url.pathname || '',
+      amount: url.searchParams.get('amount'),
+      splToken: url.searchParams.get('spl-token'),
+      reference: url.searchParams.get('reference'),
+      label: url.searchParams.get('label'),
+      message: url.searchParams.get('message'),
     };
+  } catch (error) {
+    console.error('Failed to parse Solana Pay URI:', error);
+    return {
+      recipient: '',
+      amount: null,
+      splToken: null,
+      reference: null,
+      label: null,
+      message: null,
+    };
+  }
+}
 
-    fetchPaymentData();
-  }, [merchantId, amount, apiKey, serverUrl]);
-
-  const containerStyle: React.CSSProperties = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    padding: '20px',
-    border: `2px solid ${primaryColor}`,
-    borderRadius: '8px',
-    maxWidth: '300px',
-    fontFamily: 'Arial, sans-serif',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    color: primaryColor,
-    fontSize: '16px',
-    fontWeight: 'bold',
-    marginBottom: '16px',
-  };
-
-  const qrStyle: React.CSSProperties = {
-    maxWidth: '200px',
-    maxHeight: '200px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '4px',
-  };
-
-  const errorStyle: React.CSSProperties = {
-    color: '#dc3545',
-    fontSize: '14px',
-    textAlign: 'center',
-  };
-
-  const loadingStyle: React.CSSProperties = {
-    color: primaryColor,
-    fontSize: '14px',
-  };
-
-  if (state.loading) {
+/**
+ * CheckoutWidget - A complete Solana payment interface for the BEEP payment system
+ *
+ * This widget provides a full checkout experience supporting both existing product
+ * references and on-the-fly product creation. It handles the complete payment flow
+ * from product pricing calculation through payment confirmation.
+ *
+ * Key Features:
+ * - Asset-based pricing with automatic total calculation
+ * - Solana Pay QR code generation with custom labels
+ * - Real-time payment status polling (15-second intervals)
+ * - Support for mixed asset types (existing + on-the-fly products)
+ * - Comprehensive error handling with isolated error boundaries
+ * - Responsive design with customizable theming
+ * - Zero CSS dependencies (inline styles prevent conflicts)
+ *
+ * Payment Flow:
+ * 1. Setup: Processes assets, calculates totals, generates Solana Pay URL
+ * 2. Display: Shows QR code, amount, and wallet address to user
+ * 3. Poll: Continuously monitors payment status every 15 seconds
+ * 4. Complete: Displays success state when payment confirmed on-chain
+ *
+ * Usage (browser-safe with publishable key):
+ *
+ * @example
+ * ```tsx
+ * <CheckoutWidget
+ *   publishableKey="beep_pk_..."
+ *   primaryColor="#007bff"
+ *   labels={{ scanQr: 'Scan to Pay', paymentLabel: 'My Store' }}
+ *   assets={[
+ *     { assetId: 'product-uuid', quantity: 2 },
+ *     { name: 'Rush Delivery', price: '15.00', quantity: 1 }
+ *   ]}
+ *   serverUrl="https://api.justbeep.it" // optional override
+ * />
+ * ```
+ *
+ * Notes:
+ * - This widget calls the public, CORS-open widget endpoints via the SDK (no secret keys).
+ * - Items with { name, price } are created server-side as products (persisted for audit/reuse).
+ */
+const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
+  primaryColor = '#007bff',
+  labels = { scanQr: 'Scan with your phone or copy address', paymentLabel: 'Beep Checkout' },
+  publishableKey,
+  serverUrl,
+  assets = [],
+}) => {
+  // Input validation
+  if (!publishableKey || typeof publishableKey !== 'string') {
+    console.error('[CheckoutWidget] Missing or invalid publishable key:', publishableKey);
     return (
-      <div style={containerStyle}>
-        <div style={loadingStyle}>Loading payment...</div>
-      </div>
+      <ConfigurationError
+        title="Configuration Error"
+        message="Publishable key is required"
+        primaryColor={primaryColor}
+      />
     );
   }
 
-  if (state.error) {
+  if (!Array.isArray(assets) || assets.length === 0) {
     return (
-      <div style={containerStyle}>
-        <div style={errorStyle}>Error: {state.error}</div>
-      </div>
+      <ConfigurationError
+        title="Configuration Error"
+        message="At least one asset is required"
+        primaryColor={primaryColor}
+      />
     );
+  }
+  // Setup query - runs once to create products and generate QR code
+  const {
+    data: paymentSetupData,
+    error: paymentSetupError,
+    isLoading: paymentSetupLoading,
+  } = usePaymentSetup({
+    assets,
+    publishableKey,
+    serverUrl,
+    paymentLabel: labels?.paymentLabel,
+  });
+
+  // Status query - polls for payment completion
+  const {
+    data: paymentStatusData,
+    error: paymentStatusError,
+    isLoading: paymentStatusLoading,
+  } = usePaymentStatus({
+    referenceKey: paymentSetupData?.referenceKey || null,
+    publishableKey,
+    serverUrl,
+    enabled: !!paymentSetupData?.referenceKey,
+  });
+
+  // Derive state from queries
+  const isLoading = paymentSetupLoading || paymentStatusLoading;
+  const paymentError = paymentSetupError || paymentStatusError;
+  const isPaymentComplete = Boolean(paymentStatusData === true);
+
+  // Get total amount from payment setup data (calculated from actual product pricing)
+  const totalAmount = paymentSetupData?.totalAmount ?? 0;
+
+  // Extract wallet address from Solana Pay URI for display
+  const recipientWallet = useMemo(() => {
+    try {
+      if (!paymentSetupData?.paymentUrl) return '';
+      const parsed = parseSolanaPayURI(paymentSetupData.paymentUrl);
+      return parsed?.recipient || '';
+    } catch (error) {
+      console.error('Error parsing recipient wallet:', error);
+      return '';
+    }
+  }, [paymentSetupData?.paymentUrl]);
+
+  if (isLoading) {
+    return <LoadingState primaryColor={primaryColor} />;
+  }
+
+  if (paymentError) {
+    return <PaymentError error={paymentError} primaryColor={primaryColor} />;
   }
 
   return (
-    <div style={containerStyle}>
-      <div style={labelStyle}>{labels.scanQr}</div>
-      {state.qrCode && <img src={state.qrCode} alt="QR Code for payment" style={qrStyle} />}
-      <div style={{ marginTop: '12px', fontSize: '14px', color: '#666' }}>
-        Amount: ${amount.toFixed(2)}
+    <ComponentErrorBoundary componentName="TopLevel">
+      <div style={cardStyles({ primaryColor })}>
+        <ComponentErrorBoundary componentName="AmountDisplay">
+          <div style={mainContentStyles}>
+            <p style={labelStyles}>Amount due</p>
+            <h1 style={amountStyles}>${totalAmount > 0 ? totalAmount.toFixed(2) : '...'}</h1>
+          </div>
+        </ComponentErrorBoundary>
+        {isPaymentComplete ? (
+          <ComponentErrorBoundary componentName="PaymentSuccess">
+            <PaymentSuccess />
+          </ComponentErrorBoundary>
+        ) : (
+          <ComponentErrorBoundary componentName="PaymentInterface">
+            {paymentSetupData && (
+              <>
+                <ComponentErrorBoundary componentName="InstructionLabel">
+                  <div style={labelStyle}>
+                    {labels?.scanQr ?? 'Scan with your phone or copy address'}
+                  </div>
+                </ComponentErrorBoundary>
+
+                {paymentSetupData.paymentUrl && (
+                  <ComponentErrorBoundary
+                    componentName="QRCodeDisplay"
+                    fallback={
+                      <div
+                        style={{
+                          width: '200px',
+                          height: '200px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: '#f5f5f5',
+                          border: '2px dashed #ccc',
+                          borderRadius: '8px',
+                          color: '#666',
+                          fontSize: '14px',
+                          margin: '0 auto 32px auto',
+                        }}
+                      >
+                        QR Code Failed
+                      </div>
+                    }
+                  >
+                    <div style={qrStyle({ primaryColor })}>
+                      {QRCodeSVG ? (
+                        <QRCodeSVG value={paymentSetupData.paymentUrl} size={168} />
+                      ) : (
+                        <div style={{ color: 'red', padding: '20px' }}>
+                          QRCode component not available
+                        </div>
+                      )}
+                    </div>
+                  </ComponentErrorBoundary>
+                )}
+
+                <ComponentErrorBoundary componentName="WalletAddress">
+                  <div style={{ margin: '30px auto 32px auto' }}>
+                    <WalletAddressLabel walletAddress={recipientWallet} />
+                  </div>
+                </ComponentErrorBoundary>
+              </>
+            )}
+          </ComponentErrorBoundary>
+        )}
+        {/* Footer */}
+        <ComponentErrorBoundary componentName="Footer">
+          <div style={footerStyles}>
+            <div style={footerContentStyles}>
+              <span style={poweredByTextStyles}>Powered by</span>
+              <ComponentErrorBoundary
+                componentName="Logo"
+                fallback={<span style={{ fontSize: '12px', fontWeight: 'bold' }}>BEEP</span>}
+              >
+                <div style={logoContainerStyles}>
+                  <img
+                    src={beepLogo}
+                    alt="Beep"
+                    style={{ height: '16px', width: 'auto' }}
+                    onError={(e) => {
+                      console.error('[CheckoutWidget] Logo failed to load:', beepLogo);
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = document.createElement('span');
+                      fallback.textContent = 'BEEP';
+                      fallback.style.fontSize = '12px';
+                      fallback.style.fontWeight = 'bold';
+                      target.parentNode?.appendChild(fallback);
+                    }}
+                  />
+                </div>
+              </ComponentErrorBoundary>
+            </div>
+          </div>
+        </ComponentErrorBoundary>
       </div>
-    </div>
+    </ComponentErrorBoundary>
+  );
+};
+
+/**
+ * CheckoutWidget - Complete Solana payment interface for BEEP merchants
+ * 
+ * A React component that provides a complete Solana-based payment interface with QR code generation,
+ * payment status tracking, and customizable theming. Supports both existing product references and
+ * dynamic product creation with automatic total calculation.
+ * 
+ * @example
+ * ```tsx
+ * import { CheckoutWidget } from '@beep-it/checkout-widget';
+ * 
+ * function PaymentPage() {
+ *   return (
+ *     <CheckoutWidget
+ *       apiKey="beep_live_your_api_key"
+ *       primaryColor="#3b82f6"
+ *       labels={{
+ *         scanQr: "Scan to complete your purchase",
+ *         paymentLabel: "Coffee Shop Downtown"
+ *       }}
+ *       assets={[
+ *         {
+ *           assetId: "coffee-product-uuid",
+ *           quantity: 2,
+ *           name: "Premium Espresso"
+ *         }
+ *       ]}
+ *       serverUrl="https://your-beep-server.com"
+ *     />
+ *   );
+ * }
+ * ```
+ * 
+ * @param props - Configuration for the checkout widget
+ * @param props.apiKey - BEEP API key for merchant authentication
+ * @param props.primaryColor - Hex color for theming widget elements
+ * @param props.labels - Customizable text labels for the interface
+ * @param props.assets - Array of products/services to purchase
+ * @param props.serverUrl - Optional custom BEEP server URL
+ * 
+ * @returns A fully functional Solana payment widget with QR code and status tracking
+ */
+export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
+  return (
+    <ErrorBoundary>
+      <QueryProvider>
+        <CheckoutWidgetInner {...props} />
+      </QueryProvider>
+    </ErrorBoundary>
   );
 };

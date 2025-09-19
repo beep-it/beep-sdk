@@ -4,8 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src"],
-  "references": [
-    { "path": "../core" }
-  ]
+  "include": ["src", "templates", "tests"],
+  "exclude": ["node_modules", "dist", "*/**/node_modules"],
+  "references": [{ "path": "../core" }]
 }

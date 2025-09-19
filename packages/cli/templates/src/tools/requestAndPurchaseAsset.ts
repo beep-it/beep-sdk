@@ -11,6 +11,7 @@ export const requestAndPurchaseAssetSchema = z.object({
     .string()
     .optional()
     .describe('Reference identifier for the payment transaction'),
+  generateQrCode: z.boolean().optional().describe('Generate QR Code'),
 });
 
 // Auto-generated TypeScript type (using different name to avoid conflict)
@@ -19,7 +20,7 @@ export type RequestAndPurchaseAssetParams = z.infer<typeof requestAndPurchaseAss
 export async function requestAndPurchaseAsset(
   params: RequestAndPurchaseAssetParams,
 ): Promise<MCPResponse | MCPErrorResponse> {
-  const { assetIds, paymentReference } = params;
+  const { assetIds, paymentReference, generateQrCode } = params;
 
   // Branch 1: No paymentReference -> initiate payment request via SDK
   if (!paymentReference) {
@@ -27,6 +28,7 @@ export async function requestAndPurchaseAsset(
       const result = await (beepClient.payments as any).requestAndPurchaseAsset({
         assetIds,
         paymentReference,
+        generateQrCode,
       });
 
       // Return structured 402 payment required response
@@ -38,11 +40,11 @@ export async function requestAndPurchaseAsset(
               {
                 status: 'payment_required',
                 payment: {
-                  url: result.paymentUrl,
-                  amount: result.amount,
-                  token: result.token,
-                  reference: result.referenceKey,
-                  qrCode: result.qrCode,
+                  url: result!.paymentUrl,
+                  amount: result!.amount,
+                  token: (result as any)!.token,
+                  reference: result!.referenceKey,
+                  qrCode: result!.qrCode,
                 },
                 instructions: 'Complete payment then retry with paymentReference parameter',
               },
