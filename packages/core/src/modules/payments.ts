@@ -1,5 +1,16 @@
 import { AxiosError, AxiosInstance } from 'axios';
-import { RequestAndPurchaseAssetResponse, SignSolanaTransactionResponse } from '../types';
+import {
+  IssuePaymentPayload,
+  IssuePaymentResponse,
+  PauseStreamingPayload,
+  PauseStreamingResponse,
+  RequestAndPurchaseAssetResponse,
+  SignSolanaTransactionResponse,
+  StartStreamingPayload,
+  StartStreamingResponse,
+  StopStreamingPayload,
+  StopStreamingResponse,
+} from '../types';
 import { InvoiceStatus } from '../types/invoice';
 import {
   BeepPurchaseAsset,
@@ -18,6 +29,42 @@ export class PaymentsModule {
 
   constructor(client: AxiosInstance) {
     this.client = client;
+  }
+
+  /**
+   * Initiate a payout from your treasury wallet to an external address.
+   * Requires a secret API key (server-side only).
+   *
+   * Notes:
+   * - Do not pass walletId. The server derives the wallet based on your API key's merchant and requested chain.
+   * - amount must be in smallest units for the token (e.g., 6‑decimals USDC amount as an integer string).
+   * - This endpoint responds immediately with acceptance/rejection. Actual transfer executes asynchronously after funds are reserved.
+   *
+   * Example:
+   * const res = await beep.payments.createPayout({
+   *   amount: '1000000', // 1.0 USDC with 6 decimals
+   *   destinationWalletAddress: 'DEST_ADDRESS',
+   *   chain: 'SOLANA',
+   *   token: 'USDC',
+   * });
+   */
+  public async createPayout(params: {
+    amount: string;
+    destinationWalletAddress: string;
+    chain: string;
+    token: string;
+  }): Promise<{
+    payoutId: string;
+    status: 'accepted' | 'rejected';
+    message: string;
+    withdrawRequestId?: number;
+    requestedAmount?: string;
+    reservedAmount?: string;
+    createdAt: string;
+    error?: string;
+  }> {
+    const { data } = await this.client.post('/v1/payouts', params);
+    return data;
   }
 
   /**
@@ -210,5 +257,147 @@ export class PaymentsModule {
       const errorMessage = error instanceof Error ? error.message : String(error);
       throw new Error(`Failed to sign solana transaction: ${errorMessage}`);
     }
+  }
+
+  // --- Streaming Payment Methods ---
+  // Note: These methods are ONLY available with BeepClient (secret API keys)
+  // They do NOT work with BeepPublicClient (publishable keys)
+
+  /**
+   * Issues a payment request for streaming charges with specified asset chunks
+   *
+   * Creates a new streaming payment session that can be started, paused, and stopped.
+   * This is the first step in setting up automatic billing for ongoing services or
+   * consumption-based pricing.
+   *
+   * **Important Security Note**: This method requires a secret API key and is only
+   * available when using `BeepClient`. It will NOT work with `BeepPublicClient` or
+   * publishable keys for security reasons.
+   *
+   * @param payload - Payment request details including assets and merchant information
+   * @returns Promise resolving to payment session identifiers
+   * @throws {Error} When the request fails or authentication is invalid
+   *
+   * @example
+   * ```typescript
+   * // Only works with BeepClient (server-side)
+   * const beep = new BeepClient({ apiKey: 'your_secret_api_key' });
+   *
+   * const paymentSession = await beep.payments.issuePayment({
+   *   apiKey: 'your_secret_api_key',
+   *   assetChunks: [
+   *     { assetId: 'video-streaming-uuid', quantity: 1 },
+   *     { assetId: 'api-calls-uuid', quantity: 100 }
+   *   ],
+   *   payingMerchantId: 'merchant_who_will_be_charged',
+   *   invoiceId: 'optional_existing_invoice_uuid'
+   * });
+   *
+   * console.log('Payment session created:', paymentSession.referenceKey);
+   * console.log('Invoice ID for management:', paymentSession.invoiceId);
+   * ```
+   */
+  async issuePayment(payload: IssuePaymentPayload): Promise<IssuePaymentResponse> {
+    const response = await this.client.post<IssuePaymentResponse>(
+      '/v1/invoices/issue-payment',
+      payload,
+    );
+    return response.data;
+  }
+
+  /**
+   * Starts an active streaming session and begins charging for asset usage
+   *
+   * Activates a previously issued payment request and begins billing the specified
+   * merchant according to the streaming payment configuration. Once started, charges
+   * will accumulate based on actual usage.
+   *
+   * **Important Security Note**: This method requires a secret API key and is only
+   * available when using `BeepClient`. It will NOT work with `BeepPublicClient`.
+   *
+   * @param payload - Streaming session start details
+   * @returns Promise resolving to confirmation of the started session
+   * @throws {Error} When the invoice is invalid or already active
+   *
+   * @example
+   * ```typescript
+   * // Start billing for the streaming session
+   * const result = await beep.payments.startStreaming({
+   *   apiKey: 'your_secret_api_key',
+   *   invoiceId: 'invoice_uuid_from_issuePayment'
+   * });
+   *
+   * console.log('Streaming started for invoice:', result.invoiceId);
+   * // Charges will now accumulate based on usage
+   * ```
+   */
+  async startStreaming(payload: StartStreamingPayload): Promise<StartStreamingResponse> {
+    const response = await this.client.post<StartStreamingResponse>('/v1/invoices/start', payload);
+    return response.data;
+  }
+
+  /**
+   * Temporarily pauses an active streaming session without terminating it
+   *
+   * Halts billing for a streaming session while keeping the session alive for later resumption.
+   * This is useful for temporary service interruptions or when you want to control billing
+   * periods precisely.
+   *
+   * **Important Security Note**: This method requires a secret API key and is only
+   * available when using `BeepClient`. It will NOT work with `BeepPublicClient`.
+   *
+   * @param payload - Streaming session pause details
+   * @returns Promise resolving to pause operation result
+   * @throws {Error} When the invoice is not in a valid state for pausing
+   *
+   * @example
+   * ```typescript
+   * // Temporarily pause billing (can be resumed later)
+   * const result = await beep.payments.pauseStreaming({
+   *   apiKey: 'your_secret_api_key',
+   *   invoiceId: 'active_streaming_invoice_uuid'
+   * });
+   *
+   * if (result.success) {
+   *   console.log('Streaming paused - no new charges will accumulate');
+   *   // Use startStreaming() again to resume
+   * }
+   * ```
+   */
+  async pauseStreaming(payload: PauseStreamingPayload): Promise<PauseStreamingResponse> {
+    const response = await this.client.post<PauseStreamingResponse>('/v1/invoices/pause', payload);
+    return response.data;
+  }
+
+  /**
+   * Permanently stops a streaming session and finalizes all charges
+   *
+   * Terminates a streaming session completely, finalizing all accumulated charges.
+   * This action cannot be undone - the session cannot be restarted after stopping.
+   * Use this when you're completely finished with a service or want to close out billing.
+   *
+   * **Important Security Note**: This method requires a secret API key and is only
+   * available when using `BeepClient`. It will NOT work with `BeepPublicClient`.
+   *
+   * @param payload - Streaming session stop details
+   * @returns Promise resolving to final session details and reference keys
+   * @throws {Error} When the invoice cannot be stopped or doesn't exist
+   *
+   * @example
+   * ```typescript
+   * // Permanently stop and finalize the streaming session
+   * const result = await beep.payments.stopStreaming({
+   *   apiKey: 'your_secret_api_key',
+   *   invoiceId: 'active_streaming_invoice_uuid'
+   * });
+   *
+   * console.log('Session permanently stopped:', result.invoiceId);
+   * console.log('All reference keys for records:', result.referenceKeys);
+   * // Session cannot be restarted after this point
+   * ```
+   */
+  async stopStreaming(payload: StopStreamingPayload): Promise<StopStreamingResponse> {
+    const response = await this.client.post<StopStreamingResponse>('/v1/invoices/stop', payload);
+    return response.data;
   }
 }

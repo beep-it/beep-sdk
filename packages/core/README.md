@@ -23,12 +23,14 @@ Alright, let's be real. You made something awesome. A game, an app, a digital ma
 - Full API access with secret keys
 - Server-side only (Node.js, Express, etc.)
 - Complete payment processing capabilities
+- **Streaming payments support** (issuePayment, startStreaming, etc.)
 
 **📱 Frontend/Browser Code?** → [Frontend SDK (BeepPublicClient)](#frontend-sdk-beeppublicclient)
 
 - Safe for client-side code
 - Uses publishable keys (not secret)
 - Perfect for React, Vue, or vanilla JS apps
+- **Limited to widget endpoints only** (no streaming payments)
 
 ## 🤔 So, like, what even _is_ this?
 
@@ -165,6 +167,40 @@ const payment = await beep.payments.requestAndPurchaseAsset({
 const { paid } = await beep.payments.waitForPaymentCompletion({
   assets: [{ assetId: 'product-uuid', quantity: 1 }],
   paymentReference: payment.referenceKey,
+});
+```
+
+#### Streaming Payments (BeepClient Only)
+
+**Important:** Streaming payment methods are only available with `BeepClient` using secret API keys. They do NOT work with `BeepPublicClient` or publishable keys.
+
+```typescript
+// Issue a streaming payment session
+const session = await beep.payments.issuePayment({
+  apiKey: 'your_secret_api_key',
+  assetChunks: [
+    { assetId: 'video-content-uuid', quantity: 1 },
+    { assetId: 'api-access-uuid', quantity: 100 }
+  ],
+  payingMerchantId: 'merchant_who_pays'
+});
+
+// Start charging for usage
+await beep.payments.startStreaming({
+  apiKey: 'your_secret_api_key',
+  invoiceId: session.invoiceId
+});
+
+// Pause billing temporarily
+await beep.payments.pauseStreaming({
+  apiKey: 'your_secret_api_key',
+  invoiceId: session.invoiceId
+});
+
+// Stop and finalize charges
+const result = await beep.payments.stopStreaming({
+  apiKey: 'your_secret_api_key',
+  invoiceId: session.invoiceId
 });
 ```
 
@@ -320,3 +356,27 @@ const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11Mc
 ## License
 
 MIT. Go wild.
+#### Payouts (BeepClient Only)
+
+Initiate a payout from your treasury wallet to an external address. Requires a secret API key and must be called server-side.
+
+Notes:
+- The server derives the source wallet from your API key's merchant and the requested chain; you do not provide a walletId.
+- `amount` must be provided in the token's smallest units (integer as a string). For USDC with 6 decimals, 1.00 USDC = "1000000".
+- The response indicates acceptance or rejection. Execution happens asynchronously after treasury funds are reserved.
+
+Example:
+```ts
+import { BeepClient } from '@beep-it/sdk-core';
+
+const beep = new BeepClient({ apiKey: process.env.BEEP_API_KEY! });
+
+const result = await beep.createPayout({
+  amount: '1000000', // 1.00 USDC (6 decimals)
+  destinationWalletAddress: 'DESTINATION_ADDRESS',
+  chain: 'SOLANA',
+  token: 'USDC',
+});
+
+console.log(result.status, result.message);
+```
