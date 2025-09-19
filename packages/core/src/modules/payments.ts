@@ -1,10 +1,15 @@
 import { AxiosError, AxiosInstance } from 'axios';
 import {
+  BeepPurchaseAsset,
   IssuePaymentPayload,
   IssuePaymentResponse,
   PauseStreamingPayload,
   PauseStreamingResponse,
+  PaymentRequestData,
+  RequestAndPurchaseAssetRequestParams,
   RequestAndPurchaseAssetResponse,
+  SignSolanaTransactionData,
+  SignSolanaTransactionParams,
   SignSolanaTransactionResponse,
   StartStreamingPayload,
   StartStreamingResponse,
@@ -12,13 +17,6 @@ import {
   StopStreamingResponse,
 } from '../types';
 import { InvoiceStatus } from '../types/invoice';
-import {
-  BeepPurchaseAsset,
-  PaymentRequestData,
-  RequestAndPurchaseAssetRequestParams,
-  SignSolanaTransactionData,
-  SignSolanaTransactionParams,
-} from '../types/payment';
 
 /**
  * Module for handling payment operations including asset purchases and Solana transactions

@@ -1,6 +1,8 @@
+import { PromptMessage } from '@modelcontextprotocol/sdk/dist/cjs/types';
+
 /**
  * Standard MCP (Model Context Protocol) response format.
- * 
+ *
  * Used by all BEEP MCP tools to return structured data to AI agents.
  * The content array allows for rich, multi-part responses.
  */
@@ -18,11 +20,37 @@ export interface MCPResponse {
 
 /**
  * Error response format for MCP tools.
- * 
+ *
  * Used when operations fail and need to communicate the failure reason
  * to the calling AI agent in a structured way.
  */
 export interface MCPErrorResponse {
   /** Human-readable error description */
   error: string;
+}
+
+interface ILogger {
+  debug: (message: string, obj?: any) => void;
+  log: (message: string, obj?: any) => void;
+  error: (message: string, obj?: any) => void;
+  warn: (message: string, obj?: any) => void;
+}
+
+export interface McpHttpHandlerParams {
+  logger: ILogger;
+}
+
+export interface McpServerResponse<T> extends PromptMessage {
+  data?: T;
+  isError?: boolean;
+}
+
+/**
+ * Base error class, use this to throw errors in tools.
+ */
+export class McpServerError {
+  constructor(
+    public message: string,
+    public statusCode: number = 500,
+  ) {}
 }
