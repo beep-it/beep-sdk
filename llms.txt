@@ -78,5 +78,6 @@ Links
 - Checkout Widget README: packages/checkout-widget/README.md
 - CLI README: packages/cli/README.md
 - MCP README: packages/mcp/README.md
+ - Server streaming map: ../beep-server/README.md (Streaming Payments — Implementation Map)
 
 Last updated: 2025-09-17
