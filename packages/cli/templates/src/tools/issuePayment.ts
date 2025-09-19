@@ -11,7 +11,7 @@ export const issuePaymentApiSchema = z.object({
         .object({
           assetId: z.string().describe('The ID of the asset being streamed.'),
           quantity: z.number().describe('The quantity of the asset chunk.'),
-          priceId: z.string().optional().describe('The quantity of the asset chunk.'),
+          priceId: z.string().optional().describe('The identifier for the price associated with the asset chunk.'),
         })
         .describe('Details of the asset chunk being streamed.'),
     )
