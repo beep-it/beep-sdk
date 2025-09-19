@@ -51,6 +51,9 @@
   "peerDependencies": {
     "@beep-it/sdk-core": "^0.1.2"
   },
+  "peerDependencies": {
+    "@beep-it/sdk-core": "^0.1.2"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.14",
     "@types/node": "^20.14.10",

@@ -3,7 +3,6 @@ export * from './invoice';
 export * from './payment';
 export * from './product';
 export * from './token';
-import { PaymentRequestData, SignSolanaTransactionData } from './payment';
 
 /**
  * Standard response wrapper for BEEP API endpoints
@@ -35,3 +34,4 @@ export interface SignSolanaTransactionResponse extends BeepResponse {
 }
 
 // Import types that are used in the response interfaces
+import { PaymentRequestData, SignSolanaTransactionData } from './payment';
