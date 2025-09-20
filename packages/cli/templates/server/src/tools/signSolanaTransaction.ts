@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { MCPToolDefinition } from '../mcp-server';
-import { MCPErrorResponse, MCPResponse } from '../types';
-import { beepClient } from './beepClient';
+import { MCPErrorResponse, MCPResponse, MCPToolDefinition } from '../types';
+import { beepClient } from './beepSDKClient';
 
 /**
  * Skeleton: signSolanaTransaction

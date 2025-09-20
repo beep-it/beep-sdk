@@ -1,8 +1,8 @@
+import { IssuePaymentPayload } from '@beep-it/sdk-core/dist/types/payment';
 import { z } from 'zod';
-import { IssuePaymentPayload } from '@beep/sdk-core/dist/types/payment';
-import { beepClient } from './beepClient';
-import { MCPToolDefinition } from '../mcp-server';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { MCPToolDefinition } from '../types';
+import { beepClient } from './beepSDKClient';
 
 export const issuePaymentApiSchema = z.object({
   assetChunks: z
@@ -11,7 +11,10 @@ export const issuePaymentApiSchema = z.object({
         .object({
           assetId: z.string().describe('The ID of the asset being streamed.'),
           quantity: z.number().describe('The quantity of the asset chunk.'),
-          priceId: z.string().optional().describe('The identifier for the price associated with the asset chunk.'),
+          priceId: z
+            .string()
+            .optional()
+            .describe('The identifier for the price associated with the asset chunk.'),
         })
         .describe('Details of the asset chunk being streamed.'),
     )

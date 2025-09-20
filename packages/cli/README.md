@@ -15,6 +15,24 @@ Basically, it's the ultimate shortcut to getting your BEEP integration up and ru
 
 ---
 
+## MCP Roles (Templates)
+
+Understand the two roles used by the MCP templates:
+
+- mcp-client (buying agent)
+  - Initiates tool calls against an MCP server and pays invoices when prompted.
+  - Used by agent clients or services that consume paid tools.
+
+- mcp-server (selling agent)
+  - Exposes paid tools, creates invoices for usage, and gates execution until payment is confirmed.
+  - This is what `beep init-mcp` scaffolds.
+
+Guidance
+- Choose one role per deployment — do not combine buying and selling agents in the same application.
+- If you need a buying agent, use an MCP client to call a separately deployed MCP server that exposes the tools.
+
+---
+
 ## 🚀 Installation
 
 Install the BEEP CLI globally using npm:
