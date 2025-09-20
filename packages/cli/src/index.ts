@@ -154,8 +154,9 @@ program
  */
 program
   .command('init-mcp')
-  .description('Scaffolds a new BEEP MCP server with payment tools')
+  .description('Scaffolds a new BEEP MCP project (mcp-server, mcp-client, or both)')
   .requiredOption('--mode <https|stdio>', 'Communication protocol: https (web agents) or stdio (desktop clients)')
+  .option('--role <mcp-server|mcp-client|both>', 'Template role to scaffold', 'mcp-server')
   .option('--path <directory>', 'Target directory (defaults to current directory)')
   .action(async (options) => {
     /**
@@ -168,9 +169,14 @@ program
      *  - Prefers creating a file named `mcp-server.ts` (not `server.ts`).
      */
     const targetPath = options.path ? path.resolve(options.path) : process.cwd();
-    const templatePath = path.resolve(__dirname, '../templates');
+    const templatesRoot = path.resolve(__dirname, '../templates');
 
-    console.log(`Scaffolding new BEEP MCP server at: ${targetPath}`);
+    const role: 'mcp-server' | 'mcp-client' | 'both' = options.role;
+
+    const serverTarget = role === 'both' ? path.join(targetPath, 'mcp-server') : targetPath;
+    const clientTarget = role === 'both' ? path.join(targetPath, 'mcp-client') : targetPath;
+
+    console.log(`Scaffolding new BEEP MCP project at: ${targetPath}`);
 
     try {
       /** Ensure a directory exists (mkdir -p) */
@@ -268,93 +274,123 @@ program
         }
       };
 
-      await copyTemplates(templatePath, targetPath);
+      const scaffoldServer = async () => {
+        const serverTemplate = path.join(templatesRoot, 'server');
+        await copyTemplates(serverTemplate, serverTarget);
+      };
+
+      const scaffoldClient = async () => {
+        const clientTemplate = path.join(templatesRoot, 'client');
+        await copyTemplates(clientTemplate, clientTarget);
+      };
+
+      if (role === 'mcp-server') {
+        await scaffoldServer();
+      } else if (role === 'mcp-client') {
+        await scaffoldClient();
+      } else {
+        await scaffoldServer();
+        await scaffoldClient();
+      }
 
       // Install dependencies automatically
       console.log('\n📦 Installing dependencies...');
       try {
-        execSync('npm install @beep-it/sdk-core', { 
-          cwd: targetPath, 
-          stdio: 'inherit' 
-        });
-        execSync('npm install', { 
-          cwd: targetPath, 
-          stdio: 'inherit' 
-        });
+        // install deps in each scaffolded app
+        const installAt = async (cwdPath: string) => {
+          execSync('npm install @beep-it/sdk-core', { cwd: cwdPath, stdio: 'inherit' });
+          execSync('npm install', { cwd: cwdPath, stdio: 'inherit' });
+        };
+        if (role === 'both') {
+          await installAt(serverTarget);
+          await installAt(clientTarget);
+        } else if (role === 'mcp-server') {
+          await installAt(serverTarget);
+        } else {
+          await installAt(clientTarget);
+        }
         console.log('✅ Dependencies installed successfully');
       } catch (error) {
         console.log('⚠️  Failed to install dependencies automatically. Please run:');
-        console.log('   npm install @beep-it/sdk-core && npm install');
+        if (role === 'both') {
+          console.log(`   (server) cd ${path.relative(process.cwd(), serverTarget)} && npm install @beep-it/sdk-core && npm install`);
+          console.log(`   (client) cd ${path.relative(process.cwd(), clientTarget)} && npm install @beep-it/sdk-core && npm install`);
+        } else {
+          console.log('   npm install @beep-it/sdk-core && npm install');
+        }
       }
 
       // Prompt for API key and create configured .env file
       console.log('\n🔑 Setting up your environment...');
       const apiKey = await promptUser('Enter your BEEP API key (or press Enter to skip): ');
       
-      const envExamplePath = path.join(targetPath, '.env.example');
-      const envPath = path.join(targetPath, '.env');
-      let envContent = await fs.readFile(envExamplePath, 'utf-8');
-      
-      // Set communication mode
-      envContent = envContent.replace(
-        /^COMMUNICATION_MODE=.*/m,
-        `COMMUNICATION_MODE=${options.mode}`
-      );
-      
-      // Set API key if provided
-      if (apiKey) {
+      const setupEnv = async (cwdPath: string) => {
+        const envExamplePath = path.join(cwdPath, '.env.example');
+        const envPath = path.join(cwdPath, '.env');
+        let envContent = await fs.readFile(envExamplePath, 'utf-8');
+
+        // Set communication mode
         envContent = envContent.replace(
-          /^BEEP_API_KEY=.*/m,
-          `BEEP_API_KEY=${apiKey}`
+          /^COMMUNICATION_MODE=.*/m,
+          `COMMUNICATION_MODE=${options.mode}`
         );
-      }
-      
-      // Handle .env file: create or merge safely
-      try {
-        // Check if .env already exists
-        const existingEnv = await fs.readFile(envPath, 'utf-8');
-        
-        // Merge: only add missing BEEP variables
-        let updatedEnv = existingEnv;
-        let hasUpdates = false;
-        
-        // Add COMMUNICATION_MODE if not present
-        if (!existingEnv.includes('COMMUNICATION_MODE=')) {
-          updatedEnv += `\n# BEEP MCP Server configuration\nCOMMUNICATION_MODE=${options.mode}\n`;
-          hasUpdates = true;
+
+        // Set API key if provided
+        if (apiKey) {
+          envContent = envContent.replace(
+            /^BEEP_API_KEY=.*/m,
+            `BEEP_API_KEY=${apiKey}`
+          );
         }
-        
-        // Add BEEP_API_KEY if not present and user provided one
-        if (apiKey && !existingEnv.includes('BEEP_API_KEY=')) {
-          updatedEnv += `BEEP_API_KEY=${apiKey}\n`;
-          hasUpdates = true;
+
+        // Handle .env file: create or merge safely
+        try {
+          const existingEnv = await fs.readFile(envPath, 'utf-8');
+          let updatedEnv = existingEnv;
+          let hasUpdates = false;
+          if (!existingEnv.includes('COMMUNICATION_MODE=')) {
+            updatedEnv += `\n# BEEP MCP configuration\nCOMMUNICATION_MODE=${options.mode}\n`;
+            hasUpdates = true;
+          }
+          if (apiKey && !existingEnv.includes('BEEP_API_KEY=')) {
+            updatedEnv += `BEEP_API_KEY=${apiKey}\n`;
+            hasUpdates = true;
+          }
+          if (hasUpdates) {
+            await fs.writeFile(envPath, updatedEnv);
+            console.log('  - Updated existing .env with BEEP configuration');
+          } else {
+            console.log('  - .env already contains BEEP configuration, leaving unchanged');
+          }
+        } catch (_) {
+          await fs.writeFile(envPath, envContent);
+          console.log('  - Created .env with your configuration');
         }
-        
-        if (hasUpdates) {
-          await fs.writeFile(envPath, updatedEnv);
-          console.log('  - Updated existing .env with BEEP configuration');
-        } else {
-          console.log('  - .env already contains BEEP configuration, leaving unchanged');
-        }
-      } catch (_) {
-        // .env doesn't exist, create it
-        await fs.writeFile(envPath, envContent);
-        console.log('  - Created .env with your configuration');
-      }
-      // Clean up the example file only if it was copied
-      try {
-        await fs.unlink(envExamplePath);
-      } catch (_) {
-        /* ignore */
+        try { await fs.unlink(envExamplePath); } catch (_) {}
+      };
+
+      if (role === 'both') {
+        await setupEnv(serverTarget);
+        await setupEnv(clientTarget);
+      } else if (role === 'mcp-server') {
+        await setupEnv(serverTarget);
+      } else {
+        await setupEnv(clientTarget);
       }
 
       // Detect server file to provide specific integration guidance
-      const detectedServer = await detectServerFile(targetPath);
+      const detectedServer = role === 'mcp-client' ? null : await detectServerFile(serverTarget);
       
-      console.log(`\n✅ BEEP MCP server created at: ${targetPath}`);
+      console.log(`\n✅ BEEP MCP project created at: ${targetPath}`);
       console.log('\nNext steps:');
-      console.log(`\n1. Navigate to your new server:`);
-      console.log(`   cd ${options.path || path.basename(targetPath)}`);
+      if (role === 'both') {
+        console.log(`\n1. Navigate to your new apps:`);
+        console.log(`   cd ${path.relative(process.cwd(), serverTarget)}  # selling agent`);
+        console.log(`   cd ${path.relative(process.cwd(), clientTarget)}  # buying agent`);
+      } else {
+        console.log(`\n1. Navigate to your new project:`);
+        console.log(`   cd ${options.path || path.basename(targetPath)}`);
+      }
       
       if (!apiKey) {
         console.log(`\n2. Configure your API key:`);
@@ -363,14 +399,24 @@ program
       } else {
         console.log(`\n2. Build and run the server:`);
       }
-      console.log(`   npm run build && npm start`);
+      if (role === 'both') {
+        console.log(`   (server) cd ${path.relative(process.cwd(), serverTarget)} && npm run build && npm start`);
+        console.log(`   (client) cd ${path.relative(process.cwd(), clientTarget)} && npm run build && npm start`);
+      } else {
+        console.log(`   npm run build && npm start`);
+      }
       
       if (detectedServer) {
         console.log(`\n📋 Your server file is at: ${detectedServer}`);
         console.log('   The BEEP tools are already wired up and ready to use!');
       } else {
-        console.log(`\n📋 BEEP tools are available in: src/tools/`);
-        console.log('   Import and register them in your main server file.');
+        if (role !== 'mcp-client') {
+          console.log(`\n📋 BEEP tools are available in: src/tools/`);
+          console.log('   Import and register them in your main server file.');
+        } else {
+          console.log(`\n📋 Buying agent template ready in: ${path.relative(process.cwd(), clientTarget)}`);
+          console.log('   Configure target MCP server and tool invocation in src/config.ts and src/index.ts.');
+        }
       }
 
     } catch (error) {

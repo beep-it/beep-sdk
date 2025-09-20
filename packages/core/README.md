@@ -2,6 +2,36 @@
 
 Alright, let's be real. You made something awesome. A game, an app, a digital masterpiece. And now you wanna get paid for it. As you should! But dealing with payments is a whole vibe killer. That's where we come in.
 
+## Table of Contents
+
+- [What is this?](#-so-like-what-even-is-this)
+- [🖥️ Server-Side SDK (BeepClient)](#server-side-sdk-beepclient)
+  - [Server-Side Setup](#server-side-setup)
+  - [Server-Side Making Money](#server-side-making-money)
+  - [Server-Side API Reference](#server-side-api-reference)
+- [📱 Frontend SDK (BeepPublicClient)](#frontend-sdk-beeppublicclient)
+  - [Frontend Setup](#frontend-setup)
+  - [Frontend Making Money](#frontend-making-money)
+  - [Frontend API Reference](#frontend-api-reference)
+- [Token Utilities](#token-utilities)
+- [Resources](#resources)
+
+## Which SDK Should I Use?
+
+**🖥️ Backend/Server Code?** → [Server-Side SDK (BeepClient)](#server-side-sdk-beepclient)
+
+- Full API access with secret keys
+- Server-side only (Node.js, Express, etc.)
+- Complete payment processing capabilities
+- **Streaming payments support** (issuePayment, startStreaming, etc.)
+
+**📱 Frontend/Browser Code?** → [Frontend SDK (BeepPublicClient)](#frontend-sdk-beeppublicclient)
+
+- Safe for client-side code
+- Uses publishable keys (not secret)
+- Perfect for React, Vue, or vanilla JS apps
+- **Limited to widget endpoints only** (no streaming payments)
+
 ## 🤔 So, like, what even _is_ this?
 
 Think of this SDK as your personal cheat code for money. It's a box of pre-written code that you can just drop into your project to handle all the boring payment stuff.
@@ -18,56 +48,39 @@ Basically, we're the ✨ unpaid intern ✨ who handles your finances so you can 
 
 ---
 
-## 🚀 Let's Get This Bread: Your 3-Step Setup
+## Server-Side SDK (BeepClient)
 
-This is probably easier than picking an Instagram filter. No cap.
+Perfect for Node.js, Express servers, Next.js API routes, and any backend code where you can safely store secret keys.
 
-### Step 1: Download the Magic
+### Server-Side Setup
 
-In your project's command line thingy (the black box where you type stuff), paste this:
+#### Step 1: Install the SDK
 
 ```bash
 npm install @beep-it/sdk-core
 ```
 
-This basically downloads our toolkit and puts it in your project's folder.
+#### Step 2: Get Your Secret API Key
 
-### Step 2: Get Your Secret Handshake (aka API Key)
+1. Sign up for a BEEP account at [app.justbeep.it](https://app.justbeep.it)
+2. Go to your account settings and find your secret API key
+3. **Never expose this in client-side code!** Keep it on your server only.
 
-An API Key is just a super long, secret password. It's how our system knows it's you. You'll find yours on your BEEP dashboard.
-
-> **Seriously, don't share this.** It's like giving someone the keys to your house. Don't do it.
-
-### Step 3: Wake Up the BEEP-Bot
-
-Time to write, like, one line of code. This tells your project to start using the BEEP toolkit.
+#### Step 3: Initialize BeepClient
 
 ```typescript
-// This line just says, "Hey, I wanna use that beep-sdk thing I just downloaded."
 import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
 
-// This line creates your BEEP-Bot. It's now ready for your commands.
 const beep = new BeepClient({
-  // Just paste that secret key you got from the dashboard right here.
-  apiKey: 'your_super_secret_api_key_goes_here',
+  apiKey: 'your_secret_api_key_here', // Keep this secure!
 });
-
-console.log('Ok, your BEEP-Bot is ready. Slay.');
 ```
 
-Bet. You're all set up. Now for the fun part.
+### Server-Side Making Money
 
----
+Let's say you want to charge someone 5 USDT for a pack of 100 magic crystals in your game. Here's the complete server-side flow:
 
-## ⚙️ How to Actually Make Money with This
-
-Let's say you want to charge someone 5 USDT for a pack of 100 magic crystals in your game. Here's how to make that money move! 💸
-
-### Step 1: Ask for the Money
-
-You just need to tell your BEEP-Bot how much you want to charge and in what currency. We'll generate a unique QR code and a payment link for your customer.
-
-#### The Whole Payment Flow Explained (as if you were 5... but like, a cool 5-year-old)
+#### The Server-Side Payment Flow
 
 1. **You create an invoice** - This is literally just you telling our servers "hey, I want $X for Y reason"
 2. **We create an invoice** - Think of this as a digital receipt that says "pay this amount pls"
@@ -84,299 +97,252 @@ You just need to tell your BEEP-Bot how much you want to charge and in what curr
 Seriously, all _you_ need to worry about is step 1. We handle 2-7 because we're nice like that.
 
 ```typescript
-// Just describe what you're charging for.
+// Server-side invoice creation
 const invoiceDetails = {
   description: 'A pack of 100 magic crystals',
-  amount: '5.00', // Amount as string
-  token: SupportedToken.USDT, // Much cleaner than a long address, right?
-  payerType: 'customer_wallet' as const, // Who's paying
+  amount: '5.00',
+  token: SupportedToken.USDT,
+  payerType: 'customer_wallet' as const,
 };
 
 try {
-  // Tell your BEEP-Bot to create an invoice for payment.
-  // This creates a bill and gets everything ready behind the scenes.
   const invoice = await beep.invoices.createInvoice(invoiceDetails);
 
-  // Now you have everything you need to get paid!
-  console.log('QR Code:', invoice.qrCode);
-  console.log('Payment Link:', invoice.paymentUrl);
-  console.log('Reference Key:', invoice.referenceKey);
+  // Send this payment info to your frontend
+  res.json({
+    qrCode: invoice.qrCode,
+    paymentUrl: invoice.paymentUrl,
+    referenceKey: invoice.referenceKey,
+    invoiceId: invoice.id,
+  });
 
-  // What you do next is up to you:
-  // 1. Render the `qrCode` in your UI for the user to scan.
-  // 2. Redirect the user to the `paymentUrl`.
-  // BEEP will handle the rest on the backend once the user approves the transaction.
+  // Later, check if payment completed
+  const updatedInvoice = await beep.invoices.getInvoice(invoice.id!);
+  if (updatedInvoice.status === 'paid') {
+    // Unlock content for the user!
+  }
 } catch (error) {
-  console.error('Oof. Something went wrong creating the invoice:', error.message);
+  console.error('Invoice creation failed:', error.message);
 }
 ```
 
-And that's literally it. Once the user pays, the money appears in your account. You just made money.
+### Server-Side API Reference
+
+#### Creating Invoices
+
+```typescript
+const invoice = await beep.invoices.createInvoice({
+  amount: '19.99',
+  token: SupportedToken.USDT,
+  description: 'VIP Battle Pass',
+  payerType: 'customer_wallet',
+});
+```
+
+#### Managing Products
+
+```typescript
+// Create a product
+const product = await beep.products.createProduct({
+  name: 'Magic Sword',
+  price: '9.99',
+  token: SupportedToken.USDT,
+  isSubscription: false,
+});
+
+// List all products
+const products = await beep.products.listProducts();
+```
+
+#### Payment Processing
+
+```typescript
+// Request asset purchase
+const payment = await beep.payments.requestAndPurchaseAsset({
+  assets: [{ assetId: 'product-uuid', quantity: 1 }],
+  generateQrCode: true,
+});
+
+// Wait for payment completion
+const { paid } = await beep.payments.waitForPaymentCompletion({
+  assets: [{ assetId: 'product-uuid', quantity: 1 }],
+  paymentReference: payment.referenceKey,
+});
+```
+
+#### Streaming Payments (BeepClient Only)
+
+**Important:** Streaming payment methods are only available with `BeepClient` using secret API keys. They do NOT work with `BeepPublicClient` or publishable keys.
+
+```typescript
+// Issue a streaming payment session
+const session = await beep.payments.issuePayment({
+  apiKey: 'your_secret_api_key',
+  assetChunks: [
+    { assetId: 'video-content-uuid', quantity: 1 },
+    { assetId: 'api-access-uuid', quantity: 100 }
+  ],
+  payingMerchantId: 'merchant_who_pays'
+});
+
+// Start charging for usage
+await beep.payments.startStreaming({
+  apiKey: 'your_secret_api_key',
+  invoiceId: session.invoiceId
+});
+
+// Pause billing temporarily
+await beep.payments.pauseStreaming({
+  apiKey: 'your_secret_api_key',
+  invoiceId: session.invoiceId
+});
+
+// Stop and finalize charges
+const result = await beep.payments.stopStreaming({
+  apiKey: 'your_secret_api_key',
+  invoiceId: session.invoiceId
+});
+```
 
 ---
 
-## 🤓 For the true DIYers (The API Deets)
+## Frontend SDK (BeepPublicClient)
 
-If you're the type of person who likes to take things apart just so you can put them back together, this is for you. Here are the technical specs. Everyone else, you can ignore this.
+Perfect for React, Vue, vanilla JS, or any client-side code where you can't safely store secret keys.
 
-### `BeepClient` (server-side, secret key)
+### Frontend Setup
 
-Initializes the client. Takes an `options` object.
+#### Step 1: Install the SDK
 
-```typescript
-new BeepClient(options: {
-  apiKey: string;       // Required. Your secret API key.
-  serverUrl?: string;   // Optional. For testing. Defaults to production.
-})
+```bash
+npm install @beep-it/sdk-core
 ```
 
-**High-Level Methods:**
+#### Step 2: Get Your Publishable Key
 
-#### Creating Invoices for Payment
+1. Sign up for a BEEP account at [app.justbeep.it](https://app.justbeep.it)
+2. Go to your account settings and find your publishable key (starts with `beep_pk_`)
+3. This is safe to expose in client-side code!
+
+#### Step 3: Initialize BeepPublicClient
 
 ```typescript
-// The money maker - create an invoice for payment!
-const invoice = await beep.invoices.createInvoice({
-  amount: '19.99', // Amount as string
-  token: SupportedToken.USDT, // Enum magic!
-  description: 'VIP Battle Pass - Summer Season',
-  payerType: 'customer_wallet', // Customer pays
+import { BeepPublicClient, SupportedToken } from '@beep-it/sdk-core';
+
+const publicBeep = new BeepPublicClient({
+  publishableKey: 'beep_pk_your_publishable_key_here', // Safe for browsers!
 });
-
-// Now you have everything you need for the user to pay
-console.log('Payment URL:', invoice.paymentUrl);
-console.log('Reference Key:', invoice.referenceKey);
-console.log('Invoice ID:', invoice.id);
-
-// IMPORTANT PART: What to do with this info!
-// Option 1: Redirect your user to the payment page
-window.location.href = invoice.paymentUrl;
-
-// OR Option 2: Show a QR code on your page
-renderQRCode(invoice.qrCode); // Use your favorite QR library
-
-// OR Option 3: Just give them the link
-displayToUser(`Pay here: ${invoice.paymentUrl}`);
-
-// After payment (could be seconds or minutes later):
-// Check if they've paid yet
-const updatedInvoice = await beep.invoices.getInvoice(invoice.id);
-
-if (updatedInvoice.status === 'paid') {
-  // Woohoo! Give them their digital goodies!
-  unlockAwesomeContent();
-  doHappyDance();
-} else if (updatedInvoice.status === 'pending') {
-  // Still waiting for payment
-  showSpinnyWaitingAnimation();
-} else if (updatedInvoice.status === 'expired') {
-  // Oof, they took too long
-  showSadTromboneSound();
-}
 ```
 
-#### Health Check
+### Frontend Making Money
+
+Here's how to create a complete payment flow in your React app:
+
+#### The Frontend Payment Flow
 
 ```typescript
-// Make sure our servers aren't on fire
-const health = await beep.healthCheck();
-console.log('Server health:', health); // Should return health status
+// Create a payment session with mixed assets
+const handlePurchase = async () => {
+  try {
+    const session = await publicBeep.widget.createPaymentSession({
+      assets: [
+        // Use existing products
+        { assetId: 'existing-product-uuid', quantity: 1 },
+        // Or create items on-the-fly
+        {
+          name: 'Custom Magic Potion',
+          price: '12.50',
+          quantity: 2,
+          description: 'Instant health boost',
+        },
+      ],
+      paymentLabel: 'My Awesome Game Store',
+    });
+
+    // Show payment URL/QR to user
+    setPaymentUrl(session.paymentUrl);
+    setReferenceKey(session.referenceKey);
+
+    // Start polling for payment completion
+    const { paid } = await publicBeep.widget.waitForPaid({
+      referenceKey: session.referenceKey,
+      intervalMs: 5000, // Check every 5 seconds
+      timeoutMs: 5 * 60 * 1000, // 5 minute timeout
+    });
+
+    if (paid) {
+      // Payment successful! Unlock content
+      setShowSuccessMessage(true);
+      unlockPremiumFeatures();
+    }
+  } catch (error) {
+    console.error('Payment failed:', error);
+  }
+};
 ```
 
-**Low-Level Modules:**
+### Frontend API Reference
 
-For when you need more control.
+#### Creating Payment Sessions
+
+```typescript
+const session = await publicBeep.widget.createPaymentSession({
+  assets: [
+    { assetId: 'existing-product', quantity: 1 },
+    { name: 'Custom Item', price: '5.99', quantity: 1 },
+  ],
+  paymentLabel: 'Your Store Name',
+});
+```
+
+#### Checking Payment Status
+
+```typescript
+const status = await publicBeep.widget.getPaymentStatus(referenceKey);
+console.log('Payment completed:', status.paid);
+```
+
+#### Waiting for Payment (with polling)
+
+```typescript
+const { paid, timedOut } = await publicBeep.widget.waitForPaid({
+  referenceKey: session.referenceKey,
+  intervalMs: 5000,
+  timeoutMs: 300000, // 5 minutes
+});
+```
+
+---
+
+## 🤓 Advanced API Reference
+
+## Token Utilities
 
 ### `SupportedToken`
 
-Our shiny new enum for supported tokens! Way easier than remembering addresses.
+Clean token enum instead of remembering addresses:
 
 ```typescript
-// Import it like this
 import { SupportedToken } from '@beep-it/sdk-core';
 
-// Use it like this
-const token = SupportedToken.USDT; // Currently supported
-// SupportedToken.USDC coming soon!
-```
-
-### `beep.invoices`
-
-Handle invoice operations - create, retrieve, and manage payment invoices.
-
-```typescript
-// Create invoices for payment
-const invoice = await beep.invoices.createInvoice({
-  description: 'Premium service',
-  amount: '29.99',
-  token: SupportedToken.USDT,
-  payerType: 'customer_wallet',
-});
-
-// Get all your invoices
-const invoices = await beep.invoices.listInvoices();
-
-// Look up a specific invoice
-const invoice = await beep.invoices.getInvoice('inv_123abc');
-
-// Delete an invoice
-await beep.invoices.deleteInvoice('inv_123abc');
-```
-
-### `beep.products`
-
-Manage your products - create reusable payment configurations with sweet token enum support! 🎉
-
-#### Creating Products
-
-```typescript
-// Creating a one-time purchase product
-const product = await beep.products.createProduct({
-  name: 'Magic Sword of Destiny',
-  description: 'Gives +10 attack and looks cool as heck',
-  price: '9.99', // Just regular numbers as strings
-  token: SupportedToken.USDT, // So much cleaner than a crazy address
-  isSubscription: false, // One-time purchase
-});
-
-console.log(`Created product with ID: ${product.id}`);
-
-// Creating a subscription product
-const subscriptionProduct = await beep.products.createProduct({
-  name: 'Premium Battle Pass',
-  description: 'Monthly subscription with exclusive skins and perks',
-  price: '14.99', // Monthly price
-  token: SupportedToken.USDT,
-  isSubscription: true, // This makes it recurring - monthly subscription!
-});
-
-console.log(`Created subscription with ID: ${subscriptionProduct.id}`);
-
-// Creating a one-time purchase product (pay-per-use)
-const oneTimeProduct = await beep.products.createProduct({
-  name: 'API Usage Credit',
-  description: 'Credits for API calls',
-  price: '0.001', // Price per credit
-  token: SupportedToken.USDT,
-  isSubscription: false, // One-time purchase
-});
-
-console.log(`Created one-time product with ID: ${oneTimeProduct.id}`);
-```
-
-#### Getting a Product
-
-```typescript
-// Fetch a product by ID
-const product = await beep.products.getProduct('prod_123abc456def');
-console.log(`Found product: ${product.name} for ${product.price}`);
-```
-
-#### Listing All Products
-
-```typescript
-// Get all your amazing products
-const products = await beep.products.listProducts();
-console.log(`You have ${products.length} products`);
-
-// Loop through them if you're feeling fancy
-products.forEach((product) => {
-  console.log(`${product.name}: ${product.price} ${product.token || 'tokens'}`);
-});
-```
-
-#### Updating a Product
-
-```typescript
-// Change your mind about pricing? No problemo!
-const updatedProduct = await beep.products.updateProduct('prod_123abc456def', {
-  price: '14.99', // Price increase! Cha-ching!
-  description: 'Now with extra sparkles ✨',
-  token: SupportedToken.USDT,
-});
-
-console.log('Product updated with new price:', updatedProduct.price);
-```
-
-#### Deleting a Product
-
-```typescript
-// That product is so last season - delete it!
-await beep.products.deleteProduct('prod_123abc456def');
-console.log('Poof! Product deleted.');
-```
-
-### `beep.payments`
-
-Handle low-level payment operations like asset purchasing and transaction signing.
-
-```typescript
-// Request payment for assets
-const payment = await beep.payments.requestAndPurchaseAsset({
-  paymentReference: 'premium_subscription_123',
-  assetIds: ['asset_1', 'asset_2'],
-});
-
-// Sign Solana transactions directly
-const signedTx = await beep.payments.signSolanaTransaction({
-  senderAddress: 'sender_wallet_address',
-  recipientAddress: 'recipient_wallet_address',
-  tokenMintAddress: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
-  amount: 1000000, // 1.0 USDT in base units
-  decimals: 6,
-});
+const token = SupportedToken.USDT; // Much cleaner!
 ```
 
 ### `TokenUtils`
 
-For the super nerds who want to play with token addresses:
+Advanced token utilities:
 
 ```typescript
 import { TokenUtils, SupportedToken } from '@beep-it/sdk-core';
 
 // Get the address from a token enum
 const address = TokenUtils.getTokenAddress(SupportedToken.USDT);
-console.log(address); // 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'
 
 // Check if we support a token
-const isSupported = TokenUtils.isTokenSupported(SupportedToken.USDT); // true
-const isUsdtSupported = TokenUtils.isTokenSupported('USDT'); // false (coming soon™)
+const isSupported = TokenUtils.isTokenSupported(SupportedToken.USDT);
 
 // Get a token enum from an address (reverse lookup)
 const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
-console.log(token); // SupportedToken.USDT
-
-// Get the default token if none specified
-const defaultToken = TokenUtils.getDefaultToken();
-console.log(defaultToken); // SupportedToken.USDT
-```
-
-### `BeepPublicClient` (browser, publishable key)
-
-Use this in browsers or anywhere you can’t safely keep a secret key. It talks only to the public, CORS-open widget endpoints.
-
-```typescript
-import { BeepPublicClient } from '@beep-it/sdk-core';
-
-const publicClient = new BeepPublicClient({
-  publishableKey: 'beep_pk_...',
-  serverUrl: 'https://api.justbeep.it', // optional
-});
-
-// Create a payment session with mixed assets (existing + ephemeral)
-const session = await publicClient.widget.createPaymentSession({
-  assets: [
-    { assetId: 'existing-product-uuid', quantity: 1 },
-    { name: 'Custom Item', price: '12.50', quantity: 2, description: 'On-the-fly item' },
-  ],
-  paymentLabel: 'My Store',
-});
-
-console.log(session.paymentUrl, session.referenceKey);
-
-// Poll payment status
-const status = await publicClient.widget.getPaymentStatus(session.referenceKey);
-console.log('paid:', status.paid);
 ```
 
 ---
@@ -390,3 +356,27 @@ console.log('paid:', status.paid);
 ## License
 
 MIT. Go wild.
+#### Payouts (BeepClient Only)
+
+Initiate a payout from your treasury wallet to an external address. Requires a secret API key and must be called server-side.
+
+Notes:
+- The server derives the source wallet from your API key's merchant and the requested chain; you do not provide a walletId.
+- `amount` must be provided in the token's smallest units (integer as a string). For USDC with 6 decimals, 1.00 USDC = "1000000".
+- The response indicates acceptance or rejection. Execution happens asynchronously after treasury funds are reserved.
+
+Example:
+```ts
+import { BeepClient } from '@beep-it/sdk-core';
+
+const beep = new BeepClient({ apiKey: process.env.BEEP_API_KEY! });
+
+const result = await beep.createPayout({
+  amount: '1000000', // 1.00 USDC (6 decimals)
+  destinationWalletAddress: 'DESTINATION_ADDRESS',
+  chain: 'SOLANA',
+  token: 'USDC',
+});
+
+console.log(result.status, result.message);
+```

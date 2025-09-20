@@ -1,32 +1,23 @@
-import 'dotenv/config';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
-import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import {
+  CallToolRequestSchema,
+  isInitializeRequest,
+  ListToolsRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
+import 'dotenv/config';
 import { Request, Response } from 'express';
 
 // Import tool definitions (not just handlers)
+import { randomUUID } from 'crypto';
 import { checkBeepApiTool } from './tools/checkBeepApi';
-import { getAvailableWalletsTool } from './tools/getAvailableWallets';
-import { requestAndPurchaseAssetTool } from './tools/requestAndPurchaseAsset';
-import { signSolanaTransactionTool } from './tools/signSolanaTransaction';
 import { issuePaymentTool } from './tools/issuePayment';
 import { pauseStreamingTool } from './tools/pauseStreaming';
+import { requestAndPurchaseAssetTool } from './tools/requestAndPurchaseAsset';
 import { startStreamingTool } from './tools/startStreaming';
 import { stopStreamingTool } from './tools/stopStreaming';
-import { randomUUID } from 'crypto';
-import { McpHttpHandlerParams, McpServerError } from './types';
-
-/**
- * MCP Tool Definition with Zod schema support
- */
-export interface MCPToolDefinition {
-  name: string;
-  description: string;
-  inputSchema: any; // JSON Schema object (converted from Zod)
-  handler: (params: any) => Promise<any>;
-}
+import { McpHttpHandlerParams, McpServerError, MCPToolDefinition } from './types';
 
 /**
  * Registry of all MCP tools with their schemas
@@ -42,8 +33,6 @@ export interface MCPToolRegistry {
 const tools: MCPToolRegistry = {
   checkBeepApi: checkBeepApiTool,
   requestAndPurchaseAsset: requestAndPurchaseAssetTool,
-  signSolanaTransaction: signSolanaTransactionTool,
-  getAvailableWallets: getAvailableWalletsTool,
   issuePayment: issuePaymentTool,
   pauseStreaming: pauseStreamingTool,
   startStreaming: startStreamingTool,

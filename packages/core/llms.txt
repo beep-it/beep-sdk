@@ -30,13 +30,32 @@ const session = await client.widget.createPaymentSession({
   paymentLabel: 'My Store',
 });
 const status = await client.widget.getPaymentStatus(session.referenceKey);
+// Or wait until paid
+const { paid } = await client.widget.waitForPaid({ referenceKey: session.referenceKey, intervalMs: 15000, timeoutMs: 300000 });
 ```
 
 Modules
 - products: create/get/list/update/delete (server only)
 - payments: requestAndPurchaseAsset, signSolanaTransaction (server only)
+  - requestAndPurchaseAsset → `POST /v1/payments/request` using the invoice creation (HTTP 402) pattern.
 - invoices: create/get/list/delete (server only)
 - widget: createPaymentSession, getPaymentStatus (browser)
+
+Invoice creation flow (server; HTTP 402)
+- Create invoice: Call `beep.payments.requestAndPurchaseAsset` with `assets` (and optional `paymentLabel`).
+  - If unpaid, server responds HTTP 402 with `{ referenceKey, paymentUrl, qrCode?, ... }` (invoice created; no charge performed).
+  - Show `paymentUrl/qrCode` to the payer for wallet payment.
+- Poll: Call the same method with `paymentReference: <referenceKey>` until the response returns 200 without `referenceKey` (paid).
+
+Helper (polling)
+```ts
+const { paid } = await beep.payments.waitForPaymentCompletion({
+  assets: [{ assetId: 'uuid', quantity: 1 }],
+  paymentReference: ref,
+  intervalMs: 15000,
+  timeoutMs: 300000,
+});
+```
 
 Types
 - SupportedToken, TokenUtils
@@ -46,6 +65,8 @@ Notes
 - On-the-fly items in public sessions are persisted as products server-side.
 - Do not use beep_sk_* in browsers.
 
+MCP note
+- `issuePayment` is intended for MCP/server tools (selling agent). It creates invoices and should not be invoked from browsers.
+
 Docs: README.md in this package
 Last updated: 2025-09-17
-

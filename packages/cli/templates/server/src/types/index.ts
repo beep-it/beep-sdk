@@ -54,3 +54,13 @@ export class McpServerError {
     public statusCode: number = 500,
   ) {}
 }
+
+/**
+ * MCP Tool Definition with Zod schema support
+ */
+export interface MCPToolDefinition {
+  name: string;
+  description: string;
+  inputSchema: any; // JSON Schema object (converted from Zod)
+  handler: (params: any) => Promise<any>;
+}

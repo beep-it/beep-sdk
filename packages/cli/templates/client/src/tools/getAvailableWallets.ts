@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { MCPToolDefinition } from '../mcp-server';
+import { MCPToolDefinition } from '../types';
 
 // Zod schema for getting available wallets
 export const getAvailableWalletsSchema = z.object({});
@@ -14,6 +14,7 @@ export type GetAvailableWalletsParams = z.infer<typeof getAvailableWalletsSchema
  * Returns a mock list of wallets. Replace with SDK lookup by API key.
  */
 export async function getAvailableWallets(params: GetAvailableWalletsParams): Promise<any> {
+  // TODO: Make a call to the SDK to fetch real wallet info
   const wallets = [
     { id: 1, name: 'Primary Wallet' },
     { id: 2, name: 'Secondary Wallet' },

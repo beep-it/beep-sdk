@@ -53,6 +53,22 @@ const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.jus
 const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
 ```
 
+402 Payment Flow (server)
+- Invoice creation pattern (HTTP 402)
+  - Create invoice: Call `beep.payments.requestAndPurchaseAsset` with `assets` and optional `paymentLabel`.
+    - If unpaid, server responds HTTP 402 with `{ referenceKey, paymentUrl, qrCode? }` (invoice created; no charge performed).
+  - Poll status: Call the same method with `paymentReference: <referenceKey>` until it returns 200 (paid) without `referenceKey`.
+ 
+Helper
+```ts
+const { paid } = await beep.payments.waitForPaymentCompletion({
+  assets: [{ assetId: 'uuid', quantity: 1 }],
+  paymentReference: ref,
+  intervalMs: 15000,
+  timeoutMs: 300000,
+});
+```
+
 Important Notes
 - On-the-fly items sent from the browser are persisted as products server-side (often hidden from listings by default).
 - Widget endpoints are CORS-open and CSRF-exempt; publishable keys are safe in browsers.
@@ -63,5 +79,12 @@ Links
 - Checkout Widget README: packages/checkout-widget/README.md
 - CLI README: packages/cli/README.md
 - MCP README: packages/mcp/README.md
+MCP Roles (templates)
+- mcp-client (buying agent): initiates tool calls and pays invoices.
+- mcp-server (selling agent): exposes paid tools and creates invoices via the 402 pattern and issuePayment.
+
+Routes reference
+- Widget (non-streaming): `POST /v1/widget/payment-session`, `GET /v1/widget/payment-status/:referenceKey`.
+- Paid tools (server-side): `POST /v1/payments/request` (creates invoice; 402 when unpaid, returns paymentUrl/qrCode), optional `POST /v1/payments/confirm`.
 
 Last updated: 2025-09-17

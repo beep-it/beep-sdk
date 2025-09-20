@@ -1,9 +1,8 @@
+import { StopStreamingPayload, StopStreamingResponse } from '@beep-it/sdk-core/dist/types/payment';
 import { z } from 'zod';
-import { StopStreamingPayload, StopStreamingResponse } from '@beep/sdk-core/dist/types/payment';
-import { beepClient } from './beepClient';
-import { MCPToolDefinition } from '../mcp-server';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import { startStreaming } from './startStreaming';
+import { MCPToolDefinition } from '../types';
+import { beepClient } from './beepSDKClient';
 
 export const stopStreamingInputSchema = z.object({
   invoiceId: z.string().describe('The ID of the invoice to stop streaming for.'),

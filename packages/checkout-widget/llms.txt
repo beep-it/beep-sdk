@@ -31,10 +31,14 @@ Behavior
 - Items with { name, price } are created as products server-side (persisted).
 - Endpoints are CORS-open; no server proxy required.
 
+Note on 402 flow
+- The 402 two‑phase flow is a server-side pattern used with `BeepClient`.
+- The widget uses public session endpoints instead; no 402 handling is needed in the browser.
+- For server 402 details and helpers, see @beep-it/sdk-core llms.txt.
+
 Notes
 - Never use beep_sk_* in props. Only beep_pk_*.
 - Mixed assets (existing + on-the-fly) must share the same merchant and token.
 
 Docs: README.md in this package
 Last updated: 2025-09-17
-
