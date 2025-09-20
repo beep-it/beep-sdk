@@ -59,12 +59,24 @@ Use this command when you're starting a new project and want a dedicated server 
 **When to use it**: You're building a new app, or you want to run your BEEP logic on a separate microservice.
 
 MCP Roles in templates
-- Buying agent (mcp-client): initiates tool calls and pays invoices.
-- Selling agent (mcp-server): exposes paid tools and creates invoices; gates execution until paid.
+- Buying agent (`mcp-client`): discovers a seller's tools and invokes them; surfaces payment prompts when required.
+- Selling agent (`mcp-server`): exposes paid tools, creates invoices (HTTP 402 pattern), and gates execution until paid.
 
-Important
-- Do not combine buying and selling agents within the same application. Choose one role per deployment.
-- The generated server template is a selling agent. It includes tools that create invoices via `POST /v1/payments/request` (HTTP 402 pattern) and may use `issuePayment` where appropriate. These are server-side only and must not be invoked from browsers.
+Role is required
+- `--role <mcp-server|mcp-client|both>` must be provided. This prevents accidental scaffolds of the wrong shape.
+- Do not combine buying and selling agents within the same application folder. If you need both, use `--role both`, which scaffolds two separate apps: `mcp-server/` and `mcp-client/`.
+
+Examples
+```bash
+# Selling agent (server over HTTPS)
+beep init-mcp --mode https --role mcp-server --path ./seller
+
+# Buying agent (client over HTTPS)
+beep init-mcp --mode https --role mcp-client --path ./buyer
+
+# Both roles (two apps)
+beep init-mcp --mode https --role both --path ./beep-duo
+```
 
 ```bash
 beep init-mcp [options]
@@ -79,13 +91,18 @@ beep init-mcp [options]
   beep init-mcp --path ./my-beep-server
   ```
 
-- `--mode <stdio|https>`: This is the communication protocol your server will use to talk to BEEP. (Don't worry, you can change this later).
+- `--mode <stdio|https>`: Communication protocol (can be changed later).
   - `stdio`: Your server will communicate over standard input/output. This is great for local development or if you're running the server as a child process.
   - `https`: Your server will run as a standard web server, communicating over HTTPS. This is the way to go for most production deployments.
 
+- `--role <mcp-server|mcp-client|both>`: Required. Chooses which template(s) to scaffold.
+  - `mcp-server`: Selling agent — runs an MCP server and registers paid tools.
+  - `mcp-client`: Buying agent — connects to a seller MCP to discover and invoke tools.
+  - `both`: Creates `mcp-server/` and `mcp-client/` subfolders, each with its own package.json and .env.
+
   ```bash
-  # Creates an stdio-based server
-  beep init-mcp --mode stdio
+  # Creates an stdio-based selling agent
+  beep init-mcp --mode stdio --role mcp-server
   ```
 
 #### Example: Putting it all together
@@ -93,7 +110,7 @@ beep init-mcp [options]
 Let's create a new HTTPS server in a folder called `my-awesome-mcp`:
 
 ```bash
-beep init-mcp --mode https --path ./my-awesome-mcp
+beep init-mcp --mode https --role mcp-server --path ./my-awesome-mcp
 ```
 
 The CLI will work its magic and you'll see output like this:

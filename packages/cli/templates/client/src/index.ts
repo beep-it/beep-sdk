@@ -3,11 +3,19 @@ import { mcpClient } from './mcp-client';
 import { listSellerTools, checkBeepApiTool } from './tools';
 
 /**
- * Minimal MCP buying agent example.
- * - Connects to a remote MCP server and lists available tools.
- * - Demonstrates how a buyer surfaces payment-required responses (no SDK polling here).
+ * Minimal MCP buying agent starter
  *
- * NOTE: This is a template stub. Wire this into your MCP client transport.
+ * What this does:
+ * - Reads SERVER_URL and COMMUNICATION_MODE from `.env`
+ * - Connects to the SELLER MCP server (no auto-discovery)
+ * - Lists available tools so you can see what the seller exposes
+ * - Optionally calls a simple demo tool if present
+ *
+ * How to point at a specific seller (e.g., companyA):
+ * - Set SERVER_URL to their MCP endpoint, e.g.:
+ *     SERVER_URL=https://companyA.example.com/mcp
+ * - Keep COMMUNICATION_MODE=https (default) for hosted sellers
+ * - For local testing of a seller process you run directly, set COMMUNICATION_MODE=stdio
  */
 
 async function runExample() {

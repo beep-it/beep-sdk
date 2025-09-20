@@ -156,7 +156,7 @@ program
   .command('init-mcp')
   .description('Scaffolds a new BEEP MCP project (mcp-server, mcp-client, or both)')
   .requiredOption('--mode <https|stdio>', 'Communication protocol: https (web agents) or stdio (desktop clients)')
-  .option('--role <mcp-server|mcp-client|both>', 'Template role to scaffold', 'mcp-server')
+  .requiredOption('--role <mcp-server|mcp-client|both>', 'Template role to scaffold')
   .option('--path <directory>', 'Target directory (defaults to current directory)')
   .action(async (options) => {
     /**
