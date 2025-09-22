@@ -79,6 +79,63 @@ Singleton client and readiness
 - All imports of `mcpClient` share the same instance and session.
 - Use `mcpClient.isReady()` or `mcpClient.whenReady()` to guard calls in modules that can run before startup completes.
 
+Mounting the MCP client into an existing server (mcp-client only)
+
+Modern Node/TS (top‑level await):
+```ts
+import express from 'express';
+import { mcpClient } from './src/mcp-client';
+
+const app = express();
+app.use(express.json());
+
+// Initialize once at startup
+const url = new URL(process.env.SERVER_URL || 'http://localhost:4005/mcp');
+await mcpClient.initialize({ type: 'http', url });
+
+// Use the client in your routes to invoke seller tools via MCP
+app.post('/payments/issue', async (req, res) => {
+  try {
+    const result = await mcpClient.issuePayment(req.body);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e instanceof Error ? e.message : 'Failed to issue payment' });
+  }
+});
+
+app.listen(process.env.PORT || 4006, () => console.log('App listening'));
+```
+
+Legacy Node/TS (no top‑level await):
+```ts
+import express from 'express';
+import { mcpClient } from './src/mcp-client';
+
+const app = express();
+app.use(express.json());
+
+// Initialize once at startup
+const url = new URL(process.env.SERVER_URL || 'http://localhost:4005/mcp');
+const ready = mcpClient.initialize({ type: 'http', url });
+
+// Use the client in your routes after it's ready
+app.post('/payments/issue', async (req, res) => {
+  try {
+    await ready; // or: await mcpClient.whenReady()
+    const result = await mcpClient.issuePayment(req.body);
+    res.json(result);
+  } catch (e) {
+    res.status(400).json({ error: e instanceof Error ? e.message : 'Failed to issue payment' });
+  }
+});
+
+app.listen(process.env.PORT || 4006, () => console.log('App listening'));
+```
+
+Notes:
+- The examples above assume a BEEP seller exposing `issuePayment`. For other sellers, call `mcpClient.callTool('<toolName>', args)` directly.
+- Initialize the singleton only once per process; do not construct new clients per request.
+
 Using the PaymentService with a BEEP seller
 
 This template includes a minimal `PaymentService` (`src/services/paymentService.ts`) intended for BEEP sellers that expose tools: `issuePayment`, `startStreaming`, and `stopStreaming`. Other sellers may not implement these tools.
