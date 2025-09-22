@@ -56,6 +56,18 @@ export class McpClientInternal {
     return this.initializationPromise!;
   }
 
+  /** Returns true once the underlying client has connected. */
+  isReady(): boolean {
+    return this.isInitialized && !!this._mcpClient;
+  }
+
+  /** Promise that resolves when initialization completes. */
+  whenReady(): Promise<void> {
+    if (this.isInitialized) return Promise.resolve();
+    if (this.initializationPromise) return this.initializationPromise;
+    return Promise.reject(new Error('MCP client not initialized. Call initialize() at startup.'));
+  }
+
   private async _initializeStdio(params: McpClientStdioParams): Promise<void> {
     // STDIO mode: connect to a local MCP server process that this client launches.
     // Use this for local development or when embedding a server process.
@@ -91,6 +103,23 @@ export class McpClientInternal {
 
   async checkBeepApi(): Promise<any> {
     return this.callTool('checkBeepApi');
+  }
+  // BEEP seller-specific wrappers (optional): only valid when the remote MCP implements these tools
+  async startStreaming(params: { apiKey: string; invoiceId: string }): Promise<any> {
+    if (!this.isInitialized) throw new Error('MCP client not initialized');
+    return this.callTool('startStreaming', params);
+  }
+  async stopStreaming(params: { apiKey: string; invoiceId: string }): Promise<any> {
+    if (!this.isInitialized) throw new Error('MCP client not initialized');
+    return this.callTool('stopStreaming', params);
+  }
+  async issuePayment(params: {
+    apiKey: string;
+    assetChunks: Array<{ assetId: string; quantity: number }>;
+    payingMerchantId: string;
+  }): Promise<any> {
+    if (!this.isInitialized) throw new Error('MCP client not initialized');
+    return this.callTool('issuePayment', params);
   }
   async getAvailableWallets(): Promise<any> {
     return this.callTool('getAvailableWallets');

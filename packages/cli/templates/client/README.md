@@ -73,3 +73,54 @@ Notes
 - Always use the public MCP SDK type entry points: `@modelcontextprotocol/sdk/types.js`.
 - For listing tools over HTTP, this template uses a literal JSON‑RPC request with `ListToolsResultSchema` to avoid overload/typing issues across SDK versions.
 - If you need request/response traces, add logging around your initialize + tools/list calls and on your `/mcp` route.
+
+Singleton client and readiness
+- The exported `mcpClient` is a singleton. Initialize it once at process startup.
+- All imports of `mcpClient` share the same instance and session.
+- Use `mcpClient.isReady()` or `mcpClient.whenReady()` to guard calls in modules that can run before startup completes.
+
+Using the PaymentService with a BEEP seller
+
+This template includes a minimal `PaymentService` (`src/services/paymentService.ts`) intended for BEEP sellers that expose tools: `issuePayment`, `startStreaming`, and `stopStreaming`. Other sellers may not implement these tools.
+
+Example (modern TS with top‑level await):
+```ts
+import { mcpClient } from './src/mcp-client';
+import { paymentService } from './src/services/paymentService';
+
+const url = new URL(process.env.SERVER_URL || 'http://localhost:4005/mcp');
+await mcpClient.initialize({ type: 'http', url });
+
+const pay = await paymentService.issuePayment({
+  apiKey: process.env.BEEP_API_KEY!,
+  assetChunks: [{ assetId: 'video_001', quantity: 1 }],
+  payingMerchantId: 'merchant_123',
+});
+
+if (pay.success && pay.invoiceId) {
+  await paymentService.startStreamingSession({ apiKey: process.env.BEEP_API_KEY!, invoiceId: pay.invoiceId });
+}
+```
+
+Example (no top‑level await):
+```ts
+import { mcpClient } from './src/mcp-client';
+import { paymentService } from './src/services/paymentService';
+
+const url = new URL(process.env.SERVER_URL || 'http://localhost:4005/mcp');
+mcpClient
+  .initialize({ type: 'http', url })
+  .then(() => paymentService.issuePayment({
+    apiKey: process.env.BEEP_API_KEY!,
+    assetChunks: [{ assetId: 'video_001', quantity: 1 }],
+    payingMerchantId: 'merchant_123',
+  }))
+  .then((pay) => {
+    if (pay.success && pay.invoiceId) {
+      return paymentService.startStreamingSession({ apiKey: process.env.BEEP_API_KEY!, invoiceId: pay.invoiceId });
+    }
+  })
+  .catch((err) => console.error('Payment/streaming error:', err));
+```
+
+Note: If integrating with a non‑BEEP seller, tool names and input shapes may differ. Adjust the service or call tools directly via `mcpClient.callTool(...)`.

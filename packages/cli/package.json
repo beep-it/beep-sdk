@@ -1,6 +1,6 @@
 {
   "name": "@beep-it/cli",
-  "version": "0.1.2",
+  "version": "0.1.2-beta.1",
   "description": "CLI for scaffolding and managing BEEP MCP servers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
