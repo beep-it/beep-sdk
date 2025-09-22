@@ -1,8 +1,8 @@
+import { PauseStreamingPayload } from '@beep-it/sdk-core/dist/types/payment';
 import { z } from 'zod';
-import { PauseStreamingPayload } from '@beep/sdk-core/dist/types/payment';
-import { beepClient } from './beepClient';
-import { MCPToolDefinition } from '../mcp-server';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+import { MCPToolDefinition } from '../types';
+import { beepClient } from './beepSDKClient';
 
 const pauseStreamingInputSchema = z.object({
   invoiceId: z.string().describe('The ID of the invoice to pause streaming for.'),

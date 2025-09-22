@@ -7,9 +7,22 @@ Features
 - OAuth 2.1 compliance
 - Tool-based payment hooks
 
+MCP Roles (templates)
+- Buying agent (mcp-client): initiates tool calls and pays invoices.
+- Selling agent (mcp-server): exposes paid tools, creates invoices, and gates execution until payment is confirmed.
+
+Paid tool lifecycle (invoice creation; HTTP 402)
+- Create invoice: Call `POST /v1/payments/request` with `assets` (and optional `paymentLabel`, `paymentReference`). No charge occurs at this step.
+- If unpaid: server responds 402 with `{ referenceKey, paymentUrl, qrCode? }`. Surface these to the buying agent and prompt payment.
+- Poll: Re-call the same route with `paymentReference: <referenceKey>` until it returns 200 with `{ receipt, txSignature }`.
+- Execute: Once paid, run the tool’s action and return output.
+- Optional confirm: `POST /v1/payments/confirm` after webhook settlement for finalization.
+
+Merchant identity
+- For now, the selling agent (mcp-server) provides merchant context via environment/config/tool input. Discovery is intentionally out of scope.
+
 Quickstart
 - See README for setup instructions, environment variables, and transport configuration.
 
 Docs: README.md in this package
 Last updated: 2025-09-17
-

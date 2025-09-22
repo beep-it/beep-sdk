@@ -1,4 +1,4 @@
-import { BeepClient } from '@beep/sdk-core';
+import { BeepClient } from '@beep-it/sdk-core';
 
 if (!process.env.BEEP_API_KEY) {
   throw new Error('BEEP_API_KEY is not configured in the .env file.');

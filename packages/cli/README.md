@@ -15,6 +15,24 @@ Basically, it's the ultimate shortcut to getting your BEEP integration up and ru
 
 ---
 
+## MCP Roles (Templates)
+
+Understand the two roles used by the MCP templates:
+
+- mcp-client (buying agent)
+  - Initiates tool calls against an MCP server and pays invoices when prompted.
+  - Used by agent clients or services that consume paid tools.
+
+- mcp-server (selling agent)
+  - Exposes paid tools, creates invoices for usage, and gates execution until payment is confirmed.
+  - This is what `beep init-mcp` scaffolds.
+
+Guidance
+- Choose one role per deployment — do not combine buying and selling agents in the same application.
+- If you need a buying agent, use an MCP client to call a separately deployed MCP server that exposes the tools.
+
+---
+
 ## 🚀 Installation
 
 Install the BEEP CLI globally using npm:
@@ -40,6 +58,26 @@ Use this command when you're starting a new project and want a dedicated server 
 
 **When to use it**: You're building a new app, or you want to run your BEEP logic on a separate microservice.
 
+MCP Roles in templates
+- Buying agent (`mcp-client`): discovers a seller's tools and invokes them; surfaces payment prompts when required.
+- Selling agent (`mcp-server`): exposes paid tools, creates invoices (HTTP 402 pattern), and gates execution until paid.
+
+Role is required
+- `--role <mcp-server|mcp-client|both>` must be provided. This prevents accidental scaffolds of the wrong shape.
+- Do not combine buying and selling agents within the same application folder. If you need both, use `--role both`, which scaffolds two separate apps: `mcp-server/` and `mcp-client/`.
+
+Examples
+```bash
+# Selling agent (server over HTTPS)
+beep init-mcp --mode https --role mcp-server --path ./seller
+
+# Buying agent (client over HTTPS)
+beep init-mcp --mode https --role mcp-client --path ./buyer
+
+# Both roles (two apps)
+beep init-mcp --mode https --role both --path ./beep-duo
+```
+
 ```bash
 beep init-mcp [options]
 ```
@@ -53,13 +91,18 @@ beep init-mcp [options]
   beep init-mcp --path ./my-beep-server
   ```
 
-- `--mode <stdio|https>`: This is the communication protocol your server will use to talk to BEEP. (Don't worry, you can change this later).
+- `--mode <stdio|https>`: Communication protocol (can be changed later).
   - `stdio`: Your server will communicate over standard input/output. This is great for local development or if you're running the server as a child process.
   - `https`: Your server will run as a standard web server, communicating over HTTPS. This is the way to go for most production deployments.
 
+- `--role <mcp-server|mcp-client|both>`: Required. Chooses which template(s) to scaffold.
+  - `mcp-server`: Selling agent — runs an MCP server and registers paid tools.
+  - `mcp-client`: Buying agent — connects to a seller MCP to discover and invoke tools.
+  - `both`: Creates `mcp-server/` and `mcp-client/` subfolders, each with its own package.json and .env.
+
   ```bash
-  # Creates an stdio-based server
-  beep init-mcp --mode stdio
+  # Creates an stdio-based selling agent
+  beep init-mcp --mode stdio --role mcp-server
   ```
 
 #### Example: Putting it all together
@@ -67,7 +110,7 @@ beep init-mcp [options]
 Let's create a new HTTPS server in a folder called `my-awesome-mcp`:
 
 ```bash
-beep init-mcp --mode https --path ./my-awesome-mcp
+beep init-mcp --mode https --role mcp-server --path ./my-awesome-mcp
 ```
 
 The CLI will work its magic and you'll see output like this:
@@ -144,6 +187,12 @@ Next steps:
 3.  **Auto-Install**: Automatically installed the BEEP SDK (`@beep-it/sdk-core`) as a dependency
 4.  **Code Analysis**: Read your server file to understand your existing tool patterns
 5.  **Tailored Guidance**: Provided specific hints like "Found tools array - add checkBeepApi there"
+
+Invoice creation flow (what the template demonstrates)
+- Create invoice: `POST /v1/payments/request` with `assets` (and optional `paymentLabel`). No charge occurs at this step.
+- If unpaid: server responds 402 with `{ referenceKey, paymentUrl, qrCode? }` (show to the buying agent).
+- Poll: re-call the same route with `paymentReference: <referenceKey>` until 200 with `{ receipt, txSignature }`.
+- Execute: once paid, the tool performs its action and returns the result.
 
 No more guessing where to put things! The CLI gives you exact file paths and context-specific integration instructions.
 
