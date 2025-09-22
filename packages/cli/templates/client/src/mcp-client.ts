@@ -28,7 +28,8 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+// Use public SDK type entries; avoid deep dist imports
+import { ListToolsResultSchema } from '@modelcontextprotocol/sdk/types.js';
 
 interface McpClientStdioParams {
   type: 'stdio';
@@ -83,7 +84,8 @@ export class McpClientInternal {
 
   async listTools(): Promise<Array<{ name: string; description?: string; inputSchema?: any }>> {
     if (!this._mcpClient) throw new Error('MCP client not initialized');
-    const res = await (this._mcpClient as any).request(ListToolsRequestSchema, {});
+    // Pass the expected result schema to ensure compatibility across SDK versions
+    const res = await (this._mcpClient as any).request({ method: 'tools/list', params: {} }, ListToolsResultSchema);
     return (res?.tools as any[]) || [];
   }
 

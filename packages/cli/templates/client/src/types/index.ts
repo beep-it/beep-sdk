@@ -1,4 +1,6 @@
-import { PromptMessage } from '@modelcontextprotocol/sdk/dist/cjs/types';
+import { z } from 'zod';
+import { PromptMessageSchema } from '@modelcontextprotocol/sdk/types.js';
+type PromptMessage = z.infer<typeof PromptMessageSchema>;
 
 /**
  * Standard MCP (Model Context Protocol) response format.

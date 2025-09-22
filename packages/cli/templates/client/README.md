@@ -1,8 +1,10 @@
 # MCP Client (Buying Agent)
 
-This template is a minimal buying agent that both:
-- Exposes its own client-side tools via an MCP server (buyer capabilities)
+This template is a minimal buying agent that:
+- Can expose its own client-side tools via an MCP server (buyer capabilities)
 - Connects to a remote seller MCP server to discover and invoke seller tools
+
+Important: embedding/integrating this client into your app is not automatic. You must wire the client into your server or runner. See the integration examples below.
 
 Behavior
 - Discovery-first: connects to the seller's MCP server and lists tools (name, description, schema).
@@ -26,3 +28,48 @@ Quick Start
   - Prints discovered tools from the seller (name, description) when using the discovery helper
   - With `DEFAULT_LIST_ONLY=true`, it stops after discovery
   - Optionally attempts a simple demo call if a matching tool (e.g., `checkBeepApi`) exists
+
+Integrating the client into your server
+
+There are two common ways to use this buying agent client in your own app. Choose one and embed it explicitly.
+
+1) As an outbound MCP client only (no local HTTP route)
+- Use this when your app just needs to call a seller MCP server.
+- Example with modern TS (top‑level await allowed):
+  ```ts
+  // src/main.ts (your server or script)
+  import { mcpClient } from './src/mcp-client';
+
+  const url = new URL(process.env.SERVER_URL || 'http://localhost:4005/mcp');
+  await mcpClient.initialize({ type: 'http', url });
+
+  const tools = await mcpClient.listTools();
+  console.log('Discovered seller tools:', tools.map(t => t.name));
+
+  // later in your code, invoke tools as needed
+  // await mcpClient.checkBeepApi();
+  ```
+
+- Example without top‑level await (older TS/Node configs):
+  ```ts
+  // src/main.ts
+  import { mcpClient } from './src/mcp-client';
+
+  const url = new URL(process.env.SERVER_URL || 'http://localhost:4005/mcp');
+  mcpClient
+    .initialize({ type: 'http', url })
+    .then(() => mcpClient.listTools())
+    .then((tools) => {
+      console.log('Discovered seller tools:', tools.map(t => t.name));
+      // return mcpClient.checkBeepApi();
+    })
+    .catch((err) => {
+      console.error('Failed to initialize MCP client:', err);
+      process.exit(1);
+    });
+  ```
+
+Notes
+- Always use the public MCP SDK type entry points: `@modelcontextprotocol/sdk/types.js`.
+- For listing tools over HTTP, this template uses a literal JSON‑RPC request with `ListToolsResultSchema` to avoid overload/typing issues across SDK versions.
+- If you need request/response traces, add logging around your initialize + tools/list calls and on your `/mcp` route.
