@@ -137,7 +137,6 @@ export interface SignSolanaTransactionData {
  * const beep = new BeepClient({ apiKey: 'secret_key_here' });
  *
  * const paymentRequest = await beep.payments.issuePayment({
- *   apiKey: 'secret_api_key',
  *   assetChunks: [
  *     { assetId: 'video-content-uuid', quantity: 1 },
  *     { assetId: 'api-access-uuid', quantity: 10 }
@@ -148,11 +147,6 @@ export interface SignSolanaTransactionData {
  * ```
  */
 export interface IssuePaymentPayload {
-  /**
-   * Secret API key for authentication
-   * @remarks Must be a secret key, not a publishable key
-   */
-  apiKey: string;
   /**
    * Array of asset chunks to be purchased in this payment request
    * @remarks Each asset will be charged according to its configured pricing
@@ -203,17 +197,11 @@ export interface IssuePaymentResponse {
  * ```typescript
  * // Start charging for the streaming session
  * const result = await beep.payments.startStreaming({
- *   apiKey: 'secret_api_key',
  *   invoiceId: 'invoice_uuid_from_issuePayment'
  * });
  * ```
  */
 export interface StartStreamingPayload {
-  /**
-   * Secret API key for authentication
-   * @remarks Must be a secret key, not a publishable key
-   */
-  apiKey: string;
   /**
    * UUID of the invoice to start streaming charges for
    * @remarks This should be the invoiceId returned from issuePayment()
@@ -247,7 +235,6 @@ export interface StartStreamingResponse {
  * ```typescript
  * // Temporarily pause billing
  * const result = await beep.payments.pauseStreaming({
- *   apiKey: 'secret_api_key',
  *   invoiceId: 'active_invoice_uuid'
  * });
  *
@@ -257,11 +244,6 @@ export interface StartStreamingResponse {
  * ```
  */
 export interface PauseStreamingPayload {
-  /**
-   * Secret API key for authentication
-   * @remarks Must be a secret key, not a publishable key
-   */
-  apiKey: string;
   /**
    * UUID of the invoice to pause streaming for
    * @remarks Invoice must be in an active streaming state
@@ -295,7 +277,6 @@ export interface PauseStreamingResponse {
  * ```typescript
  * // Permanently stop and finalize the streaming session
  * const result = await beep.payments.stopStreaming({
- *   apiKey: 'secret_api_key',
  *   invoiceId: 'active_invoice_uuid'
  * });
  *
@@ -303,11 +284,6 @@ export interface PauseStreamingResponse {
  * ```
  */
 export interface StopStreamingPayload {
-  /**
-   * Secret API key for authentication
-   * @remarks Must be a secret key, not a publishable key
-   */
-  apiKey: string;
   /**
    * UUID of the invoice to permanently stop streaming for
    * @remarks This action will finalize all charges and cannot be undone

@@ -233,6 +233,8 @@ program
        * Rules:
        *  - package.json => merge via mergePackageJson
        *  - server.ts => SKIP (we use mcp-server.ts instead)
+       *  - types merging => if copying into a `types/` (or `src/types/`) folder and a file exists,
+       *    append the template content to the existing file with a separator instead of skipping.
        *  - all other files => copy only if not present
        */
       const copyTemplates = async (srcDir: string, destDir: string) => {
@@ -256,10 +258,24 @@ program
               continue;
             }
 
-            // Do not overwrite existing files
+            // If the destination file exists and we are inside a types folder,
+            // merge by appending the template content rather than skipping.
+            const isTypesFolder = /(^|\\|\/)types(\\|\/)/.test(destPath) || /(^|\\|\/)src(\\|\/)types(\\|\/)/.test(destPath);
+
             try {
               await fs.access(destPath);
-              // If exists, skip
+              if (isTypesFolder && (entry.name.endsWith('.ts') || entry.name.endsWith('.d.ts'))) {
+                const existing = await fs.readFile(destPath, 'utf-8');
+                const incoming = await fs.readFile(srcPath, 'utf-8');
+                const separator = `\n\n// ---- merged from template: ${entry.name} ----\n`;
+                const merged = existing.includes(incoming)
+                  ? existing // avoid duplicating exact content
+                  : existing + separator + incoming + '\n';
+                await fs.writeFile(destPath, merged);
+                console.log(`  - Merged types: ${path.relative(destDir, destPath)}`);
+                continue;
+              }
+              // Not a types folder (or not TS), keep non-destructive behavior
               console.log(`  - Skipped existing ${path.relative(destDir, destPath)}`);
               continue;
             } catch (_) {

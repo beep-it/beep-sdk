@@ -28,7 +28,8 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+// Use public SDK type entries; avoid deep dist imports
+import { ListToolsResultSchema } from '@modelcontextprotocol/sdk/types.js';
 
 interface McpClientStdioParams {
   type: 'stdio';
@@ -53,6 +54,18 @@ export class McpClientInternal {
     if (params.type === 'stdio') this.initializationPromise = this._initializeStdio(params);
     if (params.type === 'http') this.initializationPromise = this._initializeHttp(params);
     return this.initializationPromise!;
+  }
+
+  /** Returns true once the underlying client has connected. */
+  isReady(): boolean {
+    return this.isInitialized && !!this._mcpClient;
+  }
+
+  /** Promise that resolves when initialization completes. */
+  whenReady(): Promise<void> {
+    if (this.isInitialized) return Promise.resolve();
+    if (this.initializationPromise) return this.initializationPromise;
+    return Promise.reject(new Error('MCP client not initialized. Call initialize() at startup.'));
   }
 
   private async _initializeStdio(params: McpClientStdioParams): Promise<void> {
@@ -83,14 +96,42 @@ export class McpClientInternal {
 
   async listTools(): Promise<Array<{ name: string; description?: string; inputSchema?: any }>> {
     if (!this._mcpClient) throw new Error('MCP client not initialized');
-    const res = await (this._mcpClient as any).request(ListToolsRequestSchema, {});
+    // Pass the expected result schema to ensure compatibility across SDK versions
+    const res = await (this._mcpClient as any).request(
+      { method: 'tools/list', params: {} },
+      ListToolsResultSchema,
+    );
     return (res?.tools as any[]) || [];
   }
 
-  async checkBeepApi(): Promise<any> {
+  // BEEP seller-specific wrappers (optional): only valid when the remote MCP implements these tools
+
+  // --------------------------------------------------------------
+  // These methods are called from within the PaymentService. If you do not have a use for the
+  // PaymentService, you can remove these methods. they are intended to be used with a MCP server
+  // that implements the BEEP tools like `issuePayment`, `startStreaming`, and `stopStreaming`.
+
+  // You should not call them directly; instead, use the PaymentService class in services/paymentService.ts
+  // --------------------------------------------------------------
+  async _checkBeepApi(): Promise<any> {
     return this.callTool('checkBeepApi');
   }
-  async getAvailableWallets(): Promise<any> {
+  async _startStreaming(params: { invoiceId: string }): Promise<any> {
+    if (!this.isInitialized) throw new Error('MCP client not initialized');
+    return this.callTool('startStreaming', params);
+  }
+  async _stopStreaming(params: { invoiceId: string }): Promise<any> {
+    if (!this.isInitialized) throw new Error('MCP client not initialized');
+    return this.callTool('stopStreaming', params);
+  }
+  async _issuePayment(params: {
+    assetChunks: Array<{ assetId: string; quantity: number }>;
+    payingMerchantId: string;
+  }): Promise<any> {
+    if (!this.isInitialized) throw new Error('MCP client not initialized');
+    return this.callTool('issuePayment', params);
+  }
+  async _getAvailableWallets(): Promise<any> {
     return this.callTool('getAvailableWallets');
   }
   async signSolanaTransaction(params: { walletId: string; transaction: any }): Promise<any> {

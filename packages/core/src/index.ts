@@ -8,6 +8,7 @@ import { InvoicesModule } from './modules/invoices';
 import { PaymentsModule } from './modules/payments';
 import { ProductsModule } from './modules/products';
 import { WidgetModule } from './modules/widget';
+import { UserModule } from './modules/user';
 
 /**
  * Configuration options for initializing the BeepClient
@@ -74,6 +75,8 @@ export class BeepClient {
    * stopStreaming) are only available with BeepClient and secret API keys.
    */
   public readonly payments: PaymentsModule;
+  /** Access to authenticated user info */
+  public readonly user: UserModule;
 
   /**
    * Creates a new BEEP client instance
@@ -98,6 +101,7 @@ export class BeepClient {
     this.products = new ProductsModule(this.client);
     this.invoices = new InvoicesModule(this.client);
     this.payments = new PaymentsModule(this.client);
+    this.user = new UserModule(this.client);
   }
 
   /**
