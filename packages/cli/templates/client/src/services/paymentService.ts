@@ -1,4 +1,5 @@
 import { mcpClient } from '../mcp-client';
+import { getMerchantId } from '../utils';
 
 /**
  * Payment service for interacting with a BEEP seller over MCP.
@@ -10,28 +11,36 @@ import { mcpClient } from '../mcp-client';
 export class PaymentService {
   private currentRunningInvoice: string | null = null;
 
-  async startStreamingSession(params: { apiKey: string; invoiceId: string }) {
+  async startStreamingSession(params: { invoiceId: string }) {
     console.info(`Starting streaming session for invoice: ${params.invoiceId}`);
-    const result = await mcpClient.startStreaming(params);
+    const result = await mcpClient._startStreaming(params);
     console.info('Streaming session started successfully');
     return result;
   }
 
-  async stopStreamingSession(params: { apiKey: string; invoiceId: string }) {
+  async stopStreamingSession(params: { invoiceId: string }) {
     console.info(`Stopping streaming session for invoice: ${params.invoiceId}`);
-    const result = await mcpClient.stopStreaming(params);
+
+    const result = await mcpClient._stopStreaming(params);
     console.info('Streaming session stopped successfully');
     return result;
   }
 
   async issuePayment(params: {
-    apiKey: string;
     assetChunks: Array<{ assetId: string; quantity: number }>;
     payingMerchantId: string;
   }): Promise<{ success: boolean; invoiceId?: string; referenceKey?: string; error?: unknown }> {
     console.info(`Issuing payment for ${params.assetChunks.length} asset chunks`);
+
+    const merchantId = await getMerchantId();
+
+    const paramsWithMerchant = {
+      ...params,
+      payingMerchantId: merchantId,
+    };
+
     try {
-      const result = await mcpClient.issuePayment(params);
+      const result = await mcpClient._issuePayment(paramsWithMerchant);
       const { data, isError } = result || {};
       if (isError || !data?.invoiceId) {
         console.info('Payment failed');
@@ -49,4 +58,3 @@ export class PaymentService {
 }
 
 export const paymentService = new PaymentService();
-

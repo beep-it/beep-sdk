@@ -33,7 +33,6 @@ export async function issuePayment(params: IssuePaymentApiParams) {
   };
 
   const payload: IssuePaymentPayload = {
-    apiKey: process.env.BEEP_API_KEY!,
     assetChunks,
     payingMerchantId,
     invoiceId,

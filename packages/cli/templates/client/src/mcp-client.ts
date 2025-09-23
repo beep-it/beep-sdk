@@ -97,31 +97,41 @@ export class McpClientInternal {
   async listTools(): Promise<Array<{ name: string; description?: string; inputSchema?: any }>> {
     if (!this._mcpClient) throw new Error('MCP client not initialized');
     // Pass the expected result schema to ensure compatibility across SDK versions
-    const res = await (this._mcpClient as any).request({ method: 'tools/list', params: {} }, ListToolsResultSchema);
+    const res = await (this._mcpClient as any).request(
+      { method: 'tools/list', params: {} },
+      ListToolsResultSchema,
+    );
     return (res?.tools as any[]) || [];
   }
 
-  async checkBeepApi(): Promise<any> {
+  // BEEP seller-specific wrappers (optional): only valid when the remote MCP implements these tools
+
+  // --------------------------------------------------------------
+  // These methods are called from within the PaymentService. If you do not have a use for the
+  // PaymentService, you can remove these methods. they are intended to be used with a MCP server
+  // that implements the BEEP tools like `issuePayment`, `startStreaming`, and `stopStreaming`.
+
+  // You should not call them directly; instead, use the PaymentService class in services/paymentService.ts
+  // --------------------------------------------------------------
+  async _checkBeepApi(): Promise<any> {
     return this.callTool('checkBeepApi');
   }
-  // BEEP seller-specific wrappers (optional): only valid when the remote MCP implements these tools
-  async startStreaming(params: { apiKey: string; invoiceId: string }): Promise<any> {
+  async _startStreaming(params: { invoiceId: string }): Promise<any> {
     if (!this.isInitialized) throw new Error('MCP client not initialized');
     return this.callTool('startStreaming', params);
   }
-  async stopStreaming(params: { apiKey: string; invoiceId: string }): Promise<any> {
+  async _stopStreaming(params: { invoiceId: string }): Promise<any> {
     if (!this.isInitialized) throw new Error('MCP client not initialized');
     return this.callTool('stopStreaming', params);
   }
-  async issuePayment(params: {
-    apiKey: string;
+  async _issuePayment(params: {
     assetChunks: Array<{ assetId: string; quantity: number }>;
     payingMerchantId: string;
   }): Promise<any> {
     if (!this.isInitialized) throw new Error('MCP client not initialized');
     return this.callTool('issuePayment', params);
   }
-  async getAvailableWallets(): Promise<any> {
+  async _getAvailableWallets(): Promise<any> {
     return this.callTool('getAvailableWallets');
   }
   async signSolanaTransaction(params: { walletId: string; transaction: any }): Promise<any> {
