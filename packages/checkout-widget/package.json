@@ -55,10 +55,6 @@
     "url": "https://github.com/beep-it/beep-sdk/issues"
   },
   "homepage": "https://github.com/beep-it/beep-sdk",
-  "funding": {
-    "type": "github",
-    "url": "https://github.com/beep-it/beep-sdk"
-  },
   "browserslist": [
     "defaults",
     "not IE 11"
