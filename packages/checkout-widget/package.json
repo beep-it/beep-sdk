@@ -6,8 +6,18 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "examples"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
   "engines": {
     "node": ">=20"
   },
@@ -27,7 +37,13 @@
     "widget",
     "react",
     "payment",
-    "qr-code"
+    "qr-code",
+    "solana",
+    "solana-pay",
+    "checkout",
+    "crypto",
+    "blockchain",
+    "web3"
   ],
   "author": "BEEP Engineering",
   "license": "MIT",
@@ -39,6 +55,14 @@
     "url": "https://github.com/beep-it/beep-sdk/issues"
   },
   "homepage": "https://github.com/beep-it/beep-sdk",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/beep-it/beep-sdk"
+  },
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
   "publishConfig": {
     "access": "public"
   },

@@ -1,0 +1,49 @@
+{
+  "framework": "react",
+  "category": "payment",
+  "ui-component": true,
+  "typescript": true,
+  "blockchain": "solana",
+  "payment-methods": ["solana-pay", "stablecoins", "spl-tokens"],
+  "dependencies": {
+    "peer": ["react", "react-dom"],
+    "bundled": ["@beep-it/sdk-core", "@tanstack/react-query", "qrcode.react"]
+  },
+  "features": [
+    "qr-code-generation",
+    "real-time-payment-polling",
+    "solana-pay-integration",
+    "inline-styling",
+    "typescript-support"
+  ],
+  "use-cases": [
+    "e-commerce-checkout",
+    "service-payments",
+    "digital-product-sales",
+    "one-time-donations",
+    "event-ticketing",
+    "marketplace-transactions"
+  ],
+  "browser-compatibility": {
+    "modern-browsers": true,
+    "ie11": false,
+    "mobile": true
+  },
+  "integration-patterns": {
+    "next-js": "full-support",
+    "remix": "client-side-only",
+    "vite": "full-support",
+    "create-react-app": "full-support"
+  },
+  "styling": {
+    "css-framework": "none-required",
+    "inline-styles": true,
+    "customizable": true,
+    "responsive": true
+  },
+  "security": {
+    "keys": "publishable-only",
+    "cors": "enabled",
+    "server-proxy": "not-required"
+  }
+}
