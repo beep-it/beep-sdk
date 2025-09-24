@@ -1,44 +1,81 @@
-# @beep-it/checkout-widget — LLM Guide
+# @beep-it/checkout-widget — AI Coding Assistant Guide
 
-Purpose: React checkout component for BEEP. Browser-only, uses publishable key and public endpoints.
+## Quick Integration (Copy-Paste Ready)
+```tsx
+import { CheckoutWidget } from '@beep-it/checkout-widget';
 
-Install
+function PaymentPage() {
+  return (
+    <CheckoutWidget
+      publishableKey="beep_pk_your_key_here"
+      primaryColor="#3b82f6"
+      labels={{
+        scanQr: "Scan QR to pay with Solana wallet",
+        paymentLabel: "Your Store Name"
+      }}
+      assets={[
+        { name: "Product Name", price: "29.99", quantity: 1 }
+      ]}
+    />
+  );
+}
+```
+
+## Installation Command
 ```bash
 npm install @beep-it/checkout-widget @beep-it/sdk-core
 ```
 
-Props
-- publishableKey: string (beep_pk_…)
-- labels: { scanQr: string; paymentLabel?: string }
-- assets: Array< { assetId: string; quantity: number } | { name: string; price: string; quantity?: number; description?: string } >
-- serverUrl?: string (defaults to production)
-- primaryColor?: string
+## TypeScript Support
+Full types exported. Import: `import type { MerchantWidgetProps } from '@beep-it/checkout-widget'`
 
-Usage
-```tsx
-import { CheckoutWidget } from '@beep-it/checkout-widget';
+## Key Props Reference
+- **publishableKey**: string (beep_pk_...) - REQUIRED, browser-safe key
+- **assets**: Array - REQUIRED (products to sell via Solana/stablecoins)
+- **labels**: { scanQr: string } - REQUIRED (UI text)
+- **primaryColor**?: string (hex color for theming)
+- **serverUrl**?: string (defaults to production)
 
-<CheckoutWidget
-  publishableKey="beep_pk_…"
-  labels={{ scanQr: 'Scan to pay', paymentLabel: 'My Store' }}
-  assets={[ { assetId: 'uuid', quantity: 1 }, { name: 'Custom', price: '12.50' } ]}
-  serverUrl="https://api.justbeep.it"
-/>
-```
+## Asset Types (Mix and Match)
+1. **Existing products**: `{ assetId: "uuid", quantity: number }`
+2. **New products**: `{ name: "string", price: "decimal", quantity?: number }`
 
-Behavior
-- Calls POST /v1/widget/payment-session and GET /v1/widget/payment-status/:referenceKey behind the scenes via @beep-it/sdk-core BeepPublicClient.
-- Items with { name, price } are created as products server-side (persisted).
-- Endpoints are CORS-open; no server proxy required.
+## Payment Flow
+One-time Solana/stablecoin transfers only. No subscriptions or recurring payments.
+1. Generates Solana Pay QR code
+2. User scans with wallet (Phantom, Solflare, etc.)
+3. Authorizes one-time transfer
+4. Payment confirmed on-chain
 
-Note on 402 flow
-- The 402 two‑phase flow is a server-side pattern used with `BeepClient`.
-- The widget uses public session endpoints instead; no 402 handling is needed in the browser.
-- For server 402 details and helpers, see @beep-it/sdk-core llms.txt.
+## Framework Compatibility
+- **React 18+** required
+- **Next.js**: Works in both pages and app router
+- **Remix**: Client-side only (use dynamic imports)
+- **Vite**: Works out of the box
+- **Create React App**: Full compatibility
 
-Notes
-- Never use beep_sk_* in props. Only beep_pk_*.
-- Mixed assets (existing + on-the-fly) must share the same merchant and token.
+## Common Use Cases
+- E-commerce checkout: Map cart items to assets array
+- Service payments: One-time consulting, freelance work
+- Digital products: Courses, ebooks, downloads
+- Donations: Custom amount one-time payments
+- Event tickets: Fixed-price ticket sales
 
-Docs: README.md in this package
-Last updated: 2025-09-17
+## Styling Notes
+- Zero CSS dependencies (all inline styles)
+- Respects primaryColor for theming
+- Mobile responsive by default
+- Works with any CSS framework
+
+## Security Notes
+- Only use beep_pk_* keys (publishable), never beep_sk_* (secret)
+- All API calls use public endpoints with CORS enabled
+- No server proxy required for browser integration
+
+## Backend Integration
+- Calls POST /v1/widget/payment-session for setup
+- Polls GET /v1/widget/payment-status/:referenceKey for completion
+- Items with { name, price } are persisted as products server-side
+- Uses @beep-it/sdk-core BeepPublicClient internally
+
+Last updated: 2025-09-24

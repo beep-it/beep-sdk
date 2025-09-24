@@ -1,0 +1,30 @@
+# @beep-it/checkout-widget - AI Coding Rules
+
+## Quick Integration Pattern
+```tsx
+import { CheckoutWidget } from '@beep-it/checkout-widget';
+
+<CheckoutWidget
+  publishableKey="beep_pk_..."  // REQUIRED - browser-safe only
+  labels={{ scanQr: "Scan to pay" }}  // REQUIRED
+  assets={[{ name: "Product", price: "9.99" }]}  // REQUIRED
+  primaryColor="#007bff"  // optional theming
+/>
+```
+
+## Essential Rules
+- Import: `import { CheckoutWidget } from '@beep-it/checkout-widget'`
+- Security: ONLY use `beep_pk_*` keys (publishable), NEVER `beep_sk_*` (secret)
+- Assets: Mix `{ assetId, quantity }` (existing) or `{ name, price }` (new products)
+- Styling: Inline only - no CSS imports needed
+- Framework: React 18+, works with Next.js/Vite/CRA
+
+## TypeScript
+```tsx
+import type { MerchantWidgetProps } from '@beep-it/checkout-widget';
+```
+
+## Reference Files
+- llms.txt: Comprehensive guide
+- examples/: Usage samples
+- src/types.ts: Full type definitions

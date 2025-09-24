@@ -1,0 +1,50 @@
+# BEEP SDK Monorepo - AI Assistant Rules
+
+## Monorepo Structure
+This is a pnpm workspace with 4 packages:
+- `@beep-it/sdk-core` - TypeScript SDK (packages/core)
+- `@beep-it/checkout-widget` - React component (packages/checkout-widget)
+- `@beep-it/cli` - MCP scaffolding tool (packages/cli)
+- `packages/mcp` - Documentation only
+
+## Package Selection Guide
+- **Frontend React apps**: Use `@beep-it/checkout-widget`
+- **Backend/Node.js**: Use `@beep-it/sdk-core` with secret keys
+- **Browser/client-side**: Use `@beep-it/sdk-core` BeepPublicClient with publishable keys
+- **AI agent integration**: Use `@beep-it/cli` for MCP server scaffolding
+
+## Key Security Rules
+- **beep_sk_*** - Secret keys (server-side ONLY, never in browsers)
+- **beep_pk_*** - Publishable keys (browser-safe, widget use)
+- Always use the correct key type for the environment
+
+## Quick Integration Patterns
+```tsx
+// React widget (most common)
+import { CheckoutWidget } from '@beep-it/checkout-widget';
+<CheckoutWidget publishableKey="beep_pk_..." labels={{scanQr:"Pay now"}} assets={[{name:"Item",price:"9.99"}]} />
+
+// Server SDK
+import { BeepClient } from '@beep-it/sdk-core';
+const beep = new BeepClient({apiKey: 'beep_sk_...'});
+
+// Browser SDK
+import { BeepPublicClient } from '@beep-it/sdk-core';
+const client = new BeepPublicClient({publishableKey: 'beep_pk_...'});
+```
+
+## Monorepo Commands
+- `pnpm install` - Install all dependencies
+- `pnpm build` - Build all packages
+- `pnpm test` - Test all packages
+- `pnpm dev` - Development mode (all packages)
+
+## Payment Concepts
+- One-time Solana/stablecoin payments only (no subscriptions)
+- QR code based via Solana Pay standard
+- Assets: existing products (assetId) or dynamic creation (name+price)
+
+## Reference Files
+- Root README.md: Complete overview
+- llms.txt: Detailed AI assistant guide
+- Each package has its own README, llms.txt, and .cursorrules

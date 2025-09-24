@@ -1,13 +1,23 @@
 {
   "name": "@beep-it/checkout-widget",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "React component for BEEP merchant payments with QR code display",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "examples"
   ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
   "engines": {
     "node": ">=20"
   },
@@ -27,7 +37,13 @@
     "widget",
     "react",
     "payment",
-    "qr-code"
+    "qr-code",
+    "solana",
+    "solana-pay",
+    "checkout",
+    "crypto",
+    "blockchain",
+    "web3"
   ],
   "author": "BEEP Engineering",
   "license": "MIT",
@@ -39,6 +55,10 @@
     "url": "https://github.com/beep-it/beep-sdk/issues"
   },
   "homepage": "https://github.com/beep-it/beep-sdk",
+  "browserslist": [
+    "defaults",
+    "not IE 11"
+  ],
   "publishConfig": {
     "access": "public"
   },
