@@ -1,14 +1,14 @@
 import { CheckoutWidget } from '@beep-it/checkout-widget';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 /**
  * Real e-commerce checkout example showing integration with shopping cart
  * Demonstrates mixing existing products with dynamic pricing
  */
 interface CartItem {
-  productId?: string;  // For existing products
-  displayName: string;
-  price?: string;      // For dynamic products
+  productId?: string; // For existing products
+  displayName?: string;
+  price?: string; // For dynamic products
   quantity: number;
 }
 
@@ -23,20 +23,19 @@ export function ECommerceCheckout({ cartItems, merchantKey, storeName }: ECommer
 
   useEffect(() => {
     // Convert cart items to widget assets
-    const widgetAssets = cartItems.map(item => {
+    const widgetAssets = cartItems.map((item) => {
       if (item.productId) {
         // Existing product reference
         return {
           assetId: item.productId,
           quantity: item.quantity,
-          name: item.displayName
         };
       } else {
         // Dynamic product creation
         return {
           name: item.displayName,
           price: item.price!,
-          quantity: item.quantity
+          quantity: item.quantity,
         };
       }
     });
@@ -54,8 +53,8 @@ export function ECommerceCheckout({ cartItems, merchantKey, storeName }: ECommer
         publishableKey={merchantKey}
         primaryColor="#3b82f6"
         labels={{
-          scanQr: "Scan to complete your order",
-          paymentLabel: storeName
+          scanQr: 'Scan to complete your order',
+          paymentLabel: storeName,
         }}
         assets={assets}
       />
@@ -69,15 +68,14 @@ export function ECommerceCheckout({ cartItems, merchantKey, storeName }: ECommer
 export function ExampleUsage() {
   const cartItems: CartItem[] = [
     {
-      productId: "existing-product-uuid-123",
-      displayName: "Premium Coffee Beans",
-      quantity: 1
+      productId: 'existing-product-uuid-123',
+      quantity: 1,
     },
     {
-      displayName: "Express Shipping",
-      price: "9.99",
-      quantity: 1
-    }
+      displayName: 'Express Shipping',
+      price: '9.99',
+      quantity: 1,
+    },
   ];
 
   return (

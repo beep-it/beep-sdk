@@ -1,16 +1,39 @@
-# BEEP SDK Monorepo — LLM Guide
+# BEEP SDK Monorepo — AI Coding Assistant Guide
 
-Goal: Give coding agents a compact, canonical map for integrating BEEP with SDKs and the Checkout Widget. Use this file for quick orientation; follow links for details.
+**Purpose:** Comprehensive TypeScript SDK for Solana/stablecoin payments. One-time transfers only (no subscriptions). Use this file for quick orientation.
 
-Packages (beep-sdk/packages)
-- core (@beep-it/sdk-core): TypeScript SDK for Node/browsers.
-- checkout-widget (@beep-it/checkout-widget): React drop-in payment UI.
-- cli (@beep-it/cli): Scaffolding and integration helpers.
-- mcp (@beep-it/mcp): Model Context Protocol server package.
+## 📦 Package Overview
 
-Auth Model
-- Secret API key (server only): beep_sk_… — grants access to private endpoints (/v1/products, /v1/payment/*, etc.). Do not ship to browsers.
-- Publishable key (browser-safe): beep_pk_… — for public widget endpoints (CORS-open). Safe for client apps and the Checkout Widget.
+### [@beep-it/sdk-core](./packages/core) - Core TypeScript SDK
+- **Server-side:** Full API client (beep_sk_* keys) for invoices, products, payments
+- **Browser-safe:** Public client (beep_pk_* keys) for widget integration
+- **Features:** TypeScript types, error handling, 402 payment flow helpers
+- **Install:** `npm install @beep-it/sdk-core`
+
+### [@beep-it/checkout-widget](./packages/checkout-widget) - React Payment Component
+- **Drop-in React widget** for Solana payment processing
+- **QR code generation** + real-time payment polling
+- **Zero CSS dependencies** (inline styling), customizable theming
+- **Install:** `npm install @beep-it/checkout-widget @beep-it/sdk-core`
+
+### [@beep-it/cli](./packages/cli) - MCP Server Scaffolding
+- **Generate MCP server templates** for AI agent integrations
+- **Multiple transports:** HTTP, stdio, SSE
+- **Install:** `npm install -g @beep-it/cli`
+
+### [packages/mcp](./packages/mcp) - MCP Documentation
+- **Integration guides** for Model Context Protocol servers
+- **Authentication patterns** and best practices
+
+## 🔐 Authentication
+
+### Key Types
+- **beep_sk_*** - Secret keys (server-side only, never expose to browsers)
+- **beep_pk_*** - Publishable keys (browser-safe, for frontend/widget use)
+
+### Security Rules
+- Secret keys: Full API access, server-side only
+- Publishable keys: Widget endpoints only, CORS-enabled, browser-safe
 
 Public Widget Endpoints (CORS-open)
 - POST /v1/widget/payment-session
@@ -23,34 +46,59 @@ Public Widget Endpoints (CORS-open)
 - GET /v1/widget/payment-status/:referenceKey
   - Response: { paid: boolean, status?: string }
 
-SDK Quickstarts
-1) Browser — public client
-```ts
-import { BeepPublicClient } from '@beep-it/sdk-core';
-const client = new BeepPublicClient({ publishableKey: 'beep_pk_…', serverUrl: 'https://api.justbeep.it' });
-const session = await client.widget.createPaymentSession({
-  assets: [ { assetId: 'existing-uuid', quantity: 1 }, { name: 'Tip', price: '1.00' } ],
-  paymentLabel: 'My Store',
-});
-const status = await client.widget.getPaymentStatus(session.referenceKey);
-```
+## 🚀 Quick Start Examples
 
-2) React — Checkout Widget
+### 1. React Widget (Recommended)
 ```tsx
 import { CheckoutWidget } from '@beep-it/checkout-widget';
+
 <CheckoutWidget
-  publishableKey="beep_pk_…"
-  labels={{ scanQr: 'Scan to pay', paymentLabel: 'My Store' }}
-  assets={[ { assetId: 'uuid', quantity: 1 }, { name: 'Custom', price: '12.50' } ]}
-  serverUrl="https://api.justbeep.it"
+  publishableKey="beep_pk_your_key"
+  labels={{ scanQr: 'Pay with Solana wallet', paymentLabel: 'My Store' }}
+  assets={[
+    { assetId: 'existing-uuid', quantity: 1 },  // existing product
+    { name: 'Custom Item', price: '12.50' }     // creates new product
+  ]}
+  primaryColor="#3b82f6"
 />
 ```
 
-3) Server — secret client
+### 2. Browser SDK (Advanced)
 ```ts
-import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
-const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.justbeep.it' });
-const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
+import { BeepPublicClient } from '@beep-it/sdk-core';
+
+const client = new BeepPublicClient({
+  publishableKey: 'beep_pk_…',
+  serverUrl: 'https://api.justbeep.it'
+});
+
+const session = await client.widget.createPaymentSession({
+  assets: [{ name: 'Service', price: '25.00' }],
+  paymentLabel: 'My Store',
+});
+```
+
+### 3. Server SDK (Backend)
+```ts
+import { BeepClient } from '@beep-it/sdk-core';
+
+const beep = new BeepClient({
+  apiKey: 'beep_sk_your_secret_key',
+  serverUrl: 'https://api.justbeep.it'
+});
+
+// Create invoice
+const invoice = await beep.invoices.create({
+  merchantId: 'your-merchant-id',
+  items: [{ name: 'Product', price: '25.00', quantity: 1 }]
+});
+```
+
+### 4. MCP Server (AI Agents)
+```bash
+npm install -g @beep-it/cli
+beep init my-payment-server --transport=http
+cd my-payment-server && npm run dev
 ```
 
 402 Payment Flow (server)
@@ -74,17 +122,24 @@ Important Notes
 - Widget endpoints are CORS-open and CSRF-exempt; publishable keys are safe in browsers.
 - Secret keys must never be embedded in client apps.
 
-Links
-- Core README: packages/core/README.md
-- Checkout Widget README: packages/checkout-widget/README.md
-- CLI README: packages/cli/README.md
-- MCP README: packages/mcp/README.md
-MCP Roles (templates)
-- mcp-client (buying agent): initiates tool calls and pays invoices.
-- mcp-server (selling agent): exposes paid tools and creates invoices via the 402 pattern and issuePayment.
+## 🔗 Package Documentation
+- **Core SDK**: [packages/core/README.md](./packages/core/README.md)
+- **Checkout Widget**: [packages/checkout-widget/README.md](./packages/checkout-widget/README.md)
+- **CLI Tool**: [packages/cli/README.md](./packages/cli/README.md)
+- **MCP Integration**: [packages/mcp/README.md](./packages/mcp/README.md)
 
-Routes reference
-- Widget (non-streaming): `POST /v1/widget/payment-session`, `GET /v1/widget/payment-status/:referenceKey`.
-- Paid tools (server-side): `POST /v1/payments/request` (creates invoice; 402 when unpaid, returns paymentUrl/qrCode), optional `POST /v1/payments/confirm`.
+## 💡 Key Concepts
+- **One-time payments only** (no subscriptions/recurring)
+- **Solana/stablecoin transfers** (USDC, USDT, SOL)
+- **QR code integration** via Solana Pay standard
+- **Real-time polling** for payment confirmation
+- **Browser-safe** with publishable keys
 
-Last updated: 2025-09-17
+## 🎯 Common Use Cases
+- **E-commerce checkout** (shopping cart → payment)
+- **Service payments** (consulting, freelance)
+- **Digital products** (courses, downloads)
+- **Event ticketing** (one-time purchases)
+- **AI agent payments** (MCP integration)
+
+Last updated: 2025-09-24
