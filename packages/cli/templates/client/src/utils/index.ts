@@ -6,6 +6,16 @@ export const beepClient = new BeepClient({
 });
 
 export const getMerchantId = async () => {
-  const user = await beepClient.user.getCurrentUser();
-  return user.merchantId;
+  try {
+    const user = await beepClient.user.getCurrentUser();
+
+    if (!user) {
+      throw new Error('BeepClient unable to fetch user');
+    }
+
+    return user.merchantId;
+  } catch (error) {
+    console.error('Error getting merchant ID:', error);
+    return null;
+  }
 };
