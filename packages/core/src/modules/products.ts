@@ -23,11 +23,11 @@ export class ProductsModule {
   /**
    * Creates a new product with the specified configuration
    * Products can be used to generate invoices with consistent pricing and metadata
-   * 
+   *
    * @param payload - Product creation parameters including name, price, and token information
    * @returns Promise that resolves to the created product
    * @throws {Error} When product creation fails
-   * 
+   *
    * @example
    * ```typescript
    * // Create a one-time purchase product
@@ -38,7 +38,7 @@ export class ProductsModule {
    *   token: SupportedToken.USDT,
    *   isSubscription: false
    * });
-   * 
+   *
    * // Create a subscription product
    * const subscription = await beep.products.createProduct({
    *   name: 'Monthly Pro Plan',
@@ -51,7 +51,7 @@ export class ProductsModule {
    */
   async createProduct(payload: CreateProductPayload): Promise<Product> {
     const requestPayload = { ...payload };
-    
+
     // Convert token enum to SPL address for API compatibility
     if (requestPayload.token && !requestPayload.splTokenAddress) {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(requestPayload.token);
@@ -59,11 +59,12 @@ export class ProductsModule {
 
     // Convert decimal price to base units for blockchain compatibility
     if (requestPayload.price) {
-      const token = requestPayload.token || SupportedToken.USDT;
+      const token = requestPayload.token || SupportedToken.USDC;
       const decimals = TokenUtils.getTokenDecimals(token);
-      const priceValue = typeof requestPayload.price === 'string'
-        ? parseFloat(requestPayload.price)
-        : requestPayload.price;
+      const priceValue =
+        typeof requestPayload.price === 'string'
+          ? parseFloat(requestPayload.price)
+          : requestPayload.price;
 
       // Convert to base units (e.g., 0.01 USDT with 6 decimals becomes 10000)
       const priceInBaseUnits = Math.round(priceValue * 10 ** decimals);
@@ -76,11 +77,11 @@ export class ProductsModule {
 
   /**
    * Retrieves a specific product by its ID
-   * 
+   *
    * @param productId - The unique identifier of the product to retrieve
    * @returns Promise that resolves to the product details
    * @throws {Error} When the product is not found or retrieval fails
-   * 
+   *
    * @example
    * ```typescript
    * const product = await beep.products.getProduct('prod_123abc456def');
@@ -94,10 +95,10 @@ export class ProductsModule {
 
   /**
    * Retrieves all products for the current merchant
-   * 
+   *
    * @returns Promise that resolves to an array of products
    * @throws {Error} When product retrieval fails
-   * 
+   *
    * @example
    * ```typescript
    * const products = await beep.products.listProducts();
@@ -113,19 +114,19 @@ export class ProductsModule {
   /**
    * Updates an existing product with new configuration
    * Only provided fields will be updated - omitted fields remain unchanged
-   * 
+   *
    * @param productId - The unique identifier of the product to update
    * @param payload - Product update parameters (all fields optional)
    * @returns Promise that resolves to the updated product
    * @throws {Error} When the product is not found or update fails
-   * 
+   *
    * @example
    * ```typescript
    * // Update just the price
    * const updatedProduct = await beep.products.updateProduct('prod_123', {
    *   price: '29.99'
    * });
-   * 
+   *
    * // Update multiple fields
    * const updatedProduct = await beep.products.updateProduct('prod_123', {
    *   name: 'New Product Name',
@@ -136,7 +137,7 @@ export class ProductsModule {
    */
   async updateProduct(productId: string, payload: UpdateProductPayload): Promise<Product> {
     const requestPayload = { ...payload };
-    
+
     // Convert token enum to SPL address for API compatibility
     if (requestPayload.token && !requestPayload.splTokenAddress) {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(requestPayload.token);
@@ -148,13 +149,13 @@ export class ProductsModule {
 
   /**
    * Deletes an existing product
-   * 
+   *
    * @param productId - The unique identifier of the product to delete
    * @returns Promise that resolves when the product is successfully deleted
    * @throws {Error} When the product is not found or deletion fails
-   * 
+   *
    * @remarks Once deleted, a product cannot be recovered. Existing invoices linked to this product will remain unaffected.
-   * 
+   *
    * @example
    * ```typescript
    * await beep.products.deleteProduct('prod_123abc456def');

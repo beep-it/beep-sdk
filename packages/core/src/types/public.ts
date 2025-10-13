@@ -10,7 +10,7 @@ export interface EphemeralItem {
   name: string;
   price: string; // decimal string e.g. "12.50"
   quantity?: number;
-  token?: SupportedToken; // default: USDT
+  token?: SupportedToken; // default: USDC
   description?: string;
 }
 
