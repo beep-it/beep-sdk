@@ -12,4 +12,3 @@ export class UserModule {
     return data as CurrentUserResponse;
   }
 }
-

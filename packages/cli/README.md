@@ -230,6 +230,65 @@ The goal? You run one command, follow the specific instructions, and you're paym
 
 ---
 
+## MCP Mounting Examples
+
+Minimal client/server wiring examples matching the reference apps.
+
+- Express server (seller) mounting an MCP HTTP endpoint at `/mcp`:
+
+```ts
+// server/src/routes/index.ts
+import { Express } from 'express';
+import { createMcpHttpHandler } from './mcp-server';
+import { logger } from './utils/logger';
+
+export const setupRoutes = (app: Express): void => {
+  const mcpHandler = createMcpHttpHandler({ logger });
+
+  // Optional liveness for MCP endpoint
+  app.head('/mcp', (_req, res) => {
+    res
+      .header('Access-Control-Allow-Origin', '*')
+      .header('Access-Control-Expose-Headers', 'mcp-session-id')
+      .status(200)
+      .end();
+  });
+
+  // Streamable HTTP transport routes
+  app.post('/mcp', mcpHandler);
+  app.get('/mcp', mcpHandler);
+};
+```
+
+- MCP client (buyer) initialization targeting the seller’s `/mcp` endpoint:
+
+```ts
+// client/src/index.ts
+import { mcpClient } from './mcp-client';
+
+async function start() {
+  const serverUrl = process.env.SERVER_URL || 'http://localhost:4005/mcp';
+  await mcpClient.initialize({ type: 'http', url: new URL(serverUrl) });
+  await mcpClient.whenReady();
+
+  // Optionally discover tools
+  const tools = await mcpClient.listTools();
+  console.log('Seller tools:', tools.map(t => t.name));
+}
+
+start().catch((e) => {
+  console.error('[MCP CLIENT] init failed:', e);
+  process.exit(1);
+});
+```
+
+Notes
+- Always include the `/mcp` path in `SERVER_URL` for the HTTP transport.
+- Ensure the server mounts `express.json()` before the MCP routes.
+- The first client POST must be JSON-RPC `initialize`; the provided client transport handles this automatically.
+
+---
+
 ## License
 
 MIT. Go build something amazing.
