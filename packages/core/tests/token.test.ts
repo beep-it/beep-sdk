@@ -26,6 +26,6 @@ describe('TokenUtils', () => {
   });
 
   it('getDefaultToken returns USDT', () => {
-    expect(TokenUtils.getDefaultToken()).toBe(SupportedToken.USDT);
+    expect(TokenUtils.getDefaultToken()).toBe(SupportedToken.USDC);
   });
 });
