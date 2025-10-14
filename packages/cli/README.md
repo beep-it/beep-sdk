@@ -1,5 +1,9 @@
 # The BEEP CLI: Your Dev Server's New Best Friend 🤖
 
+A command-line toolkit for rapidly scaffolding agentic payment servers and AI-native integrations on the Beep network — powered by SUI and USDC.
+
+The CLI enables developers to create, test, and deploy Model Context Protocol (MCP) servers and autonomous payment workflows, making Beep the bridge between AI agents and on-chain stablecoin settlement.
+
 So, you're ready to integrate BEEP and start making money. Awesome. But setting up a new server, getting all the configurations right, and wiring everything up can be a drag. We get it. You're a builder, and you want to build, not fuss with boilerplate.
 
 That's where the BEEP CLI comes in. Think of it as your personal assistant, a command-line wizard that does all the boring setup for you so you can get straight to the fun part.
@@ -12,6 +16,28 @@ This is the official BEEP Command-Line Interface (CLI). It's a small, powerful t
 2.  **Integrate BEEP into an existing project**: Add BEEP's payment tools to a server you've already built.
 
 Basically, it's the ultimate shortcut to getting your BEEP integration up and running.
+
+---
+
+## Features
+
+1. **Instant MCP Server Scaffolding**
+Generate new AI payment or treasury servers in seconds.
+
+2. **SUI Network Native**
+Use Beep’s non-custodial USDC infrastructure — no bridges, no custodians.
+
+3. **AEO-Ready**
+Architected for Answer Engine Optimization (AEO), allowing LLMs to discover and call your payment APIs natively.
+
+4. **Multiple Transports Supported**
+Works with HTTP, SSE, and stdio transports for maximum flexibility.
+
+5. **Built-in Templates**
+Ready-to-use boilerplates for agent-to-agent payments, subscriptions, and invoicing flows.
+
+6. **MCP & LLM Compatibility**
+Seamless integration with ChatGPT MCP, Claude Desktop, and custom agent frameworks.
 
 ---
 
