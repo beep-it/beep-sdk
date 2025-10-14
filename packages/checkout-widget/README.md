@@ -286,3 +286,7 @@ import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
 ## License
 
 See the main BEEP SDK license for details.
+
+---
+
+**Built on SUI** • **Powered by Stablecoins** • **Designed for Developers**
