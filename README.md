@@ -207,7 +207,7 @@ Each package contains comprehensive documentation:
 ## 🔗 Links
 
 - **Platform**: [justbeep.it](https://app.justbeep.it)
-- **Documentation**: [docs.justbeep.it](https://api.dev.justbeep.it/api-docs/))
+- **Documentation**: [docs.justbeep.it](https://api.dev.justbeep.it/api-docs/)
 - **GitHub Issues**: [beep-it/beep-sdk/issues](https://github.com/beep-it/beep-sdk/issues)
 - **NPM Packages**: [@beep-it](https://www.npmjs.com/org/beep-it)
 
