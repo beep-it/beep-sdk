@@ -1,4 +1,4 @@
-# 📡 Beep MCP Integration (Model Context Protocol)
+# 📡 MCP-Pay Integration
 
 This package provides the **Model Context Protocol (MCP)** integration layer for **Beep SDK**, enabling seamless connections between **AI agents**, **backends**, and **on-chain payment workflows** on the **SUI network**.
 
