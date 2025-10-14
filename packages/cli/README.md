@@ -1,4 +1,4 @@
-# The BEEP CLI: Your Dev Server's New Best Friend 🤖
+# The MCP-PAY CLI: Your Dev Server's New Best Friend 🤖
 
 A command-line toolkit for rapidly scaffolding agentic payment servers and AI-native integrations on the Beep network — powered by SUI and USDC.
 
