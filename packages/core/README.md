@@ -1,5 +1,7 @@
 # The BEEP SDK: Turn Your Cool Sh\*t into Revenue - now on SUI 💸
 
+Accept credit cards, USDC and receive revenue in USDC on SUI wallets
+
 Alright, let's be real. You made something awesome. A game, an app, a digital masterpiece. And now you wanna get paid for it. As you should! But dealing with payments is a whole vibe killer. 
 
 That’s where **Beep** comes in.
