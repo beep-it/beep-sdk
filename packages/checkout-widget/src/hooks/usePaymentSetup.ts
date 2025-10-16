@@ -14,6 +14,7 @@ interface PaymentSetupData {
   paymentLabel?: string;
   processedAssets: BeepPurchaseAsset[];
   totalAmount: number;
+  payWithCashEligible: boolean;
 }
 
 interface UsePaymentSetupParams {
@@ -62,8 +63,11 @@ export const usePaymentSetup = ({
         qrCode: resp.qrCode || null,
         referenceKey: resp.referenceKey || null,
         paymentUrl: resp.paymentUrl || null,
-        processedAssets: publicAssets.filter((a): a is BeepPurchaseAsset => 'assetId' in a) as BeepPurchaseAsset[],
+        processedAssets: publicAssets.filter(
+          (a): a is BeepPurchaseAsset => 'assetId' in a,
+        ) as BeepPurchaseAsset[],
         totalAmount: resp.amount ? parseFloat(resp.amount) : 0,
+        payWithCashEligible: resp.payWithCashEligible,
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

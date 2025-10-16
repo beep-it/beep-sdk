@@ -24,7 +24,7 @@
   "scripts": {
     "build": "tsup --config tsup.lib.config.ts",
     "build:showcase": "tsup --config tsup.config.ts",
-    "dev": "npm run build:showcase && npx serve . -p 8090",
+    "dev": "npm run build:showcase && cp showcase.html index.html && npx serve . -p 8090",
     "dev:watch": "tsup src/index.ts --format cjs,esm --dts --watch",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest",

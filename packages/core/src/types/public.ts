@@ -23,6 +23,16 @@ export interface PublicPaymentSessionRequest {
   generateQrCode?: boolean;
 }
 
+export interface GenerateCashPaymentUrlRequest {
+  reference: string;
+  amount: string;
+  walletAddress: string;
+}
+
+export interface GenerateCashPaymentUrlResponse {
+  paymentUrl: string;
+}
+
 export interface PublicPaymentSessionResponse {
   referenceKey: string;
   paymentUrl: string;
@@ -30,6 +40,7 @@ export interface PublicPaymentSessionResponse {
   amount: string; // decimal string
   expiresAt: string | Date;
   status: InvoiceStatus | string;
+  payWithCashEligible: boolean;
 }
 
 export interface PublicPaymentStatusResponse {

@@ -1,5 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   ConfigurationError,
   LoadingState,
@@ -27,16 +27,17 @@ import { MerchantWidgetProps } from './types';
 
 // Safe logo import with fallback
 import beepLogoUrl from './beep_logo_mega.svg';
+import { useGeneratePaymentUrl } from './hooks/useGeneratePaymentUrl';
 
 const beepLogo =
   beepLogoUrl ||
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCA0MCAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzMzMzMzMyI+QkVFUDwvdGV4dD4KPHN2Zz4K';
 
 /**
- * Parses a Solana Pay URI to extract payment parameters.
+ * Parses a Payment URI to extract payment parameters.
  * Expected format: solana:recipient?amount=X&reference=Y&label=Z
  */
-function parseSolanaPayURI(uri: string) {
+function parsePaymentURI(uri: string) {
   try {
     if (!uri || typeof uri !== 'string') {
       return {
@@ -165,6 +166,9 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     enabled: !!paymentSetupData?.referenceKey,
   });
 
+  const { generateCahPaymentUrl, isPending: isGenerateCashPaymentUrlPending } =
+    useGeneratePaymentUrl({ publishableKey, serverUrl });
+
   // Derive state from queries
   const isLoading = paymentSetupLoading || paymentStatusLoading;
   const paymentError = paymentSetupError || paymentStatusError;
@@ -177,13 +181,22 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   const recipientWallet = useMemo(() => {
     try {
       if (!paymentSetupData?.paymentUrl) return '';
-      const parsed = parseSolanaPayURI(paymentSetupData.paymentUrl);
+      const parsed = parsePaymentURI(paymentSetupData.paymentUrl);
       return parsed?.recipient || '';
     } catch (error) {
       console.error('Error parsing recipient wallet:', error);
       return '';
     }
   }, [paymentSetupData?.paymentUrl]);
+
+  const handleBuyWithCash = useCallback(async () => {
+    const result = await generateCahPaymentUrl({
+      amount: String(paymentSetupData!.totalAmount),
+      reference: paymentSetupData!.referenceKey!,
+      walletAddress: recipientWallet,
+    });
+    window.location.href = result.paymentUrl;
+  }, [paymentSetupData, recipientWallet]);
 
   if (isLoading) {
     return <LoadingState primaryColor={primaryColor} />;
@@ -256,6 +269,67 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                     <WalletAddressLabel walletAddress={recipientWallet} />
                   </div>
                 </ComponentErrorBoundary>
+                {paymentSetupData.payWithCashEligible && (
+                  <ComponentErrorBoundary componentName="Pay with cash">
+                    <div style={{ margin: '30px auto 32px auto' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          width: '80%',
+                          margin: '20px auto',
+                        }}
+                      >
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                        <span
+                          style={{
+                            padding: '0 16px',
+                            color: '#999',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                          }}
+                        >
+                          OR
+                        </span>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                        <button
+                          onClick={handleBuyWithCash}
+                          style={{
+                            width: '80%',
+                            background: 'linear-gradient(to right, #a855f7, #ec4899)',
+                            color: 'white',
+                            fontWeight: '600',
+                            padding: '16px',
+                            borderRadius: '12px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background =
+                              'linear-gradient(to right, #9333ea, #db2777)';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background =
+                              'linear-gradient(to right, #a855f7, #ec4899)';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                          onMouseDown={(e) => {
+                            e.currentTarget.style.transform = 'scale(0.95)';
+                          }}
+                          onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                        >
+                          Pay with cash
+                        </button>
+                      </div>
+                    </div>
+                  </ComponentErrorBoundary>
+                )}
               </>
             )}
           </ComponentErrorBoundary>
@@ -297,15 +371,15 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
 /**
  * CheckoutWidget - Complete Solana payment interface for BEEP merchants
- * 
+ *
  * A React component that provides a complete Solana-based payment interface with QR code generation,
  * payment status tracking, and customizable theming. Supports both existing product references and
  * dynamic product creation with automatic total calculation.
- * 
+ *
  * @example
  * ```tsx
  * import { CheckoutWidget } from '@beep-it/checkout-widget';
- * 
+ *
  * function PaymentPage() {
  *   return (
  *     <CheckoutWidget
@@ -327,14 +401,14 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
  *   );
  * }
  * ```
- * 
+ *
  * @param props - Configuration for the checkout widget
  * @param props.apiKey - BEEP API key for merchant authentication
  * @param props.primaryColor - Hex color for theming widget elements
  * @param props.labels - Customizable text labels for the interface
  * @param props.assets - Array of products/services to purchase
  * @param props.serverUrl - Optional custom BEEP server URL
- * 
+ *
  * @returns A fully functional Solana payment widget with QR code and status tracking
  */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {

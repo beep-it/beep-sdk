@@ -1,5 +1,7 @@
 import { AxiosError, AxiosInstance } from 'axios';
 import {
+  GenerateCashPaymentUrlRequest,
+  GenerateCashPaymentUrlResponse,
   PublicPaymentSessionRequest,
   PublicPaymentSessionResponse,
   PublicPaymentStatusResponse,
@@ -29,6 +31,17 @@ export class WidgetModule {
     const res = await this.client.post<PublicPaymentSessionResponse>(
       '/v1/widget/payment-session',
       body,
+    );
+    return res.data;
+  }
+
+  async generateCashPaymentUrl(input: GenerateCashPaymentUrlRequest) {
+    const res = await this.client.post<GenerateCashPaymentUrlResponse>(
+      '/v1/widget/generate-cash-payment-url',
+      {
+        ...input,
+        publishableKey: this.publishableKey,
+      },
     );
     return res.data;
   }
