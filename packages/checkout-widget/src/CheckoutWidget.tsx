@@ -323,6 +323,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                           onMouseUp={(e) => {
                             e.currentTarget.style.transform = 'scale(1.05)';
                           }}
+                          disabled={isGenerateCashPaymentUrlPending}
                         >
                           Pay with cash
                         </button>
