@@ -269,7 +269,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                     <WalletAddressLabel walletAddress={recipientWallet} />
                   </div>
                 </ComponentErrorBoundary>
-                {paymentSetupData.payWithCashEligible && (
+                {paymentSetupData.isCashPaymentEligible && (
                   <ComponentErrorBoundary componentName="Pay with cash">
                     <div style={{ margin: '30px auto 32px auto' }}>
                       <div

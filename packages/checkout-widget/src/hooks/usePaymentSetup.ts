@@ -14,7 +14,7 @@ interface PaymentSetupData {
   paymentLabel?: string;
   processedAssets: BeepPurchaseAsset[];
   totalAmount: number;
-  payWithCashEligible: boolean;
+  isCashPaymentEligible: boolean;
 }
 
 interface UsePaymentSetupParams {
@@ -67,7 +67,7 @@ export const usePaymentSetup = ({
           (a): a is BeepPurchaseAsset => 'assetId' in a,
         ) as BeepPurchaseAsset[],
         totalAmount: resp.amount ? parseFloat(resp.amount) : 0,
-        payWithCashEligible: resp.payWithCashEligible,
+        isCashPaymentEligible: resp.isCashPaymentEligible,
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

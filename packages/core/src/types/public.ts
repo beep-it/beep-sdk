@@ -40,7 +40,7 @@ export interface PublicPaymentSessionResponse {
   amount: string; // decimal string
   expiresAt: string | Date;
   status: InvoiceStatus | string;
-  payWithCashEligible: boolean;
+  isCashPaymentEligible: boolean;
 }
 
 export interface PublicPaymentStatusResponse {
