@@ -5,7 +5,8 @@ interface WalletAddressLabelProps {
 }
 
 export const WalletAddressLabel: React.FC<WalletAddressLabelProps> = ({ walletAddress }) => {
-  const safeWalletAddress = walletAddress || '0x1234567890121234567890121234567890120611';
+  const safeWalletAddress =
+    walletAddress || '0x3bab868a1954fd34892ca25193b91f1976add40cc61559f7f58bd2a7c454b8dd';
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {

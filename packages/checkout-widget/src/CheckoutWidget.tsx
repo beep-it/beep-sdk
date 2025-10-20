@@ -1,11 +1,12 @@
 import { QRCodeSVG } from 'qrcode.react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ConfigurationError,
   LoadingState,
   PaymentError,
   PaymentSuccess,
   WalletAddressLabel,
+  WalletConnectPanel,
 } from './components';
 import { ComponentErrorBoundary } from './components/ComponentErrorBoundary';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -24,6 +25,7 @@ import {
   qrStyle,
 } from './styles';
 import { MerchantWidgetProps } from './types';
+import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 
 // Safe logo import with fallback
 import beepLogoUrl from './beep_logo_mega.svg';
@@ -154,16 +156,22 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     paymentLabel: labels?.paymentLabel,
   });
 
+  const [transactionDigest, setTransactionDigest] = useState<string | null>(null);
+
+  const handlePaymentComplete = useCallback((trxDigest: string) => {
+    setTransactionDigest(trxDigest);
+  }, []);
+
   // Status query - polls for payment completion
   const {
     data: paymentStatusData,
     error: paymentStatusError,
     isLoading: paymentStatusLoading,
   } = usePaymentStatus({
-    referenceKey: paymentSetupData?.referenceKey || null,
+    referenceKey: transactionDigest || paymentSetupData?.referenceKey || null,
     publishableKey,
     serverUrl,
-    enabled: !!paymentSetupData?.referenceKey,
+    enabled: !!(transactionDigest || paymentSetupData?.referenceKey),
   });
 
   const { generateCahPaymentUrl, isPending: isGenerateCashPaymentUrlPending } =
@@ -182,7 +190,9 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     try {
       if (!paymentSetupData?.paymentUrl) return '';
       const parsed = parsePaymentURI(paymentSetupData.paymentUrl);
-      return parsed?.recipient || '';
+      return (
+        parsed?.recipient || '0x3bab868a1954fd34892ca25193b91f1976add40cc61559f7f58bd2a7c454b8dd'
+      );
     } catch (error) {
       console.error('Error parsing recipient wallet:', error);
       return '';
@@ -269,6 +279,39 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                     <WalletAddressLabel walletAddress={recipientWallet} />
                   </div>
                 </ComponentErrorBoundary>
+                <ComponentErrorBoundary componentName="Connect Wallet">
+                  <div style={{ margin: '30px auto 32px auto' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '80%',
+                        margin: '20px auto',
+                      }}
+                    >
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                      <span
+                        style={{
+                          padding: '0 16px',
+                          color: '#999',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                        }}
+                      >
+                        OR
+                      </span>
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                      <WalletConnectPanel
+                        paymentSetupData={paymentSetupData}
+                        destinationAddress={recipientWallet}
+                        onPaymentComplete={handlePaymentComplete}
+                      />
+                    </div>
+                  </div>
+                </ComponentErrorBoundary>
+
                 {paymentSetupData.isCashPaymentEligible && (
                   <ComponentErrorBoundary componentName="Pay with cash">
                     <div style={{ margin: '30px auto 32px auto' }}>
@@ -413,10 +456,15 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
  * @returns A fully functional Solana payment widget with QR code and status tracking
  */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
+  // TODO SST: Move to .env? Build prop?
+  // NEXT_PUBLIC_DYNAMIC_WALLET_ENVIRONMENT_KEY=f3685d51-8b46-454f-9859-f8bb88dfac14
+  const dynamicEnvironmentId = 'f3685d51-8b46-454f-9859-f8bb88dfac14';
   return (
     <ErrorBoundary>
       <QueryProvider>
-        <CheckoutWidgetInner {...props} />
+        <DynamicWalletProvider environmentId={dynamicEnvironmentId}>
+          <CheckoutWidgetInner {...props} />
+        </DynamicWalletProvider>
       </QueryProvider>
     </ErrorBoundary>
   );

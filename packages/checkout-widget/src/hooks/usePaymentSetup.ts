@@ -7,7 +7,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useBeepPublicClient } from './useBeepPublicClient';
 
-interface PaymentSetupData {
+export interface PaymentSetupData {
   qrCode: string | null;
   referenceKey: string | null;
   paymentUrl: string | null;
