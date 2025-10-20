@@ -1,8 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useBeepPublicClient } from './useBeepPublicClient';
-import { GenerateCashPaymentUrlRequest } from '../../../core/src/types/public';
+import { CheckEmailVerificationRequest } from '../../../core/src/types/public';
 
-export const useGeneratePaymentUrl = ({
+export const useCheckEmailVerification = ({
   publishableKey,
   serverUrl,
 }: {
@@ -12,16 +12,16 @@ export const useGeneratePaymentUrl = ({
   const client = useBeepPublicClient({ publishableKey, serverUrl });
 
   const { mutateAsync, isPending, error } = useMutation({
-    mutationFn: async (data: GenerateCashPaymentUrlRequest) => {
-      return client.widget.generateCashPaymentUrl(data);
+    mutationFn: async (data: CheckEmailVerificationRequest) => {
+      return client.widget.checkEmailVerification(data);
     },
     onError: (error) => {
-      console.error('Generation for TopUp payment url failed:', error);
+      console.error('Check email verification failed:', error);
     },
   });
 
   return {
-    generateCashPaymentUrl: mutateAsync,
+    checkEmailVerification: mutateAsync,
     isPending,
     error,
   };

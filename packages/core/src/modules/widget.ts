@@ -1,5 +1,7 @@
 import { AxiosError, AxiosInstance } from 'axios';
 import {
+  CheckEmailVerificationRequest,
+  CheckEmailVerificationResponse,
   GenerateCashPaymentUrlRequest,
   GenerateCashPaymentUrlResponse,
   PublicPaymentSessionRequest,
@@ -31,6 +33,17 @@ export class WidgetModule {
     const res = await this.client.post<PublicPaymentSessionResponse>(
       '/v1/widget/payment-session',
       body,
+    );
+    return res.data;
+  }
+
+  async checkEmailVerification(input: CheckEmailVerificationRequest) {
+    const res = await this.client.post<CheckEmailVerificationResponse>(
+      '/v1/widget/check-email-verification',
+      {
+        ...input,
+        publishableKey: this.publishableKey,
+      },
     );
     return res.data;
   }
