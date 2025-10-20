@@ -30,6 +30,7 @@ import beepLogoUrl from './beep_logo_mega.svg';
 import { useGeneratePaymentUrl } from './hooks/useGeneratePaymentUrl';
 import { WidgetSteps } from './constants';
 import { EmailVerification } from './components/EmailVerification';
+import { CodeConfirmation } from './components/CodeConfirmation';
 
 const beepLogo =
   beepLogoUrl ||
@@ -191,7 +192,8 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     }
   }, [paymentSetupData?.paymentUrl]);
 
-  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
+  // TODO: goran - replace with the PaymentInterface step at the end
+  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.CodeConfirmation);
 
   const handlePayWithCash = useCallback(() => {
     setWidgetStep(WidgetSteps.EmailVerification);
@@ -360,6 +362,11 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
         {widgetStep === WidgetSteps.EmailVerification && (
           <ComponentErrorBoundary componentName="EmailVerification">
             <EmailVerification setWidgetStep={setWidgetStep} publishableKey={publishableKey} />
+          </ComponentErrorBoundary>
+        )}
+        {widgetStep === WidgetSteps.CodeConfirmation && (
+          <ComponentErrorBoundary componentName="CodeConfirmation">
+            <CodeConfirmation setWidgetStep={setWidgetStep} publishableKey={publishableKey} />
           </ComponentErrorBoundary>
         )}
         {/* Footer */}
