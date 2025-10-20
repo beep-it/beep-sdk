@@ -39,7 +39,7 @@ const ShowcasePage: React.FC = () => {
               scanQr: 'Scan with your phone or copy address',
             }}
             assets={[{ assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 }]}
-            publishableKey="beep_pk_DYLaQemoEwQu4O355Qi8tEWtPTfEQu5_"
+            publishableKey="beep_pk_demo_publishable_key"
             serverUrl="http://localhost:4070"
           />
         </div>
