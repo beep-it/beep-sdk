@@ -114,12 +114,7 @@ const payToAddress = async ({
     tx.setGasBudget(10_000_000);
 
     // Transfer to recipient
-    tx.transferObjects(
-      [sendCoin],
-      tx.pure.address(
-        destinationAddress || '0x3bab868a1954fd34892ca25193b91f1976add40cc61559f7f58bd2a7c454b8dd',
-      ),
-    );
+    tx.transferObjects([sendCoin], tx.pure.address(destinationAddress));
 
     // Sign and execute transaction
     const signedTransaction = await primaryWallet.signTransaction(tx);

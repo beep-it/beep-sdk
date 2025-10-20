@@ -190,9 +190,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     try {
       if (!paymentSetupData?.paymentUrl) return '';
       const parsed = parsePaymentURI(paymentSetupData.paymentUrl);
-      return (
-        parsed?.recipient || '0x3bab868a1954fd34892ca25193b91f1976add40cc61559f7f58bd2a7c454b8dd'
-      );
+      return parsed?.recipient || '';
     } catch (error) {
       console.error('Error parsing recipient wallet:', error);
       return '';
