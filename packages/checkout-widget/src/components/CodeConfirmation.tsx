@@ -85,7 +85,7 @@ export const CodeConfirmation: React.FC<{
       }
 
       // If verification successful, navigate to next step
-      setWidgetStep(WidgetSteps.CashPaymentQuote);
+      setWidgetStep(WidgetSteps.PaymentQuote);
     } catch (error) {
       setCodeError('Verification failed. Please try again.');
     }

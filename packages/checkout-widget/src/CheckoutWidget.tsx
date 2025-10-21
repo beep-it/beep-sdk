@@ -30,6 +30,7 @@ import beepLogoUrl from './beep_logo_mega.svg';
 import { WidgetSteps } from './constants';
 import { EmailVerification } from './components/EmailVerification';
 import { CodeConfirmation } from './components/CodeConfirmation';
+import { PaymentQuote } from './components/PaymentQuote';
 
 const beepLogo =
   beepLogoUrl ||
@@ -190,7 +191,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
   const [email, setEmail] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
-  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
+  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentQuote);
   const [otp, setOTP] = useState<string | null>(null);
 
   const handlePayWithCash = useCallback(() => {
@@ -198,11 +199,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   }, []);
 
   const shouldRenderAmountDisplay = useMemo(() => {
-    return (
-      widgetStep === WidgetSteps.PaymentInterface ||
-      widgetStep === WidgetSteps.PaymentSuccess ||
-      widgetStep === WidgetSteps.PaymentFailure
-    );
+    return widgetStep === WidgetSteps.PaymentInterface;
   }, [widgetStep]);
 
   if (isLoading) {
@@ -225,13 +222,13 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
             </div>
           </ComponentErrorBoundary>
         )}
-        {/* Payment Success Section */}
+        {/* Payment Success Step */}
         {isPaymentComplete && (
           <ComponentErrorBoundary componentName="PaymentSuccess">
             <PaymentSuccess />
           </ComponentErrorBoundary>
         )}
-        {/* Payment Interface Section */}
+        {/* Payment Interface Step */}
         {widgetStep === WidgetSteps.PaymentInterface && (
           <ComponentErrorBoundary componentName="PaymentInterface">
             {paymentSetupData && (
@@ -347,6 +344,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
             )}
           </ComponentErrorBoundary>
         )}
+        {/* Email Verification Step */}
         {widgetStep === WidgetSteps.EmailVerification && (
           <ComponentErrorBoundary componentName="EmailVerification">
             <EmailVerification
@@ -361,6 +359,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
             />
           </ComponentErrorBoundary>
         )}
+        {/* Code Confirmation Step */}
         {widgetStep === WidgetSteps.CodeConfirmation && (
           <ComponentErrorBoundary componentName="CodeConfirmation">
             <CodeConfirmation
@@ -368,6 +367,18 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
               tosAccepted={tosAccepted}
               otp={otp}
               setOTP={setOTP}
+              setWidgetStep={setWidgetStep}
+              publishableKey={publishableKey}
+              serverUrl={serverUrl}
+            />
+          </ComponentErrorBoundary>
+        )}
+        {/* Payment Quote Step */}
+        {widgetStep === WidgetSteps.PaymentQuote && paymentSetupData && (
+          <ComponentErrorBoundary componentName="PaymentQuote">
+            <PaymentQuote
+              amount={paymentSetupData.totalAmount.toString()}
+              walletAddress={recipientWallet}
               setWidgetStep={setWidgetStep}
               publishableKey={publishableKey}
               serverUrl={serverUrl}

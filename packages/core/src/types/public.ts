@@ -1,6 +1,7 @@
 import { BeepPurchaseAsset } from './payment';
 import { SupportedToken } from './token';
 import { InvoiceStatus } from './invoice';
+import { PayWayCode } from './cash-payment';
 
 /**
  * On-the-fly item sent from the browser. The server will create a corresponding product record
@@ -21,6 +22,30 @@ export interface PublicPaymentSessionRequest {
   assets: PublicAssetInput[];
   paymentLabel?: string;
   generateQrCode?: boolean;
+}
+
+export interface GeneratePaymentQuoteRequest {
+  amount: string;
+  walletAddress: string;
+  payWayCode?: PayWayCode;
+}
+
+interface PaymentLimit {
+  /** Country code (e.g., 'US') */
+  country: string;
+  /** Payment method code */
+  payWayCode: PayWayCode;
+  /** Minimum purchase amount in fiat currency */
+  minPurchaseAmount: string;
+  /** Maximum purchase amount in fiat currency */
+  maxPurchaseAmount: string;
+}
+
+export interface GeneratePaymentQuoteResponse {
+  fiatAmount: string;
+  networkFee: string;
+  rampFee: string;
+  supportedPaymentMethods: PaymentLimit[];
 }
 
 export interface GenerateCashPaymentUrlRequest {

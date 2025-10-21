@@ -9,6 +9,8 @@ import {
   PublicPaymentStatusResponse,
   VerifyOTPRequest,
   VerifyOTPResponse,
+  GeneratePaymentQuoteRequest,
+  GeneratePaymentQuoteResponse,
 } from '../types/public';
 
 export class WidgetModule {
@@ -52,6 +54,17 @@ export class WidgetModule {
       ...input,
       publishableKey: this.publishableKey,
     });
+    return res.data;
+  }
+
+  async generatePaymentQuote(input: GeneratePaymentQuoteRequest) {
+    const res = await this.client.post<GeneratePaymentQuoteResponse>(
+      '/v1/widget/generate-payment-quote',
+      {
+        ...input,
+        publishableKey: this.publishableKey,
+      },
+    );
     return res.data;
   }
 
