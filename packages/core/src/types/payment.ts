@@ -308,3 +308,29 @@ export interface StopStreamingResponse {
    */
   referenceKeys: string[];
 }
+
+export enum PayoutStatus {
+  PENDING = 'PENDING',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELED = 'CANCELED',
+}
+
+export interface CheckPaymentStatusPayload {
+  /** The payment reference key to check */
+  referenceKey: string;
+}
+
+export interface CheckPaymentStatusResponse {
+  /** The current status of the payment (PENDING, IN_PROGRESS, COMPLETED, FAILED, CANCELED) */
+  status: PayoutStatus | 'NOT_FOUND';
+  /** The payout amount (if applicable) */
+  amount?: string;
+  /** The blockchain chain (if applicable) */
+  chain?: string;
+  /** The token type (if applicable) */
+  token?: string;
+  /** The destination wallet address (if applicable) */
+  destinationWalletAddress?: string;
+}
