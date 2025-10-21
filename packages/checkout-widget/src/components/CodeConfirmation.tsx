@@ -1,15 +1,34 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { styles } from './EmailVerification.styles';
 import { WidgetSteps } from '../constants';
+import { useGenerateOTP } from '../hooks/useGenerateOTP';
+import { useVerifyOTP } from '../hooks/useVerifyOTP';
+
+const ONE_MINUTE_SECONDS = 60;
 
 export const CodeConfirmation: React.FC<{
+  email: string;
+  tosAccepted: boolean;
+  otp: string | null;
+  setOTP: (otp: string | null) => void;
   setWidgetStep: (step: WidgetSteps) => void;
   publishableKey: string;
-}> = ({ setWidgetStep, publishableKey }) => {
+  serverUrl?: string;
+}> = ({ email, tosAccepted, otp, setOTP, setWidgetStep, publishableKey, serverUrl }) => {
   const [code, setCode] = useState('');
-  const [timeUntilResend, setTimeUntilResend] = useState(30);
+  const [timeUntilResend, setTimeUntilResend] = useState(ONE_MINUTE_SECONDS);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const [codeError, setCodeError] = useState('');
+
+  const { generateOTP, isPending: isGenerateOTPPending } = useGenerateOTP({
+    publishableKey,
+    serverUrl,
+  });
+
+  const { verifyOTP, isPending: isVerifyOTPPending } = useVerifyOTP({
+    publishableKey,
+    serverUrl,
+  });
 
   // Countdown timer for resend button
   useEffect(() => {
@@ -39,11 +58,15 @@ export const CodeConfirmation: React.FC<{
   );
 
   const handleResend = useCallback(async () => {
-    // TODO: Implement resend verification code logic
-    console.log('Resending verification code...');
+    const result = await generateOTP({ email, tosAccepted });
+    if (result.newCodeGenerated && result.verificationCode) {
+      setOTP(result.verificationCode);
+    } else {
+      setCodeError(`Verification code was recently sent. Please wait before requesting a new one.`);
+    }
 
     // Reset timer
-    setTimeUntilResend(30);
+    setTimeUntilResend(ONE_MINUTE_SECONDS);
     setIsResendDisabled(true);
   }, []);
 
@@ -53,11 +76,8 @@ export const CodeConfirmation: React.FC<{
     }
 
     try {
-      // TODO: Implement code verification logic
-      console.log('Verifying code:', code);
-
-      // Simulate verification - replace with actual API call
-      const isValid = false; // Replace with actual verification result
+      const result = await verifyOTP({ email, otp: code });
+      const isValid = result.success;
 
       if (!isValid) {
         setCodeError('Invalid verification code. Please try again.');
@@ -75,7 +95,10 @@ export const CodeConfirmation: React.FC<{
     setWidgetStep(WidgetSteps.EmailVerification);
   }, [setWidgetStep]);
 
-  const isContinueDisabled = useMemo(() => code.length !== 6, [code]);
+  const isContinueDisabled = useMemo(
+    () => code.length !== 6 || isGenerateOTPPending,
+    [code, isGenerateOTPPending],
+  );
 
   return (
     <div style={styles.container}>
@@ -145,7 +168,7 @@ export const CodeConfirmation: React.FC<{
 
       <button
         onClick={handleResend}
-        disabled={isResendDisabled}
+        disabled={isResendDisabled || isGenerateOTPPending}
         style={{
           background: 'none',
           border: 'none',

@@ -33,20 +33,23 @@ export interface GenerateCashPaymentUrlResponse {
   paymentUrl: string;
 }
 
-export enum BuyerEmailVerificationStatus {
-  /** Verification code sent but not yet confirmed */
-  PENDING = 'PENDING',
-  /** Email verification successfully completed */
-  VERIFIED = 'VERIFIED',
+export interface VerifyOTPRequest {
+  email: string;
+  otp: string;
 }
 
-export interface CheckEmailVerificationRequest {
+export interface VerifyOTPResponse {
+  success: boolean;
+}
+
+export interface GenerateOTPRequest {
   email: string;
   tosAccepted: boolean;
 }
 
-export interface CheckEmailVerificationResponse {
-  status: BuyerEmailVerificationStatus;
+export interface GenerateOTPResponse {
+  verificationCode?: string;
+  newCodeGenerated: boolean;
 }
 
 export interface PublicPaymentSessionResponse {

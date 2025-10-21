@@ -1,13 +1,15 @@
 import { AxiosError, AxiosInstance } from 'axios';
 import {
-  CheckEmailVerificationRequest,
-  CheckEmailVerificationResponse,
+  GenerateOTPRequest,
+  GenerateOTPResponse,
   DynamicEnvResponse,
   GenerateCashPaymentUrlRequest,
   GenerateCashPaymentUrlResponse,
   PublicPaymentSessionRequest,
   PublicPaymentSessionResponse,
   PublicPaymentStatusResponse,
+  VerifyOTPRequest,
+  VerifyOTPResponse,
 } from '../types/public';
 
 export class WidgetModule {
@@ -38,14 +40,19 @@ export class WidgetModule {
     return res.data;
   }
 
-  async checkEmailVerification(input: CheckEmailVerificationRequest) {
-    const res = await this.client.post<CheckEmailVerificationResponse>(
-      '/v1/widget/check-email-verification',
-      {
-        ...input,
-        publishableKey: this.publishableKey,
-      },
-    );
+  async generateOTP(input: GenerateOTPRequest) {
+    const res = await this.client.post<GenerateOTPResponse>('/v1/widget/generate-otp', {
+      ...input,
+      publishableKey: this.publishableKey,
+    });
+    return res.data;
+  }
+
+  async verifyOTP(input: VerifyOTPRequest) {
+    const res = await this.client.post<VerifyOTPResponse>('/v1/widget/verify-otp', {
+      ...input,
+      publishableKey: this.publishableKey,
+    });
     return res.data;
   }
 
