@@ -488,13 +488,13 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
  * @returns A fully functional Solana payment widget with QR code and status tracking
  */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
-  // TODO SST: Move to .env? Build prop?
-  // NEXT_PUBLIC_DYNAMIC_WALLET_ENVIRONMENT_KEY=f3685d51-8b46-454f-9859-f8bb88dfac14
-  const dynamicEnvironmentId = 'f3685d51-8b46-454f-9859-f8bb88dfac14';
   return (
     <ErrorBoundary>
       <QueryProvider>
-        <DynamicWalletProvider environmentId={dynamicEnvironmentId}>
+        <DynamicWalletProvider
+          publishableKey={props.publishableKey}
+          serverUrl={props.serverUrl}
+        >
           <CheckoutWidgetInner {...props} />
         </DynamicWalletProvider>
       </QueryProvider>
