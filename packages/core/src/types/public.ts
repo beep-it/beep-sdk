@@ -91,3 +91,7 @@ export interface PublicPaymentStatusResponse {
   paid: boolean;
   status?: InvoiceStatus | string;
 }
+
+export interface DynamicEnvResponse {
+  environmentId: string;
+}
