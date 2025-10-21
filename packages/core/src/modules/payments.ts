@@ -282,7 +282,6 @@ export class PaymentsModule {
    * const beep = new BeepClient({ apiKey: 'your_secret_api_key' });
    *
    * const paymentSession = await beep.payments.issuePayment({
-   *   apiKey: 'your_secret_api_key',
    *   assetChunks: [
    *     { assetId: 'video-streaming-uuid', quantity: 1 },
    *     { assetId: 'api-calls-uuid', quantity: 100 }
@@ -321,7 +320,6 @@ export class PaymentsModule {
    * ```typescript
    * // Start billing for the streaming session
    * const result = await beep.payments.startStreaming({
-   *   apiKey: 'your_secret_api_key',
    *   invoiceId: 'invoice_uuid_from_issuePayment'
    * });
    *
@@ -352,7 +350,6 @@ export class PaymentsModule {
    * ```typescript
    * // Temporarily pause billing (can be resumed later)
    * const result = await beep.payments.pauseStreaming({
-   *   apiKey: 'your_secret_api_key',
    *   invoiceId: 'active_streaming_invoice_uuid'
    * });
    *
@@ -385,7 +382,6 @@ export class PaymentsModule {
    * ```typescript
    * // Permanently stop and finalize the streaming session
    * const result = await beep.payments.stopStreaming({
-   *   apiKey: 'your_secret_api_key',
    *   invoiceId: 'active_streaming_invoice_uuid'
    * });
    *
@@ -397,5 +393,18 @@ export class PaymentsModule {
   async stopStreaming(payload: StopStreamingPayload): Promise<StopStreamingResponse> {
     const response = await this.client.post<StopStreamingResponse>('/v1/invoices/stop', payload);
     return response.data;
+  }
+
+  /**
+   * Checks payment status for a given reference key.
+   * Calls the server `/v1/invoices/check-payment-status` endpoint with an API key.
+   *
+   * @param params.referenceKey - The payment reference key to check
+   */
+  async checkPaymentStatus(params: {
+    referenceKey: string;
+  }): Promise<{ success: boolean; paid: boolean; status?: string; data?: any }> {
+    const { data } = await this.client.post('/v1/invoices/check-payment-status', params);
+    return data;
   }
 }

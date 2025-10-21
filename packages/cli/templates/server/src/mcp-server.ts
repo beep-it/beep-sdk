@@ -13,6 +13,7 @@ import { Request, Response } from 'express';
 import { randomUUID } from 'crypto';
 import { checkBeepApiTool } from './tools/checkBeepApi';
 import { issuePaymentTool } from './tools/issuePayment';
+import { checkPaymentStatusTool } from './tools/checkPaymentStatus';
 import { pauseStreamingTool } from './tools/pauseStreaming';
 import { requestAndPurchaseAssetTool } from './tools/requestAndPurchaseAsset';
 import { startStreamingTool } from './tools/startStreaming';
@@ -34,6 +35,7 @@ const tools: MCPToolRegistry = {
   checkBeepApi: checkBeepApiTool,
   requestAndPurchaseAsset: requestAndPurchaseAssetTool,
   issuePayment: issuePaymentTool,
+  checkPaymentStatus: checkPaymentStatusTool,
   pauseStreaming: pauseStreamingTool,
   startStreaming: startStreamingTool,
   stopStreaming: stopStreamingTool,
