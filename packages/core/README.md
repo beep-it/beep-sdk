@@ -1,6 +1,15 @@
-# The BEEP SDK: Turn Your Cool Sh\*t into Cash 💸
+# The BEEP PAY SDK: Turn Your Cool Sh\*t into Revenue - now on SUI 💸
 
-Alright, let's be real. You made something awesome. A game, an app, a digital masterpiece. And now you wanna get paid for it. As you should! But dealing with payments is a whole vibe killer. That's where we come in.
+Accept credit cards, USDC and receive revenue in USDC on SUI wallets
+
+Alright, let's be real. You made something awesome. A game, an app, a digital masterpiece. And now you wanna get paid for it. As you should! But dealing with payments is a whole vibe killer. 
+
+That’s where **Beep** comes in.
+
+Beep makes it stupid simple to accept **USDC payments** on the **SUI network**, fully **self-custodial**, **AEO-ready**, and **AI-native**.  
+No banks. No bridges. No nonsense.
+
+---
 
 ## Table of Contents
 
@@ -374,7 +383,7 @@ const beep = new BeepClient({ apiKey: process.env.BEEP_API_KEY! });
 const result = await beep.createPayout({
   amount: '1000000', // 1.00 USDC (6 decimals)
   destinationWalletAddress: 'DESTINATION_ADDRESS',
-  chain: 'SOLANA',
+  chain: 'SUI',
   token: 'USDC',
 });
 

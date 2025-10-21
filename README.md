@@ -1,6 +1,6 @@
 # BEEP SDK
 
-A comprehensive TypeScript SDK for integrating with the BEEP Solana payment platform. Enables one-time stablecoin payments, invoice management, and MCP (Model Context Protocol) server integration.
+A comprehensive TypeScript SDK for integrating with the BEEP payment platform on the SUI network — enabling self-custodial stablecoin payments, native a402 implementation (agent http 402 standard), and native LLM agent integrations through the Model Context Protocol (MCP).
 
 ## 📦 Packages Overview
 
@@ -30,10 +30,9 @@ npm install @beep-it/sdk-core
 
 ### [`@beep-it/checkout-widget`](./packages/checkout-widget)
 
-**React component for embedded Solana payment interfaces**
+**React component for embedded Credit card, stablecoin payment interfaces**
 
-- Drop-in React component for payment processing
-- QR code generation for Solana Pay
+- Drop-in React component for payment processing and settlement on SUI wallets
 - Real-time payment status polling
 - Customizable theming and labels
 - Zero CSS dependencies (inline styling)
@@ -44,7 +43,12 @@ npm install @beep-it/checkout-widget @beep-it/sdk-core
 
 **Use Cases:**
 
+- Digital Gaming item sell
 - E-commerce checkout flows
+- Server-side SUI payment processing
+- Client-side checkout integrations
+- AI-agent-to-wallet transactions
+- Automated treasury and invoicing flows
 - Service payment forms
 - Digital product purchases
 - Donation widgets
@@ -68,10 +72,12 @@ beep init my-mcp-server
 
 **Use Cases:**
 
-- AI agent payment integrations
+- Building AI agent payment integrations
 - MCP server development
 - Claude Desktop integrations
 - Automated payment workflows
+- MCP-enabled treasury or billing bots
+- Claude / ChatGPT plugin scaffolding
 
 ---
 
@@ -86,9 +92,10 @@ beep init my-mcp-server
 
 **Use Cases:**
 
-- Understanding MCP integration
-- Reference implementation
-- Production deployment guides
+- AI agents that handle payments
+- AEO-compliant context injection
+- LLM-based financial reasoning or invoicing
+- On-chain automation via SUI smart contracts
 
 ## 🚀 Quick Start
 
@@ -139,6 +146,7 @@ cd my-payment-server
 # Start development
 npm run dev
 ```
+This enables your LLM agent to send, receive, and verify payments in real-time via Beep’s non-custodial USDC-on-SUI infrastructure.
 
 ## 🏗 Development Setup
 
@@ -207,7 +215,7 @@ Each package contains comprehensive documentation:
 ## 🔗 Links
 
 - **Platform**: [justbeep.it](https://app.justbeep.it)
-- **Documentation**: [docs.justbeep.it](https://docs.justbeep.it)
+- **Documentation**: [docs.justbeep.it](https://api.dev.justbeep.it/api-docs/)
 - **GitHub Issues**: [beep-it/beep-sdk/issues](https://github.com/beep-it/beep-sdk/issues)
 - **NPM Packages**: [@beep-it](https://www.npmjs.com/org/beep-it)
 
@@ -217,4 +225,4 @@ MIT - See [LICENSE](./LICENSE) for details.
 
 ---
 
-**Built for Solana** • **Powered by Stablecoins** • **Designed for Developers**
+**Built on SUI** • **Powered by Stablecoins** • **Designed for Developers**

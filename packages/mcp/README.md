@@ -1,4 +1,57 @@
-# Beep MCP Server - Client Integration Guide
+# 📡 MCP-Pay Integration
+
+This package provides the **Model Context Protocol (MCP)** integration layer for **Beep SDK**, enabling seamless connections between **AI agents**, **backends**, and **on-chain payment workflows** on the **SUI network**.
+
+Beep’s MCP integration allows **LLMs and autonomous agents** (ChatGPT, Claude, custom bots, etc.) to:
+
+- Initiate or verify stablecoin payments
+- Automate invoicing and settlement
+- Embed on-chain context into reasoning flows
+- Be discoverable and callable through **AEO (Answer Engine Optimization)**
+
+---
+
+## 📦 What’s Inside
+
+- Reference **MCP server** implementations  
+- Transport adapters (`HTTP`, `SSE`, `stdio`)  
+- Authentication and schema definitions  
+- AEO-compatible metadata for agent discovery  
+- Best practices and integration examples  
+
+---
+
+## 🚀 Why MCP Matters for Beep
+
+Beep bridges **AI agents ↔ SUI payments** using self-custodial USDC infrastructure.
+
+| Capability | Description |
+|-------------|--------------|
+| **Agentic Payments** | Agents can autonomously send, request, and verify payments |
+| **Context-Aware Reasoning** | Payment data feeds directly into LLM reasoning graphs |
+| **AEO Discoverability** | Endpoints can be indexed for direct LLM use |
+| **Composable Workflows** | Integrate Beep payments into any AI or SaaS product |
+
+---
+
+## 🔄 Supported Transports
+
+| Transport | Use Case | Description |
+|-----------|-----------|-------------|
+| `http` | Web services / REST APIs | Standard HTTP-based MCP endpoints |
+| `sse` | Streaming / real-time agents | Push updates via Server-Sent Events |
+| `stdio` | Local / CLI agents | For Claude Desktop or local agent communication |
+
+Each transport adapter includes:
+
+- JSON message serialization/parsing  
+- Lifecycle hooks (`onOpen`, `onClose`, `onError`)  
+- API key–based authentication middleware  
+
+---
+
+
+## Beep MCP Server - Client Integration Guide
 
 A Model-Context-Protocol (MCP) server that provides secure access to Beep platform capabilities through multiple transport protocols.
 

@@ -1,6 +1,6 @@
 # @beep-it/checkout-widget
 
-A React component for Solana-based payment processing with QR code generation and real-time payment status polling. Built for the BEEP payment system.
+A React component for SUI-based, self-custodial stablecoin payments with QR code generation, real-time payment verification, and full agent compatibility via AEO (Answer Engine Optimization). Built for the Beep payment system — the first agentic payment layer on the SUI network.
 
 ## Installation
 
@@ -107,8 +107,8 @@ const assets = [
 
 ### Core Functionality
 
-- **Solana Pay Integration**: Generates standards-compliant Solana Pay QR codes
-- **Real-time Status Polling**: Automatically checks payment status every 15 seconds
+- **SUI Network Integration**: Generates native SUI USDC payment requests
+- **Real-time Status Polling**: Verifies payment confirmation directly from the SUI RPC
 - **Flexible Asset Support**: Mix existing products with on-the-fly product creation (persisted)
 - **Payment Label Support**: Custom labels appear in wallet interfaces
 - **Wallet Address Display**: Shows copyable recipient address for desktop users
@@ -217,9 +217,9 @@ const assets = [
 
 ## Payment Flow
 
-1. **Setup Phase**: Widget fetches/creates products and generates Solana Pay URL
+1. **Initialization Phase**: The widget prepares a signed USDC-on-SUI payment request.
 2. **Display Phase**: Shows QR code and total amount to user
-3. **Polling Phase**: Continuously checks payment status every 15 seconds
+3. **Polling Phase**: Automatically checks transaction finality via SUI RPC
 4. **Completion**: Displays success state when payment is confirmed on-chain
 
 ## Error Handling
@@ -231,12 +231,12 @@ The widget includes comprehensive error handling:
 - **Payment Errors**: Failed transactions, expired payments
 - **Component Errors**: Isolated error boundaries prevent crashes
 
-## Solana Pay Integration
+## SUI Payment Integration
 
-The widget generates Solana Pay URLs with:
+The widget generates SUI-native Payment URLs with:
 
-- **Recipient**: Merchant's Solana wallet address
-- **Amount**: Total calculated from all assets
+- **Recipient**: Developer's SUI wallet address
+- **Amount**: Total calculated from all assets in USDC
 - **SPL Token**: Token address for payment
 - **Reference**: Unique tracking identifier
 - **Label**: Custom payment label for wallet display
@@ -286,3 +286,7 @@ import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
 ## License
 
 See the main BEEP SDK license for details.
+
+---
+
+**Built on SUI** • **Powered by Stablecoins** • **Designed for Developers**
