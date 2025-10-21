@@ -30,6 +30,9 @@ import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 // Safe logo import with fallback
 import beepLogoUrl from './beep_logo_mega.svg';
 import { useGeneratePaymentUrl } from './hooks/useGeneratePaymentUrl';
+import { WidgetSteps } from './constants';
+import { EmailVerification } from './components/EmailVerification';
+import { CodeConfirmation } from './components/CodeConfirmation';
 
 const beepLogo =
   beepLogoUrl ||
@@ -174,7 +177,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     enabled: !!(transactionDigest || paymentSetupData?.referenceKey),
   });
 
-  const { generateCahPaymentUrl, isPending: isGenerateCashPaymentUrlPending } =
+  const { generateCashPaymentUrl, isPending: isGenerateCashPaymentUrlPending } =
     useGeneratePaymentUrl({ publishableKey, serverUrl });
 
   // Derive state from queries
@@ -197,14 +200,29 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     }
   }, [paymentSetupData?.paymentUrl]);
 
+  // TODO: goran - replace with the PaymentInterface step at the end
+  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.CodeConfirmation);
+
+  const handlePayWithCash = useCallback(() => {
+    setWidgetStep(WidgetSteps.EmailVerification);
+  }, []);
+
   const handleBuyWithCash = useCallback(async () => {
-    const result = await generateCahPaymentUrl({
+    const result = await generateCashPaymentUrl({
       amount: String(paymentSetupData!.totalAmount),
       reference: paymentSetupData!.referenceKey!,
       walletAddress: recipientWallet,
     });
     window.location.href = result.paymentUrl;
   }, [paymentSetupData, recipientWallet]);
+
+  const shouldRenderAmountDisplay = useMemo(() => {
+    return (
+      widgetStep === WidgetSteps.PaymentInterface ||
+      widgetStep === WidgetSteps.PaymentSuccess ||
+      widgetStep === WidgetSteps.PaymentFailure
+    );
+  }, [widgetStep]);
 
   if (isLoading) {
     return <LoadingState primaryColor={primaryColor} />;
@@ -217,17 +235,23 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   return (
     <ComponentErrorBoundary componentName="TopLevel">
       <div style={cardStyles({ primaryColor })}>
-        <ComponentErrorBoundary componentName="AmountDisplay">
-          <div style={mainContentStyles}>
-            <p style={labelStyles}>Amount due</p>
-            <h1 style={amountStyles}>${totalAmount > 0 ? totalAmount.toFixed(2) : '...'}</h1>
-          </div>
-        </ComponentErrorBoundary>
-        {isPaymentComplete ? (
+        {/* Amount Display Section */}
+        {shouldRenderAmountDisplay && (
+          <ComponentErrorBoundary componentName="AmountDisplay">
+            <div style={mainContentStyles}>
+              <p style={labelStyles}>Amount due</p>
+              <h1 style={amountStyles}>${totalAmount > 0 ? totalAmount.toFixed(2) : '...'}</h1>
+            </div>
+          </ComponentErrorBoundary>
+        )}
+        {/* Payment Success Section */}
+        {isPaymentComplete && (
           <ComponentErrorBoundary componentName="PaymentSuccess">
             <PaymentSuccess />
           </ComponentErrorBoundary>
-        ) : (
+        )}
+        {/* Payment Interface Section */}
+        {widgetStep === WidgetSteps.PaymentInterface && (
           <ComponentErrorBoundary componentName="PaymentInterface">
             {paymentSetupData && (
               <>
@@ -336,7 +360,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                         <button
-                          onClick={handleBuyWithCash}
+                          onClick={handlePayWithCash}
                           style={{
                             width: '80%',
                             background: 'linear-gradient(to right, #a855f7, #ec4899)',
@@ -374,6 +398,16 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                 )}
               </>
             )}
+          </ComponentErrorBoundary>
+        )}
+        {widgetStep === WidgetSteps.EmailVerification && (
+          <ComponentErrorBoundary componentName="EmailVerification">
+            <EmailVerification setWidgetStep={setWidgetStep} publishableKey={publishableKey} />
+          </ComponentErrorBoundary>
+        )}
+        {widgetStep === WidgetSteps.CodeConfirmation && (
+          <ComponentErrorBoundary componentName="CodeConfirmation">
+            <CodeConfirmation setWidgetStep={setWidgetStep} publishableKey={publishableKey} />
           </ComponentErrorBoundary>
         )}
         {/* Footer */}
