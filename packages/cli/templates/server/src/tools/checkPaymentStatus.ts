@@ -28,6 +28,10 @@ export async function checkPaymentStatus(params: CheckPaymentStatusParams) {
         break;
       case 'COMPLETED':
         statusText = 'Payment confirmed';
+        break;
+      case 'NOT_FOUND':
+        statusText = 'Payment reference not found';
+        break;
     }
 
     return {
