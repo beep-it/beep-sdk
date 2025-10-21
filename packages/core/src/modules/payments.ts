@@ -1,6 +1,8 @@
 import { AxiosError, AxiosInstance } from 'axios';
 import {
   BeepPurchaseAsset,
+  CheckPaymentStatusPayload,
+  CheckPaymentStatusResponse,
   IssuePaymentPayload,
   IssuePaymentResponse,
   PauseStreamingPayload,
@@ -401,9 +403,8 @@ export class PaymentsModule {
    *
    * @param params.referenceKey - The payment reference key to check
    */
-  async checkPaymentStatus(params: {
-    referenceKey: string;
-  }): Promise<{ success: boolean; paid: boolean; status?: string; data?: any }> {
+
+  async checkPaymentStatus(params: CheckPaymentStatusPayload): Promise<CheckPaymentStatusResponse> {
     const { data } = await this.client.post('/v1/invoices/check-payment-status', params);
     return data;
   }

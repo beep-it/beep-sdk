@@ -13,12 +13,28 @@ export type CheckPaymentStatusParams = z.infer<typeof checkPaymentStatusSchema>;
 export async function checkPaymentStatus(params: CheckPaymentStatusParams) {
   try {
     const response = await beepClient.payments.checkPaymentStatus(params);
-    const paid = !!response?.paid;
+
+    let statusText = 'Payment pending';
+    switch (response?.status) {
+      case 'PENDING':
+      case 'IN_PROGRESS':
+        statusText = 'Payment pending';
+        break;
+      case 'CANCELED':
+        statusText = 'Payment canceled';
+        break;
+      case 'FAILED':
+        statusText = 'Payment failed';
+        break;
+      case 'COMPLETED':
+        statusText = 'Payment confirmed';
+    }
+
     return {
       content: [
         {
           type: 'text',
-          text: paid ? 'Payment confirmed.' : 'Payment pending.',
+          text: statusText,
         },
       ],
       data: response,
@@ -44,4 +60,3 @@ export const checkPaymentStatusTool: MCPToolDefinition = {
   inputSchema: zodToJsonSchema(checkPaymentStatusSchema),
   handler: checkPaymentStatus,
 };
-
