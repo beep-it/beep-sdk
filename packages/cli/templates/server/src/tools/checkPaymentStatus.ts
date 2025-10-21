@@ -5,7 +5,6 @@ import { beepClient } from './beepSDKClient';
 
 export const checkPaymentStatusSchema = z.object({
   referenceKey: z.string().min(1).describe('Reference key for the pending payment'),
-  apiKey: z.string().min(1).describe('Secret API key authorized to query status'),
 });
 
 export type CheckPaymentStatusParams = z.infer<typeof checkPaymentStatusSchema>;
