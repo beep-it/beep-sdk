@@ -1,5 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   ConfigurationError,
   LoadingState,
@@ -31,45 +31,6 @@ import beepLogoUrl from './beep_logo_mega.svg';
 const beepLogo =
   beepLogoUrl ||
   'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCA0MCAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzMzMzMzMyI+QkVFUDwvdGV4dD4KPHN2Zz4K';
-
-/**
- * Parses a Solana Pay URI to extract payment parameters.
- * Expected format: solana:recipient?amount=X&reference=Y&label=Z
- */
-function parseSolanaPayURI(uri: string) {
-  try {
-    if (!uri || typeof uri !== 'string') {
-      return {
-        recipient: '',
-        amount: null,
-        splToken: null,
-        reference: null,
-        label: null,
-        message: null,
-      };
-    }
-    const url = new URL(uri);
-
-    return {
-      recipient: url.pathname || '',
-      amount: url.searchParams.get('amount'),
-      splToken: url.searchParams.get('spl-token'),
-      reference: url.searchParams.get('reference'),
-      label: url.searchParams.get('label'),
-      message: url.searchParams.get('message'),
-    };
-  } catch (error) {
-    console.error('Failed to parse Solana Pay URI:', error);
-    return {
-      recipient: '',
-      amount: null,
-      splToken: null,
-      reference: null,
-      label: null,
-      message: null,
-    };
-  }
-}
 
 /**
  * CheckoutWidget - A complete Solana payment interface for the BEEP payment system
@@ -174,16 +135,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   const totalAmount = paymentSetupData?.totalAmount ?? 0;
 
   // Extract wallet address from Solana Pay URI for display
-  const recipientWallet = useMemo(() => {
-    try {
-      if (!paymentSetupData?.paymentUrl) return '';
-      const parsed = parseSolanaPayURI(paymentSetupData.paymentUrl);
-      return parsed?.recipient || '';
-    } catch (error) {
-      console.error('Error parsing recipient wallet:', error);
-      return '';
-    }
-  }, [paymentSetupData?.paymentUrl]);
+  const destinationAddress = paymentSetupData?.destinationAddress || '';
 
   if (isLoading) {
     return <LoadingState primaryColor={primaryColor} />;
@@ -253,7 +205,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
                 <ComponentErrorBoundary componentName="WalletAddress">
                   <div style={{ margin: '30px auto 32px auto' }}>
-                    <WalletAddressLabel walletAddress={recipientWallet} />
+                    <WalletAddressLabel walletAddress={destinationAddress} />
                   </div>
                 </ComponentErrorBoundary>
               </>
@@ -297,15 +249,15 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
 /**
  * CheckoutWidget - Complete Solana payment interface for BEEP merchants
- * 
+ *
  * A React component that provides a complete Solana-based payment interface with QR code generation,
  * payment status tracking, and customizable theming. Supports both existing product references and
  * dynamic product creation with automatic total calculation.
- * 
+ *
  * @example
  * ```tsx
  * import { CheckoutWidget } from '@beep-it/checkout-widget';
- * 
+ *
  * function PaymentPage() {
  *   return (
  *     <CheckoutWidget
@@ -327,14 +279,14 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
  *   );
  * }
  * ```
- * 
+ *
  * @param props - Configuration for the checkout widget
  * @param props.apiKey - BEEP API key for merchant authentication
  * @param props.primaryColor - Hex color for theming widget elements
  * @param props.labels - Customizable text labels for the interface
  * @param props.assets - Array of products/services to purchase
  * @param props.serverUrl - Optional custom BEEP server URL
- * 
+ *
  * @returns A fully functional Solana payment widget with QR code and status tracking
  */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {

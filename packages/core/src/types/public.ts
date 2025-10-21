@@ -30,6 +30,7 @@ export interface PublicPaymentSessionResponse {
   amount: string; // decimal string
   expiresAt: string | Date;
   status: InvoiceStatus | string;
+  destinationAddress: string;
 }
 
 export interface PublicPaymentStatusResponse {

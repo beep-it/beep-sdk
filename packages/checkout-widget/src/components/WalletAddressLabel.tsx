@@ -1,34 +1,36 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 interface WalletAddressLabelProps {
   walletAddress?: string;
 }
 
 export const WalletAddressLabel: React.FC<WalletAddressLabelProps> = ({ walletAddress }) => {
-  const safeWalletAddress = walletAddress || '0x1234567890121234567890121234567890120611';
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async () => {
+  const handleCopy = useCallback(async () => {
+    if (!walletAddress) {
+      return;
+    }
     try {
       if (!navigator?.clipboard?.writeText) {
         // Fallback for older browsers
         const textArea = document.createElement('textarea');
-        textArea.value = safeWalletAddress;
+        textArea.value = walletAddress;
         document.body.appendChild(textArea);
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
       } else {
-        await navigator.clipboard.writeText(safeWalletAddress);
+        await navigator.clipboard.writeText(walletAddress);
       }
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy: ', err);
     }
-  };
+  }, [walletAddress]);
 
-  const truncateAddress = (address: string) => {
+  const truncateAddress = (address?: string) => {
     if (!address || typeof address !== 'string') {
       return 'Invalid address';
     }
@@ -94,8 +96,9 @@ export const WalletAddressLabel: React.FC<WalletAddressLabelProps> = ({ walletAd
   return (
     <div style={styles.container}>
       <div style={styles.labelContainer}>
-        <span style={styles.walletLabel}>{truncateAddress(safeWalletAddress)}</span>
+        <span style={styles.walletLabel}>{truncateAddress(walletAddress)}</span>
         <button
+          disabled={!walletAddress}
           onClick={handleCopy}
           style={styles.copyButton}
           onMouseEnter={(e) => {
