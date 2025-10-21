@@ -7,3 +7,4 @@ coverage
 # Generated tarballs - should be built fresh, not committed
 *.tgz
 
+**/.DS_Store

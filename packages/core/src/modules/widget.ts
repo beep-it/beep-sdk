@@ -2,6 +2,7 @@ import { AxiosError, AxiosInstance } from 'axios';
 import {
   GenerateOTPRequest,
   GenerateOTPResponse,
+  DynamicEnvResponse,
   GenerateCashPaymentUrlRequest,
   GenerateCashPaymentUrlResponse,
   PublicPaymentSessionRequest,
@@ -120,5 +121,10 @@ export class WidgetModule {
       if (Date.now() >= deadline) return { paid: false, last };
       await new Promise((r) => setTimeout(r, currentIntervalMs));
     }
+  }
+
+  async getDynamicEnv() {
+    const res = await this.client.get<DynamicEnvResponse>(`/v1/widget/environment`);
+    return res.data;
   }
 }

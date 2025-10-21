@@ -6,6 +6,7 @@ import {
   PaymentError,
   PaymentSuccess,
   WalletAddressLabel,
+  WalletConnectPanel,
 } from './components';
 import { ComponentErrorBoundary } from './components/ComponentErrorBoundary';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -24,6 +25,7 @@ import {
   qrStyle,
 } from './styles';
 import { MerchantWidgetProps } from './types';
+import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 
 // Safe logo import with fallback
 import beepLogoUrl from './beep_logo_mega.svg';
@@ -156,16 +158,22 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     paymentLabel: labels?.paymentLabel,
   });
 
+  const [transactionDigest, setTransactionDigest] = useState<string | null>(null);
+
+  const handlePaymentComplete = useCallback((trxDigest: string) => {
+    setTransactionDigest(trxDigest);
+  }, []);
+
   // Status query - polls for payment completion
   const {
     data: paymentStatusData,
     error: paymentStatusError,
     isLoading: paymentStatusLoading,
   } = usePaymentStatus({
-    referenceKey: paymentSetupData?.referenceKey || null,
+    referenceKey: transactionDigest || paymentSetupData?.referenceKey || null,
     publishableKey,
     serverUrl,
-    enabled: !!paymentSetupData?.referenceKey,
+    enabled: !!(transactionDigest || paymentSetupData?.referenceKey),
   });
 
   // Derive state from queries
@@ -282,6 +290,39 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                     <WalletAddressLabel walletAddress={recipientWallet} />
                   </div>
                 </ComponentErrorBoundary>
+                <ComponentErrorBoundary componentName="Connect Wallet">
+                  <div style={{ margin: '30px auto 32px auto' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '80%',
+                        margin: '20px auto',
+                      }}
+                    >
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                      <span
+                        style={{
+                          padding: '0 16px',
+                          color: '#999',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                        }}
+                      >
+                        OR
+                      </span>
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                      <WalletConnectPanel
+                        paymentSetupData={paymentSetupData}
+                        destinationAddress={recipientWallet}
+                        onPaymentComplete={handlePaymentComplete}
+                      />
+                    </div>
+                  </div>
+                </ComponentErrorBoundary>
+
                 {paymentSetupData.isCashPaymentEligible && (
                   <ComponentErrorBoundary componentName="Pay with cash">
                     <div style={{ margin: '30px auto 32px auto' }}>
@@ -455,7 +496,12 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
   return (
     <ErrorBoundary>
       <QueryProvider>
-        <CheckoutWidgetInner {...props} />
+        <DynamicWalletProvider
+          publishableKey={props.publishableKey}
+          serverUrl={props.serverUrl}
+        >
+          <CheckoutWidgetInner {...props} />
+        </DynamicWalletProvider>
       </QueryProvider>
     </ErrorBoundary>
   );
