@@ -27,7 +27,6 @@ import { MerchantWidgetProps } from './types';
 
 // Safe logo import with fallback
 import beepLogoUrl from './beep_logo_mega.svg';
-import { useGeneratePaymentUrl } from './hooks/useGeneratePaymentUrl';
 import { WidgetSteps } from './constants';
 import { EmailVerification } from './components/EmailVerification';
 import { CodeConfirmation } from './components/CodeConfirmation';
@@ -169,9 +168,6 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     enabled: !!paymentSetupData?.referenceKey,
   });
 
-  const { generateCashPaymentUrl, isPending: isGenerateCashPaymentUrlPending } =
-    useGeneratePaymentUrl({ publishableKey, serverUrl });
-
   // Derive state from queries
   const isLoading = paymentSetupLoading || paymentStatusLoading;
   const paymentError = paymentSetupError || paymentStatusError;
@@ -192,21 +188,14 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     }
   }, [paymentSetupData?.paymentUrl]);
 
-  // TODO: goran - replace with the PaymentInterface step at the end
-  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.CodeConfirmation);
+  const [email, setEmail] = useState('');
+  const [tosAccepted, setTosAccepted] = useState(false);
+  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
+  const [otp, setOTP] = useState<string | null>(null);
 
   const handlePayWithCash = useCallback(() => {
     setWidgetStep(WidgetSteps.EmailVerification);
   }, []);
-
-  const handleBuyWithCash = useCallback(async () => {
-    const result = await generateCashPaymentUrl({
-      amount: String(paymentSetupData!.totalAmount),
-      reference: paymentSetupData!.referenceKey!,
-      walletAddress: recipientWallet,
-    });
-    window.location.href = result.paymentUrl;
-  }, [paymentSetupData, recipientWallet]);
 
   const shouldRenderAmountDisplay = useMemo(() => {
     return (
@@ -347,7 +336,6 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                           onMouseUp={(e) => {
                             e.currentTarget.style.transform = 'scale(1.05)';
                           }}
-                          disabled={isGenerateCashPaymentUrlPending}
                         >
                           Pay with cash
                         </button>
@@ -361,12 +349,29 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
         )}
         {widgetStep === WidgetSteps.EmailVerification && (
           <ComponentErrorBoundary componentName="EmailVerification">
-            <EmailVerification setWidgetStep={setWidgetStep} publishableKey={publishableKey} />
+            <EmailVerification
+              email={email}
+              setEmail={setEmail}
+              tosAccepted={tosAccepted}
+              setTosAccepted={setTosAccepted}
+              setWidgetStep={setWidgetStep}
+              setOTP={setOTP}
+              publishableKey={publishableKey}
+              serverUrl={serverUrl}
+            />
           </ComponentErrorBoundary>
         )}
         {widgetStep === WidgetSteps.CodeConfirmation && (
           <ComponentErrorBoundary componentName="CodeConfirmation">
-            <CodeConfirmation setWidgetStep={setWidgetStep} publishableKey={publishableKey} />
+            <CodeConfirmation
+              email={email}
+              tosAccepted={tosAccepted}
+              otp={otp}
+              setOTP={setOTP}
+              setWidgetStep={setWidgetStep}
+              publishableKey={publishableKey}
+              serverUrl={serverUrl}
+            />
           </ComponentErrorBoundary>
         )}
         {/* Footer */}

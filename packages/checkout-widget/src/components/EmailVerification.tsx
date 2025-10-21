@@ -2,19 +2,33 @@ import React, { useCallback, useMemo, useState } from 'react';
 import validator from 'validator';
 import { styles } from './EmailVerification.styles';
 import { WidgetSteps } from '../constants';
-import { useCheckEmailVerification } from '../hooks/useCheckEmailVerification';
-import { BuyerEmailVerificationStatus } from '../../../core/src/types/public';
+import { useGenerateOTP } from '../hooks/useGenerateOTP';
 
 export const EmailVerification: React.FC<{
+  email: string;
+  setEmail: (email: string) => void;
+  tosAccepted: boolean;
+  setTosAccepted: (accepted: boolean) => void;
   setWidgetStep: (step: WidgetSteps) => void;
+  setOTP: (otp: string | null) => void;
   publishableKey: string;
-}> = ({ setWidgetStep, publishableKey }) => {
-  const [email, setEmail] = useState('');
-  const [tosAccepted, setTosAccepted] = useState(false);
+  serverUrl?: string;
+}> = ({
+  email,
+  setEmail,
+  tosAccepted,
+  setTosAccepted,
+  setWidgetStep,
+  setOTP,
+  publishableKey,
+  serverUrl,
+}) => {
   const [emailError, setEmailError] = useState('');
 
-  const { checkEmailVerification, isPending: isEmailVerificationPending } =
-    useCheckEmailVerification({ publishableKey });
+  const { generateOTP, isPending: isGenerateOTPPending } = useGenerateOTP({
+    publishableKey,
+    serverUrl,
+  });
 
   const validateEmail = (emailValue: string): boolean => {
     return validator.isEmail(emailValue);
@@ -49,17 +63,16 @@ export const EmailVerification: React.FC<{
       return;
     }
 
-    const result = await checkEmailVerification({ email, tosAccepted });
-    if (result.status === BuyerEmailVerificationStatus.VERIFIED) {
-      setWidgetStep(WidgetSteps.CashPaymentQuote);
-      return;
+    const result = await generateOTP({ email, tosAccepted });
+    if (result.newCodeGenerated && result.verificationCode) {
+      setOTP(result.verificationCode);
     }
     setWidgetStep(WidgetSteps.CodeConfirmation);
   }, [email, tosAccepted]);
 
   const isButtonDisabled = useMemo(
-    () => !email || !tosAccepted || !validateEmail(email) || isEmailVerificationPending,
-    [email, tosAccepted, isEmailVerificationPending],
+    () => !email || !tosAccepted || !validateEmail(email) || isGenerateOTPPending,
+    [email, tosAccepted, isGenerateOTPPending],
   );
 
   // Handle back navigation
