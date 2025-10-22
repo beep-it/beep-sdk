@@ -16,21 +16,18 @@ import {
 
 export class WidgetModule {
   private client: AxiosInstance;
-  private publishableKey: string;
 
-  constructor(client: AxiosInstance, publishableKey: string) {
+  constructor(client: AxiosInstance) {
     this.client = client;
-    this.publishableKey = publishableKey;
   }
 
   /**
    * Creates a payment session (public, CORS-open) for Checkout Widget
    */
   async createPaymentSession(
-    input: Omit<PublicPaymentSessionRequest, 'publishableKey'>,
+    input: PublicPaymentSessionRequest,
   ): Promise<PublicPaymentSessionResponse> {
     const body: PublicPaymentSessionRequest = {
-      publishableKey: this.publishableKey,
       assets: input.assets,
       paymentLabel: input.paymentLabel,
       generateQrCode: input.generateQrCode ?? true,
@@ -45,7 +42,6 @@ export class WidgetModule {
   async generateOTP(input: GenerateOTPRequest) {
     const res = await this.client.post<GenerateOTPResponse>('/v1/widget/generate-otp', {
       ...input,
-      publishableKey: this.publishableKey,
     });
     return res.data;
   }
@@ -53,7 +49,6 @@ export class WidgetModule {
   async verifyOTP(input: VerifyOTPRequest) {
     const res = await this.client.post<VerifyOTPResponse>('/v1/widget/verify-otp', {
       ...input,
-      publishableKey: this.publishableKey,
     });
     return res.data;
   }
@@ -63,7 +58,6 @@ export class WidgetModule {
       '/v1/widget/generate-payment-quote',
       {
         ...input,
-        publishableKey: this.publishableKey,
       },
     );
     return res.data;
@@ -74,7 +68,6 @@ export class WidgetModule {
       '/v1/widget/generate-cash-payment-url',
       {
         ...input,
-        publishableKey: this.publishableKey,
       },
     );
     return res.data;

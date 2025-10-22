@@ -199,7 +199,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
   const [email, setEmail] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
-  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentQuote);
+  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
   const [otp, setOTP] = useState<string | null>(null);
 
   const handlePayWithCash = useCallback(() => {
@@ -323,27 +323,6 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                 {paymentSetupData.isCashPaymentEligible && (
                   <ComponentErrorBoundary componentName="Pay with cash">
                     <div style={{ margin: '30px auto 32px auto' }}>
-                      <div
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          width: '80%',
-                          margin: '20px auto',
-                        }}
-                      >
-                        <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
-                        <span
-                          style={{
-                            padding: '0 16px',
-                            color: '#999',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                          }}
-                        >
-                          OR
-                        </span>
-                        <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
-                      </div>
                       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                         <button
                           onClick={handlePayWithCash}
@@ -507,10 +486,7 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
   return (
     <ErrorBoundary>
       <QueryProvider>
-        <DynamicWalletProvider
-          publishableKey={props.publishableKey}
-          serverUrl={props.serverUrl}
-        >
+        <DynamicWalletProvider publishableKey={props.publishableKey} serverUrl={props.serverUrl}>
           <CheckoutWidgetInner {...props} />
         </DynamicWalletProvider>
       </QueryProvider>

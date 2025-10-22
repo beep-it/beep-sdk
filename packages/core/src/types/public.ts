@@ -18,7 +18,6 @@ export interface EphemeralItem {
 export type PublicAssetInput = BeepPurchaseAsset | EphemeralItem;
 
 export interface PublicPaymentSessionRequest {
-  publishableKey: string;
   assets: PublicAssetInput[];
   paymentLabel?: string;
   generateQrCode?: boolean;

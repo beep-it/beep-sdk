@@ -254,10 +254,11 @@ export class BeepPublicClient {
       headers: {
         'Content-Type': 'application/json',
         'X-Beep-Client': 'beep-sdk',
+        Authorization: `Bearer ${options.publishableKey}`,
       },
     });
 
-    this.widget = new WidgetModule(this.client, options.publishableKey);
+    this.widget = new WidgetModule(this.client);
   }
 }
 
