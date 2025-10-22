@@ -2,5 +2,4 @@
 ./dist
 
 # Development files
-.DS_Store
 *.log

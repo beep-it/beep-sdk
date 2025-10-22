@@ -1,6 +1,7 @@
 import { BeepPurchaseAsset } from './payment';
 import { SupportedToken } from './token';
 import { InvoiceStatus } from './invoice';
+import { PayWayCode } from './cash-payment';
 
 /**
  * On-the-fly item sent from the browser. The server will create a corresponding product record
@@ -17,10 +18,64 @@ export interface EphemeralItem {
 export type PublicAssetInput = BeepPurchaseAsset | EphemeralItem;
 
 export interface PublicPaymentSessionRequest {
-  publishableKey: string;
   assets: PublicAssetInput[];
   paymentLabel?: string;
   generateQrCode?: boolean;
+}
+
+export interface GeneratePaymentQuoteRequest {
+  amount: string;
+  walletAddress: string;
+  payWayCode?: PayWayCode;
+}
+
+interface PaymentLimit {
+  /** Country code (e.g., 'US') */
+  country: string;
+  /** Payment method code */
+  payWayCode: PayWayCode;
+  /** Minimum purchase amount in fiat currency */
+  minPurchaseAmount: string;
+  /** Maximum purchase amount in fiat currency */
+  maxPurchaseAmount: string;
+}
+
+export interface GeneratePaymentQuoteResponse {
+  fiatAmount: string;
+  networkFee: string;
+  rampFee: string;
+  supportedPaymentMethods: PaymentLimit[];
+}
+
+export interface CreateCashPaymentOrderRequest {
+  reference: string;
+  walletAddress: string;
+  amount: string;
+  payWayCode: PayWayCode;
+  email: string;
+}
+
+export interface CreateCashPaymentOrderResponse {
+  payUrl: string;
+}
+
+export interface VerifyOTPRequest {
+  email: string;
+  otp: string;
+}
+
+export interface VerifyOTPResponse {
+  success: boolean;
+}
+
+export interface GenerateOTPRequest {
+  email: string;
+  tosAccepted: boolean;
+}
+
+export interface GenerateOTPResponse {
+  verificationCode?: string;
+  newCodeGenerated: boolean;
 }
 
 export interface PublicPaymentSessionResponse {
@@ -30,10 +85,15 @@ export interface PublicPaymentSessionResponse {
   amount: string; // decimal string
   expiresAt: string | Date;
   status: InvoiceStatus | string;
+  isCashPaymentEligible: boolean;
   destinationAddress: string;
 }
 
 export interface PublicPaymentStatusResponse {
   paid: boolean;
   status?: InvoiceStatus | string;
+}
+
+export interface DynamicEnvResponse {
+  environmentId: string;
 }

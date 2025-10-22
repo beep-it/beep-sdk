@@ -7,13 +7,14 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useBeepPublicClient } from './useBeepPublicClient';
 
-interface PaymentSetupData {
+export interface PaymentSetupData {
   qrCode: string | null;
   referenceKey: string | null;
   paymentUrl: string | null;
   paymentLabel?: string;
   processedAssets: BeepPurchaseAsset[];
   totalAmount: number;
+  isCashPaymentEligible: boolean;
   destinationAddress: string;
 }
 
@@ -67,6 +68,7 @@ export const usePaymentSetup = ({
           (a): a is BeepPurchaseAsset => 'assetId' in a,
         ) as BeepPurchaseAsset[],
         totalAmount: resp.amount ? parseFloat(resp.amount) : 0,
+        isCashPaymentEligible: resp.isCashPaymentEligible,
         destinationAddress: resp.destinationAddress,
       };
     },

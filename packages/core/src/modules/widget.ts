@@ -1,27 +1,33 @@
 import { AxiosError, AxiosInstance } from 'axios';
 import {
+  GenerateOTPRequest,
+  GenerateOTPResponse,
+  DynamicEnvResponse,
+  CreateCashPaymentOrderRequest,
+  CreateCashPaymentOrderResponse,
   PublicPaymentSessionRequest,
   PublicPaymentSessionResponse,
   PublicPaymentStatusResponse,
+  VerifyOTPRequest,
+  VerifyOTPResponse,
+  GeneratePaymentQuoteRequest,
+  GeneratePaymentQuoteResponse,
 } from '../types/public';
 
 export class WidgetModule {
   private client: AxiosInstance;
-  private publishableKey: string;
 
-  constructor(client: AxiosInstance, publishableKey: string) {
+  constructor(client: AxiosInstance) {
     this.client = client;
-    this.publishableKey = publishableKey;
   }
 
   /**
    * Creates a payment session (public, CORS-open) for Checkout Widget
    */
   async createPaymentSession(
-    input: Omit<PublicPaymentSessionRequest, 'publishableKey'>,
+    input: PublicPaymentSessionRequest,
   ): Promise<PublicPaymentSessionResponse> {
     const body: PublicPaymentSessionRequest = {
-      publishableKey: this.publishableKey,
       assets: input.assets,
       paymentLabel: input.paymentLabel,
       generateQrCode: input.generateQrCode ?? true,
@@ -29,6 +35,40 @@ export class WidgetModule {
     const res = await this.client.post<PublicPaymentSessionResponse>(
       '/v1/widget/payment-session',
       body,
+    );
+    return res.data;
+  }
+
+  async generateOTP(input: GenerateOTPRequest) {
+    const res = await this.client.post<GenerateOTPResponse>('/v1/widget/generate-otp', {
+      ...input,
+    });
+    return res.data;
+  }
+
+  async verifyOTP(input: VerifyOTPRequest) {
+    const res = await this.client.post<VerifyOTPResponse>('/v1/widget/verify-otp', {
+      ...input,
+    });
+    return res.data;
+  }
+
+  async generatePaymentQuote(input: GeneratePaymentQuoteRequest) {
+    const res = await this.client.post<GeneratePaymentQuoteResponse>(
+      '/v1/widget/generate-payment-quote',
+      {
+        ...input,
+      },
+    );
+    return res.data;
+  }
+
+  async createCashPaymentOrder(input: CreateCashPaymentOrderRequest) {
+    const res = await this.client.post<CreateCashPaymentOrderResponse>(
+      '/v1/widget/create-cash-payment-order',
+      {
+        ...input,
+      },
     );
     return res.data;
   }
@@ -87,5 +127,10 @@ export class WidgetModule {
       if (Date.now() >= deadline) return { paid: false, last };
       await new Promise((r) => setTimeout(r, currentIntervalMs));
     }
+  }
+
+  async getDynamicEnv() {
+    const res = await this.client.get<DynamicEnvResponse>(`/v1/widget/environment`);
+    return res.data;
   }
 }

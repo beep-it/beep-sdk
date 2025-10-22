@@ -1,0 +1,201 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { styles } from './EmailVerification.styles';
+import { WidgetSteps } from '../constants';
+import { useGenerateOTP } from '../hooks/useGenerateOTP';
+import { useVerifyOTP } from '../hooks/useVerifyOTP';
+
+const ONE_MINUTE_SECONDS = 60;
+
+export const CodeConfirmation: React.FC<{
+  email: string;
+  tosAccepted: boolean;
+  otp: string | null;
+  setOTP: (otp: string | null) => void;
+  setWidgetStep: (step: WidgetSteps) => void;
+  publishableKey: string;
+  serverUrl?: string;
+}> = ({ email, tosAccepted, otp, setOTP, setWidgetStep, publishableKey, serverUrl }) => {
+  const [code, setCode] = useState('');
+  const [timeUntilResend, setTimeUntilResend] = useState(ONE_MINUTE_SECONDS);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
+  const [codeError, setCodeError] = useState('');
+
+  const { generateOTP, isPending: isGenerateOTPPending } = useGenerateOTP({
+    publishableKey,
+    serverUrl,
+  });
+
+  const { verifyOTP, isPending: isVerifyOTPPending } = useVerifyOTP({
+    publishableKey,
+    serverUrl,
+  });
+
+  // Countdown timer for resend button
+  useEffect(() => {
+    if (timeUntilResend > 0) {
+      const timer = setTimeout(() => {
+        setTimeUntilResend(timeUntilResend - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setIsResendDisabled(false);
+    }
+  }, [timeUntilResend]);
+
+  const handleCodeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+      if (value.length <= 6) {
+        setCode(value);
+      }
+
+      // Clear error when user starts typing
+      if (codeError) {
+        setCodeError('');
+      }
+    },
+    [codeError],
+  );
+
+  const handleResend = useCallback(async () => {
+    const result = await generateOTP({ email, tosAccepted });
+    if (result.newCodeGenerated && result.verificationCode) {
+      setOTP(result.verificationCode);
+    } else {
+      setCodeError(`Verification code was recently sent. Please wait before requesting a new one.`);
+    }
+
+    // Reset timer
+    setTimeUntilResend(ONE_MINUTE_SECONDS);
+    setIsResendDisabled(true);
+  }, []);
+
+  const handleContinue = useCallback(async () => {
+    if (code.length !== 6) {
+      return;
+    }
+
+    try {
+      const result = await verifyOTP({ email, otp: code });
+      const isValid = result.success;
+
+      if (!isValid) {
+        setCodeError('Invalid verification code. Please try again.');
+        return;
+      }
+
+      // If verification successful, navigate to next step
+      setWidgetStep(WidgetSteps.PaymentQuote);
+    } catch (error) {
+      setCodeError('Verification failed. Please try again.');
+    }
+  }, [code, setWidgetStep]);
+
+  const handleBack = useCallback(() => {
+    setWidgetStep(WidgetSteps.EmailVerification);
+  }, [setWidgetStep]);
+
+  const isContinueDisabled = useMemo(
+    () => code.length !== 6 || isGenerateOTPPending,
+    [code, isGenerateOTPPending],
+  );
+
+  return (
+    <div style={styles.container}>
+      <style>{`
+        .back-button:hover {
+          color: #111827 !important;
+        }
+        .resend-button:not(:disabled):hover {
+          color: #1f2937 !important;
+        }
+        .continue-button:not(:disabled):hover {
+          background: linear-gradient(to right, #9333ea, #db2777) !important;
+          transform: scale(1.02) !important;
+        }
+        .continue-button:not(:disabled):active {
+          transform: scale(0.98) !important;
+        }
+      `}</style>
+
+      <button
+        onClick={handleBack}
+        style={styles.backButton}
+        className="back-button"
+        aria-label="Go back"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <h2 style={styles.title}>Confirm your email</h2>
+
+      <div style={styles.inputGroup}>
+        <label style={styles.label}>Enter 6-digit code</label>
+        <input
+          type="text"
+          inputMode="numeric"
+          value={code}
+          onChange={handleCodeChange}
+          placeholder="000000"
+          style={{
+            ...styles.input,
+            textAlign: 'center',
+            fontSize: '24px',
+            letterSpacing: '8px',
+            fontWeight: '600',
+            ...(codeError ? { borderColor: '#ef4444' } : {}),
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.borderColor = codeError ? '#ef4444' : '#a855f7';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.borderColor = codeError ? '#ef4444' : '#d1d5db';
+          }}
+        />
+        {codeError && <span style={styles.errorText}>{codeError}</span>}
+      </div>
+
+      <button
+        onClick={handleResend}
+        disabled={isResendDisabled || isGenerateOTPPending}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: isResendDisabled ? '#9ca3af' : '#6b7280',
+          fontSize: '14px',
+          cursor: isResendDisabled ? 'not-allowed' : 'pointer',
+          padding: '8px',
+          textAlign: 'center',
+          transition: 'color 0.2s ease',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        }}
+        className="resend-button"
+      >
+        {isResendDisabled ? `Resend code in ${timeUntilResend}s` : 'Resend code'}
+      </button>
+
+      <button
+        onClick={handleContinue}
+        disabled={isContinueDisabled}
+        style={{
+          ...styles.button,
+          ...(isContinueDisabled ? styles.buttonDisabled : {}),
+        }}
+        className="continue-button"
+      >
+        Continue
+      </button>
+    </div>
+  );
+};

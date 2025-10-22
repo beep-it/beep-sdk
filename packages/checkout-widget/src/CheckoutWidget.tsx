@@ -1,11 +1,12 @@
 import { QRCodeSVG } from 'qrcode.react';
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   ConfigurationError,
   LoadingState,
   PaymentError,
   PaymentSuccess,
   WalletAddressLabel,
+  WalletConnectPanel,
 } from './components';
 import { ComponentErrorBoundary } from './components/ComponentErrorBoundary';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -24,14 +25,16 @@ import {
   qrStyle,
 } from './styles';
 import { MerchantWidgetProps } from './types';
+import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 
 // Safe logo import with fallback
 import beepLogoUrl from './beep_logo_mega.svg';
+import { WidgetSteps } from './constants';
+import { EmailVerification } from './components/EmailVerification';
+import { CodeConfirmation } from './components/CodeConfirmation';
+import { PaymentQuote } from './components/PaymentQuote';
 
-const beepLogo =
-  beepLogoUrl ||
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCA0MCAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzMzMzMzMyI+QkVFUDwvdGV4dD4KPHN2Zz4K';
-
+const beepLogo = beepLogoUrl;
 /**
  * CheckoutWidget - A complete Solana payment interface for the BEEP payment system
  *
@@ -114,16 +117,22 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     paymentLabel: labels?.paymentLabel,
   });
 
+  const [transactionDigest, setTransactionDigest] = useState<string | null>(null);
+
+  const handlePaymentComplete = useCallback((trxDigest: string) => {
+    setTransactionDigest(trxDigest);
+  }, []);
+
   // Status query - polls for payment completion
   const {
     data: paymentStatusData,
     error: paymentStatusError,
     isLoading: paymentStatusLoading,
   } = usePaymentStatus({
-    referenceKey: paymentSetupData?.referenceKey || null,
+    referenceKey: transactionDigest || paymentSetupData?.referenceKey || null,
     publishableKey,
     serverUrl,
-    enabled: !!paymentSetupData?.referenceKey,
+    enabled: !!(transactionDigest || paymentSetupData?.referenceKey),
   });
 
   // Derive state from queries
@@ -135,7 +144,23 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   const totalAmount = paymentSetupData?.totalAmount ?? 0;
 
   // Extract wallet address from Solana Pay URI for display
-  const destinationAddress = paymentSetupData?.destinationAddress || '';
+  const destinationAddress = useMemo(
+    () => paymentSetupData?.destinationAddress || '',
+    [paymentSetupData],
+  );
+
+  const [email, setEmail] = useState('');
+  const [tosAccepted, setTosAccepted] = useState(false);
+  const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
+  const [otp, setOTP] = useState<string | null>(null);
+
+  const handlePayWithCash = useCallback(() => {
+    setWidgetStep(WidgetSteps.EmailVerification);
+  }, []);
+
+  const shouldRenderAmountDisplay = useMemo(() => {
+    return widgetStep === WidgetSteps.PaymentInterface;
+  }, [widgetStep]);
 
   if (isLoading) {
     return <LoadingState primaryColor={primaryColor} />;
@@ -148,17 +173,23 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   return (
     <ComponentErrorBoundary componentName="TopLevel">
       <div style={cardStyles({ primaryColor })}>
-        <ComponentErrorBoundary componentName="AmountDisplay">
-          <div style={mainContentStyles}>
-            <p style={labelStyles}>Amount due</p>
-            <h1 style={amountStyles}>${totalAmount > 0 ? totalAmount.toFixed(2) : '...'}</h1>
-          </div>
-        </ComponentErrorBoundary>
-        {isPaymentComplete ? (
+        {/* Amount Display Section */}
+        {shouldRenderAmountDisplay && (
+          <ComponentErrorBoundary componentName="AmountDisplay">
+            <div style={mainContentStyles}>
+              <p style={labelStyles}>Amount due</p>
+              <h1 style={amountStyles}>${totalAmount > 0 ? totalAmount.toFixed(2) : '...'}</h1>
+            </div>
+          </ComponentErrorBoundary>
+        )}
+        {/* Payment Success Step */}
+        {isPaymentComplete && (
           <ComponentErrorBoundary componentName="PaymentSuccess">
             <PaymentSuccess />
           </ComponentErrorBoundary>
-        ) : (
+        )}
+        {/* Payment Interface Step */}
+        {widgetStep === WidgetSteps.PaymentInterface && (
           <ComponentErrorBoundary componentName="PaymentInterface">
             {paymentSetupData && (
               <>
@@ -208,8 +239,124 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                     <WalletAddressLabel walletAddress={destinationAddress} />
                   </div>
                 </ComponentErrorBoundary>
+                <ComponentErrorBoundary componentName="Connect Wallet">
+                  <div style={{ margin: '30px auto 32px auto' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '80%',
+                        margin: '20px auto',
+                      }}
+                    >
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                      <span
+                        style={{
+                          padding: '0 16px',
+                          color: '#999',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                        }}
+                      >
+                        OR
+                      </span>
+                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                      <WalletConnectPanel
+                        paymentSetupData={paymentSetupData}
+                        destinationAddress={destinationAddress}
+                        onPaymentComplete={handlePaymentComplete}
+                      />
+                    </div>
+                  </div>
+                </ComponentErrorBoundary>
+
+                {paymentSetupData.isCashPaymentEligible && (
+                  <ComponentErrorBoundary componentName="Pay with cash">
+                    <div style={{ margin: '30px auto 32px auto' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                        <button
+                          onClick={handlePayWithCash}
+                          style={{
+                            width: '80%',
+                            background: 'linear-gradient(to right, #a855f7, #ec4899)',
+                            color: 'white',
+                            fontWeight: '600',
+                            padding: '16px',
+                            borderRadius: '12px',
+                            border: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background =
+                              'linear-gradient(to right, #9333ea, #db2777)';
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background =
+                              'linear-gradient(to right, #a855f7, #ec4899)';
+                            e.currentTarget.style.transform = 'scale(1)';
+                          }}
+                          onMouseDown={(e) => {
+                            e.currentTarget.style.transform = 'scale(0.95)';
+                          }}
+                          onMouseUp={(e) => {
+                            e.currentTarget.style.transform = 'scale(1.05)';
+                          }}
+                        >
+                          Pay with cash
+                        </button>
+                      </div>
+                    </div>
+                  </ComponentErrorBoundary>
+                )}
               </>
             )}
+          </ComponentErrorBoundary>
+        )}
+        {/* Email Verification Step */}
+        {widgetStep === WidgetSteps.EmailVerification && (
+          <ComponentErrorBoundary componentName="EmailVerification">
+            <EmailVerification
+              email={email}
+              setEmail={setEmail}
+              tosAccepted={tosAccepted}
+              setTosAccepted={setTosAccepted}
+              setWidgetStep={setWidgetStep}
+              setOTP={setOTP}
+              publishableKey={publishableKey}
+              serverUrl={serverUrl}
+            />
+          </ComponentErrorBoundary>
+        )}
+        {/* Code Confirmation Step */}
+        {widgetStep === WidgetSteps.CodeConfirmation && (
+          <ComponentErrorBoundary componentName="CodeConfirmation">
+            <CodeConfirmation
+              email={email}
+              tosAccepted={tosAccepted}
+              otp={otp}
+              setOTP={setOTP}
+              setWidgetStep={setWidgetStep}
+              publishableKey={publishableKey}
+              serverUrl={serverUrl}
+            />
+          </ComponentErrorBoundary>
+        )}
+        {/* Payment Quote Step */}
+        {widgetStep === WidgetSteps.PaymentQuote && paymentSetupData && (
+          <ComponentErrorBoundary componentName="PaymentQuote">
+            <PaymentQuote
+              email={email}
+              reference={paymentSetupData.referenceKey!}
+              amount={paymentSetupData.totalAmount.toString()}
+              walletAddress={destinationAddress}
+              setWidgetStep={setWidgetStep}
+              publishableKey={publishableKey}
+              serverUrl={serverUrl}
+            />
           </ComponentErrorBoundary>
         )}
         {/* Footer */}
@@ -225,7 +372,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                   <img
                     src={beepLogo}
                     alt="Beep"
-                    style={{ height: '16px', width: 'auto' }}
+                    style={{ height: '24px', width: 'auto' }}
                     onError={(e) => {
                       console.error('[CheckoutWidget] Logo failed to load:', beepLogo);
                       const target = e.target as HTMLImageElement;
@@ -293,7 +440,9 @@ export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
   return (
     <ErrorBoundary>
       <QueryProvider>
-        <CheckoutWidgetInner {...props} />
+        <DynamicWalletProvider publishableKey={props.publishableKey} serverUrl={props.serverUrl}>
+          <CheckoutWidgetInner {...props} />
+        </DynamicWalletProvider>
       </QueryProvider>
     </ErrorBoundary>
   );
