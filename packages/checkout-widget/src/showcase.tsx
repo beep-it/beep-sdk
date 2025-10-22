@@ -40,7 +40,6 @@ const ShowcasePage: React.FC = () => {
             }}
             assets={[{ assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 }]}
             publishableKey="your_beep_pk_here"
-            // publishableKey="beep_pk_DYLaQemoEwQu4O355Qi8tEWtPTfEQu5_"
             serverUrl="http://localhost:4070"
           />
         </div>
