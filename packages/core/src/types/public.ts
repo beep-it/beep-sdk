@@ -97,3 +97,46 @@ export interface PublicPaymentStatusResponse {
 export interface DynamicEnvResponse {
   environmentId: string;
 }
+
+export interface ProductWithPrices {
+  /** External UUID for API references */
+  uuid: string;
+  /** UUID of the merchant who owns this product */
+  merchantId: string;
+  /** Display name for the product */
+  name: string;
+  /** Optional detailed description of the product */
+  description: string | null;
+  /** Whether product is available for purchase */
+  active: boolean;
+  /** Array of image URLs for product display */
+  images: string[];
+  /** Flexible key-value data for additional product information */
+  metadata: Record<string, any>;
+  /** Associated price information (most recent active price) */
+  prices: Array<{
+    /** External UUID for API references */
+    uuid: string;
+    /** The currency token (USDT, USDC, etc.) */
+    token: string;
+    /** Blockchain network (SOLANA, BASE, SUI) */
+    chain: string;
+    /** Base amount in smallest units. */
+    amount: string;
+    /** Type/description of billing unit */
+    unitType: string;
+    /** Unit amount for incremental billing */
+    unitAmount: string;
+    /** Size of each billing unit */
+    unitSize: number;
+    /** Whether this price is available for new purchases */
+    active: boolean;
+  }>;
+}
+/**
+ * Response structure for the public products endpoint.
+ */
+export interface GetProductsResponse {
+  /** Array of products with their associated prices */
+  products: Array<ProductWithPrices>;
+}
