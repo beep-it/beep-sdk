@@ -34,10 +34,7 @@ import { EmailVerification } from './components/EmailVerification';
 import { CodeConfirmation } from './components/CodeConfirmation';
 import { PaymentQuote } from './components/PaymentQuote';
 
-const beepLogo =
-  beepLogoUrl ||
-  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCA0MCAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHRleHQgeD0iMCIgeT0iMTIiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzMzMzMzMyI+QkVFUDwvdGV4dD4KPHN2Zz4K';
-
+const beepLogo = beepLogoUrl;
 /**
  * Parses a Payment URI to extract payment parameters.
  * Expected format: solana:recipient?amount=X&reference=Y&label=Z
@@ -397,6 +394,8 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
         {widgetStep === WidgetSteps.PaymentQuote && paymentSetupData && (
           <ComponentErrorBoundary componentName="PaymentQuote">
             <PaymentQuote
+              email={email}
+              reference={paymentSetupData.referenceKey!}
               amount={paymentSetupData.totalAmount.toString()}
               walletAddress={recipientWallet}
               setWidgetStep={setWidgetStep}
@@ -418,7 +417,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                   <img
                     src={beepLogo}
                     alt="Beep"
-                    style={{ height: '16px', width: 'auto' }}
+                    style={{ height: '24px', width: 'auto' }}
                     onError={(e) => {
                       console.error('[CheckoutWidget] Logo failed to load:', beepLogo);
                       const target = e.target as HTMLImageElement;

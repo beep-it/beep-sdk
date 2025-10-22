@@ -47,14 +47,16 @@ export interface GeneratePaymentQuoteResponse {
   supportedPaymentMethods: PaymentLimit[];
 }
 
-export interface GenerateCashPaymentUrlRequest {
+export interface CreateCashPaymentOrderRequest {
   reference: string;
-  amount: string;
   walletAddress: string;
+  amount: string;
+  payWayCode: PayWayCode;
+  email: string;
 }
 
-export interface GenerateCashPaymentUrlResponse {
-  paymentUrl: string;
+export interface CreateCashPaymentOrderResponse {
+  payUrl: string;
 }
 
 export interface VerifyOTPRequest {

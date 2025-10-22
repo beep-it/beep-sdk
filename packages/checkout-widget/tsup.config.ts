@@ -1,4 +1,4 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from 'tsup';
 
 export default defineConfig({
   entry: ['src/showcase.tsx'],
@@ -9,8 +9,11 @@ export default defineConfig({
   define: {
     'process.env.NODE_ENV': '"production"',
   },
+  loader: {
+    '.svg': 'dataurl',
+  },
   // Ensure we don't try to bundle Node.js modules
   platform: 'browser',
   // External dependencies that should not be bundled
   noExternal: ['react', 'react-dom', '@beep-it/sdk-core', 'qrcode'],
-})
+});

@@ -3,8 +3,8 @@ import {
   GenerateOTPRequest,
   GenerateOTPResponse,
   DynamicEnvResponse,
-  GenerateCashPaymentUrlRequest,
-  GenerateCashPaymentUrlResponse,
+  CreateCashPaymentOrderRequest,
+  CreateCashPaymentOrderResponse,
   PublicPaymentSessionRequest,
   PublicPaymentSessionResponse,
   PublicPaymentStatusResponse,
@@ -63,9 +63,9 @@ export class WidgetModule {
     return res.data;
   }
 
-  async generateCashPaymentUrl(input: GenerateCashPaymentUrlRequest) {
-    const res = await this.client.post<GenerateCashPaymentUrlResponse>(
-      '/v1/widget/generate-cash-payment-url',
+  async createCashPaymentOrder(input: CreateCashPaymentOrderRequest) {
+    const res = await this.client.post<CreateCashPaymentOrderResponse>(
+      '/v1/widget/create-cash-payment-order',
       {
         ...input,
       },

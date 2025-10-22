@@ -1,29 +1,42 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { styles } from './EmailVerification.styles';
-import { WidgetSteps } from '../constants';
+import { PAY_WAY_CODE_LABELS, WidgetSteps } from '../constants';
 import { useGeneratePaymentQuote } from '../hooks/useGeneratePaymentQuote';
 import { PayWayCode } from '../../../core/src/types/cash-payment';
+import { useCreateCashPaymentOrder } from '../hooks/useCreateCashPaymentOrder';
 
 const QUOTE_REFRESH_INTERVAL = 15; // 15 seconds
 
 export const PaymentQuote: React.FC<{
+  reference: string;
+  email: string;
   amount: string;
   walletAddress: string;
   setWidgetStep: (step: WidgetSteps) => void;
   publishableKey: string;
   serverUrl?: string;
-}> = ({ amount, walletAddress, setWidgetStep, publishableKey, serverUrl }) => {
+}> = ({ reference, email, amount, walletAddress, setWidgetStep, publishableKey, serverUrl }) => {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PayWayCode>(
     PayWayCode.VISA_MASTER_CARD,
   );
   const [timeUntilRefresh, setTimeUntilRefresh] = useState(QUOTE_REFRESH_INTERVAL);
 
-  const { data, isLoading, error, refetch } = useGeneratePaymentQuote({
+  const {
+    data,
+    isLoading,
+    error,
+    refetch: refetchQuote,
+  } = useGeneratePaymentQuote({
     publishableKey,
     serverUrl,
     amount,
     walletAddress,
     payWayCode: selectedPaymentMethod,
+  });
+
+  const { createCashPaymentOrder, isPending: isCreatingOrder } = useCreateCashPaymentOrder({
+    publishableKey,
+    serverUrl,
   });
 
   // Countdown timer for quote refresh
@@ -35,10 +48,10 @@ export const PaymentQuote: React.FC<{
       return () => clearTimeout(timer);
     } else {
       // Auto-refetch when timer hits 0
-      refetch();
+      refetchQuote();
       setTimeUntilRefresh(QUOTE_REFRESH_INTERVAL);
     }
-  }, [timeUntilRefresh, refetch]);
+  }, [timeUntilRefresh, refetchQuote]);
 
   // Reset timer when payment method changes
   useEffect(() => {
@@ -53,31 +66,27 @@ export const PaymentQuote: React.FC<{
     setWidgetStep(WidgetSteps.CodeConfirmation);
   }, [setWidgetStep]);
 
-  const handleContinue = useCallback(() => {
-    // TODO: Implement checkout flow
-    console.log('Continue to checkout with payment method:', selectedPaymentMethod);
+  const handleContinue = useCallback(async () => {
+    // Check all required data is present just in case
+    if (email && walletAddress && reference && selectedPaymentMethod && data?.fiatAmount) {
+      const result = await createCashPaymentOrder({
+        amount: data.fiatAmount,
+        email,
+        walletAddress,
+        reference,
+        payWayCode: selectedPaymentMethod,
+      });
+
+      if (result.payUrl) {
+        // Redirect to payment URL
+        window.location.href = result.payUrl;
+      }
+    }
   }, [selectedPaymentMethod]);
 
-  const getPaymentMethodLabel = (payWayCode: PayWayCode): string => {
-    switch (payWayCode) {
-      case PayWayCode.VISA_MASTER_CARD:
-        return 'Visa / MasterCard';
-      case PayWayCode.APPLE_PAY:
-        return 'Apple Pay';
-      case PayWayCode.GOOGLE_PAY:
-        return 'Google Pay';
-      case PayWayCode.NETELLER:
-        return 'Neteller';
-      case PayWayCode.SKRILL:
-        return 'Skrill';
-      default:
-        return 'Unknown Payment Method';
-    }
-  };
-
   const isContinueDisabled = useMemo(() => {
-    return isLoading || !data?.fiatAmount;
-  }, [isLoading, data]);
+    return isLoading || !data?.fiatAmount || isCreatingOrder;
+  }, [isLoading, data, isCreatingOrder]);
 
   return (
     <div style={{ ...styles.container }}>
@@ -200,57 +209,54 @@ export const PaymentQuote: React.FC<{
       <div style={styles.inputGroup}>
         <label style={styles.label}>Select payment method</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '8px' }}>
-          {data?.supportedPaymentMethods?.map((paymentLimit) => (
-            <label
-              key={paymentLimit.payWayCode}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '16px',
-                border: '2px solid #d1d5db',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                backgroundColor: '#ffffff',
-              }}
-              className={`payment-method-radio ${selectedPaymentMethod === paymentLimit.payWayCode ? 'selected' : ''}`}
-            >
-              <input
-                type="radio"
-                name="paymentMethod"
-                value={paymentLimit.payWayCode}
-                checked={selectedPaymentMethod === paymentLimit.payWayCode}
-                onChange={() => handlePaymentMethodChange(paymentLimit.payWayCode as PayWayCode)}
+          {data?.supportedPaymentMethods
+            ?.filter((method) => {
+              const methodLabel = PAY_WAY_CODE_LABELS[method.payWayCode];
+              return !!methodLabel;
+            })
+            .map((paymentLimit) => (
+              <label
+                key={paymentLimit.payWayCode}
                 style={{
-                  width: '20px',
-                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  border: '2px solid #d1d5db',
+                  borderRadius: '12px',
                   cursor: 'pointer',
-                  marginRight: '12px',
-                  accentColor: '#a855f7',
+                  transition: 'all 0.2s ease',
+                  backgroundColor: '#ffffff',
                 }}
-              />
-              <div style={{ flex: 1 }}>
-                <div
+                className={`payment-method-radio ${selectedPaymentMethod === paymentLimit.payWayCode ? 'selected' : ''}`}
+              >
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value={paymentLimit.payWayCode}
+                  checked={selectedPaymentMethod === paymentLimit.payWayCode}
+                  onChange={() => handlePaymentMethodChange(paymentLimit.payWayCode)}
                   style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#111827',
-                    marginBottom: '4px',
+                    width: '20px',
+                    height: '20px',
+                    cursor: 'pointer',
+                    marginRight: '12px',
+                    accentColor: '#a855f7',
                   }}
-                >
-                  {getPaymentMethodLabel(paymentLimit.payWayCode as PayWayCode)}
+                />
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#111827',
+                      marginBottom: '4px',
+                    }}
+                  >
+                    {PAY_WAY_CODE_LABELS[paymentLimit.payWayCode]}
+                  </div>
                 </div>
-                <div
-                  style={{
-                    fontSize: '12px',
-                    color: '#6b7280',
-                  }}
-                >
-                  ${paymentLimit.minPurchaseAmount} - ${paymentLimit.maxPurchaseAmount}
-                </div>
-              </div>
-            </label>
-          ))}
+              </label>
+            ))}
         </div>
       </div>
 
