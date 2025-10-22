@@ -86,6 +86,7 @@ export interface PublicPaymentSessionResponse {
   expiresAt: string | Date;
   status: InvoiceStatus | string;
   isCashPaymentEligible: boolean;
+  destinationAddress: string;
 }
 
 export interface PublicPaymentStatusResponse {

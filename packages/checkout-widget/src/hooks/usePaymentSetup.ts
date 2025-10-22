@@ -15,6 +15,7 @@ export interface PaymentSetupData {
   processedAssets: BeepPurchaseAsset[];
   totalAmount: number;
   isCashPaymentEligible: boolean;
+  destinationAddress: string;
 }
 
 interface UsePaymentSetupParams {
@@ -68,6 +69,7 @@ export const usePaymentSetup = ({
         ) as BeepPurchaseAsset[],
         totalAmount: resp.amount ? parseFloat(resp.amount) : 0,
         isCashPaymentEligible: resp.isCashPaymentEligible,
+        destinationAddress: resp.destinationAddress,
       };
     },
     staleTime: 5 * 60 * 1000, // 5 minutes

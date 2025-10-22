@@ -36,45 +36,6 @@ import { PaymentQuote } from './components/PaymentQuote';
 
 const beepLogo = beepLogoUrl;
 /**
- * Parses a Payment URI to extract payment parameters.
- * Expected format: solana:recipient?amount=X&reference=Y&label=Z
- */
-function parsePaymentURI(uri: string) {
-  try {
-    if (!uri || typeof uri !== 'string') {
-      return {
-        recipient: '',
-        amount: null,
-        splToken: null,
-        reference: null,
-        label: null,
-        message: null,
-      };
-    }
-    const url = new URL(uri);
-
-    return {
-      recipient: url.pathname || '',
-      amount: url.searchParams.get('amount'),
-      splToken: url.searchParams.get('spl-token'),
-      reference: url.searchParams.get('reference'),
-      label: url.searchParams.get('label'),
-      message: url.searchParams.get('message'),
-    };
-  } catch (error) {
-    console.error('Failed to parse Solana Pay URI:', error);
-    return {
-      recipient: '',
-      amount: null,
-      splToken: null,
-      reference: null,
-      label: null,
-      message: null,
-    };
-  }
-}
-
-/**
  * CheckoutWidget - A complete Solana payment interface for the BEEP payment system
  *
  * This widget provides a full checkout experience supporting both existing product
@@ -183,16 +144,10 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   const totalAmount = paymentSetupData?.totalAmount ?? 0;
 
   // Extract wallet address from Solana Pay URI for display
-  const recipientWallet = useMemo(() => {
-    try {
-      if (!paymentSetupData?.paymentUrl) return '';
-      const parsed = parsePaymentURI(paymentSetupData.paymentUrl);
-      return parsed?.recipient || '';
-    } catch (error) {
-      console.error('Error parsing recipient wallet:', error);
-      return '';
-    }
-  }, [paymentSetupData?.paymentUrl]);
+  const destinationAddress = useMemo(
+    () => paymentSetupData?.destinationAddress || '',
+    [paymentSetupData],
+  );
 
   const [email, setEmail] = useState('');
   const [tosAccepted, setTosAccepted] = useState(false);
@@ -281,7 +236,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
                 <ComponentErrorBoundary componentName="WalletAddress">
                   <div style={{ margin: '30px auto 32px auto' }}>
-                    <WalletAddressLabel walletAddress={recipientWallet} />
+                    <WalletAddressLabel walletAddress={destinationAddress} />
                   </div>
                 </ComponentErrorBoundary>
                 <ComponentErrorBoundary componentName="Connect Wallet">
@@ -310,7 +265,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                       <WalletConnectPanel
                         paymentSetupData={paymentSetupData}
-                        destinationAddress={recipientWallet}
+                        destinationAddress={destinationAddress}
                         onPaymentComplete={handlePaymentComplete}
                       />
                     </div>
@@ -397,7 +352,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
               email={email}
               reference={paymentSetupData.referenceKey!}
               amount={paymentSetupData.totalAmount.toString()}
-              walletAddress={recipientWallet}
+              walletAddress={destinationAddress}
               setWidgetStep={setWidgetStep}
               publishableKey={publishableKey}
               serverUrl={serverUrl}

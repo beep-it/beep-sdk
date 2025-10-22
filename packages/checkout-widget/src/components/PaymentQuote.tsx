@@ -82,7 +82,7 @@ export const PaymentQuote: React.FC<{
         window.location.href = result.payUrl;
       }
     }
-  }, [selectedPaymentMethod]);
+  }, [selectedPaymentMethod, data]);
 
   const isContinueDisabled = useMemo(() => {
     return isLoading || !data?.fiatAmount || isCreatingOrder;

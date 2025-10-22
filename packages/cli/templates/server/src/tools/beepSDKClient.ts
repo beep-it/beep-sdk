@@ -6,5 +6,5 @@ if (!process.env.BEEP_API_KEY) {
 
 export const beepClient = new BeepClient({
   apiKey: process.env.BEEP_API_KEY!,
-  serverUrl: process.env.BEEP_URL,
+  serverUrl: process.env.BEEP_SERVER_URL,
 });
