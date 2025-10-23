@@ -31,7 +31,7 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "prepare": "pnpm build",
-    "prepublishOnly": "npm run lint && npm test && pnpm run build"
+    "prepublishOnly": "pnpm run lint && pnpm test && pnpm run build"
   },
   "keywords": [
     "beep",
