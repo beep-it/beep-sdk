@@ -1,129 +1,192 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { CheckoutWidget } from './CheckoutWidget';
+
+import { Example1 } from './examples/Example1';
+import { Example2 } from './examples/Example2';
+
+type Tab = 'example1' | 'example2';
+
+const PUB_KEY_STORAGE_KEY = 'beep_cw_pub_key';
+const DEFAULT_PUB_KEY = 'beep_pk_demo_publishable_key';
+
+const getStoredValue = (key: string, defaultValue: string): string => {
+  const stored = localStorage.getItem(key);
+  if (stored) {
+    return stored;
+  }
+  localStorage.setItem(key, defaultValue);
+  return defaultValue;
+};
 
 const ShowcasePage: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<Tab>('example1');
+  const [publishableKey, setPublishableKey] = useState(
+    getStoredValue(PUB_KEY_STORAGE_KEY, DEFAULT_PUB_KEY),
+  );
+  const [inputPubKey, setInputPubKey] = useState(
+    getStoredValue(PUB_KEY_STORAGE_KEY, DEFAULT_PUB_KEY),
+  );
+
+  const handleSetPubKey = () => {
+    setPublishableKey(inputPubKey);
+    localStorage.setItem(PUB_KEY_STORAGE_KEY, inputPubKey);
+  };
+
+  const tabStyles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column' as const,
+      padding: '20px',
+      backgroundColor: '#2c3e50',
+      minHeight: '100vh',
+      fontFamily: 'Arial, sans-serif',
+    },
+    header: {
+      marginBottom: '20px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    title: {
+      color: 'white',
+      fontSize: '24px',
+      margin: 0,
+    },
+    inputContainer: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      padding: '10px 15px',
+      backgroundColor: 'white',
+      borderRadius: '8px',
+    },
+    inputLabel: {
+      color: '#333',
+      fontWeight: 'bold' as const,
+      fontSize: '14px',
+      whiteSpace: 'nowrap' as const,
+    },
+    input: {
+      padding: '8px 12px',
+      fontSize: '14px',
+      border: '2px solid #ddd',
+      borderRadius: '4px',
+      minWidth: '300px',
+    },
+    setButton: {
+      padding: '8px 20px',
+      fontSize: '14px',
+      backgroundColor: '#3498db',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontWeight: 'bold' as const,
+      transition: 'background-color 0.2s',
+    },
+    contentWrapper: {
+      display: 'flex',
+      flex: 1,
+      gap: '20px',
+    },
+    sidebar: {
+      width: '200px',
+      backgroundColor: '#34495e',
+      borderRadius: '8px',
+      padding: '10px',
+    },
+    tabButton: (isActive: boolean) => ({
+      width: '100%',
+      padding: '12px 16px',
+      marginBottom: '8px',
+      backgroundColor: isActive ? '#3498db' : 'transparent',
+      color: 'white',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
+      fontSize: '14px',
+      textAlign: 'left' as const,
+      transition: 'background-color 0.2s',
+    }),
+    mainContent: {
+      flex: 1,
+      backgroundColor: 'white',
+      borderRadius: '8px',
+      overflow: 'auto',
+    },
+  };
+
   return (
-    <div
-      style={{
-        padding: '40px',
-        fontFamily: 'Arial, sans-serif',
-        backgroundColor: '#f5f5f5',
-        minHeight: '100vh',
-      }}
-    >
-      <h1
-        style={{
-          textAlign: 'center',
-          marginBottom: '40px',
-          color: '#333',
-        }}
-      >
-        BEEP Merchant Widget Showcase
-      </h1>
+    <div style={tabStyles.container}>
+      <div style={tabStyles.header}>
+        <h1 style={tabStyles.title}>BEEP Merchant Widget Showcase</h1>
 
-      <div
-        style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '30px',
-          justifyContent: 'center',
-        }}
-      >
-        {/* Default Theme */}
-        <div style={{ textAlign: 'center' }}>
-          <h3 style={{ marginBottom: '20px', color: '#666' }}>Default Theme</h3>
-          <CheckoutWidget
-            primaryColor="#007bff"
-            labels={{
-              scanQr: 'Scan with your phone or copy address',
-            }}
-            assets={[{ assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 }]}
-            publishableKey="your_beep_pk_here"
-            serverUrl="http://localhost:4070"
-          />
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <div style={tabStyles.inputContainer}>
+            <label style={tabStyles.inputLabel}>Publishable Key:</label>
+            <input
+              type="text"
+              value={inputPubKey}
+              onChange={(e) => setInputPubKey(e.target.value)}
+              placeholder="Enter publishable key"
+              style={tabStyles.input}
+            />
+            <button
+              style={tabStyles.setButton}
+              onClick={handleSetPubKey}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#2980b9';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#3498db';
+              }}
+            >
+              Set
+            </button>
+          </div>
         </div>
-
-        {/* Green Theme */}
-        {/*<div style={{ textAlign: 'center' }}>*/}
-        {/*  <h3 style={{ marginBottom: '20px', color: '#666' }}>Green Theme</h3>*/}
-        {/*  <CheckoutWidget*/}
-        {/*    merchantId="demo-merchant-002"*/}
-        {/*    amount={15.5}*/}
-        {/*    primaryColor="#28a745"*/}
-        {/*    labels={{*/}
-        {/*      scanQr: 'Pay with QR',*/}
-        {/*    }}*/}
-        {/*    apiKey="demo-api-key-456"*/}
-        {/*    serverUrl="http://localhost:4070"*/}
-        {/*  />*/}
-        {/*</div>*/}
-
-        {/* Purple Theme */}
-        {/*<div style={{ textAlign: 'center' }}>*/}
-        {/*  <h3 style={{ marginBottom: '20px', color: '#666' }}>Purple Theme</h3>*/}
-        {/*  <CheckoutWidget*/}
-        {/*    merchantId="demo-merchant-003"*/}
-        {/*    amount={99.99}*/}
-        {/*    primaryColor="#6f42c1"*/}
-        {/*    labels={{*/}
-        {/*      scanQr: 'Quick Pay',*/}
-        {/*    }}*/}
-        {/*    apiKey="demo-api-key-789"*/}
-        {/*    serverUrl="http://localhost:4070"*/}
-        {/*  />*/}
-        {/*</div>*/}
-
-        {/* Orange Theme */}
-        {/*<div style={{ textAlign: 'center' }}>*/}
-        {/*  <h3 style={{ marginBottom: '20px', color: '#666' }}>Orange Theme</h3>*/}
-        {/*  <CheckoutWidget*/}
-        {/*    merchantId="demo-merchant-004"*/}
-        {/*    amount={5.0}*/}
-        {/*    primaryColor="#fd7e14"*/}
-        {/*    labels={{*/}
-        {/*      scanQr: 'Scan & Pay',*/}
-        {/*    }}*/}
-        {/*    apiKey="demo-api-key-abc"*/}
-        {/*    serverUrl="http://localhost:4070"*/}
-        {/*  />*/}
-        {/*</div>*/}
       </div>
 
-      <div
-        style={{
-          marginTop: '50px',
-          padding: '20px',
-          backgroundColor: 'white',
-          borderRadius: '8px',
-          maxWidth: '800px',
-          margin: '50px auto 0',
-        }}
-      >
-        <h2 style={{ color: '#333', marginBottom: '20px' }}>Component Props</h2>
-        <pre
-          style={{
-            backgroundColor: '#f8f9fa',
-            padding: '15px',
-            borderRadius: '4px',
-            fontSize: '14px',
-            overflow: 'auto',
-          }}
-        >
-          {`interface MerchantWidgetProps {
-  publishableKey: string;   // Browser-safe publishable key
-  primaryColor?: string;    // Hex color for theming
-  labels: {
-    scanQr: string;        // Text displayed above QR code
-    paymentLabel?: string; // Optional label visible in wallets
-  };
-  assets: Array<
-    { assetId: string; quantity: number } |
-    { name: string; price: string; quantity?: number; description?: string }
-  >;
-  serverUrl?: string;      // Optional server URL (defaults to production)
-}`}
-        </pre>
+      <div style={tabStyles.contentWrapper}>
+        <div style={tabStyles.sidebar}>
+          <button
+            style={tabStyles.tabButton(activeTab === 'example1')}
+            onClick={() => setActiveTab('example1')}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'example1') {
+                e.currentTarget.style.backgroundColor = '#2c3e50';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'example1') {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
+          >
+            Example 1
+          </button>
+          <button
+            style={tabStyles.tabButton(activeTab === 'example2')}
+            onClick={() => setActiveTab('example2')}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'example2') {
+                e.currentTarget.style.backgroundColor = '#2c3e50';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'example2') {
+                e.currentTarget.style.backgroundColor = 'transparent';
+              }
+            }}
+          >
+            Example 2
+          </button>
+        </div>
+
+        <div style={tabStyles.mainContent}>
+          {activeTab === 'example1' && <Example1 publishableKey={publishableKey} />}
+          {activeTab === 'example2' && <Example2 publishableKey={publishableKey} />}
+        </div>
       </div>
     </div>
   );

@@ -12,6 +12,7 @@ import {
   VerifyOTPResponse,
   GeneratePaymentQuoteRequest,
   GeneratePaymentQuoteResponse,
+  GetProductsResponse,
 } from '../types/public';
 
 export class WidgetModule {
@@ -130,7 +131,12 @@ export class WidgetModule {
   }
 
   async getDynamicEnv() {
-    const res = await this.client.get<DynamicEnvResponse>(`/v1/widget/environment`);
+    const res = await this.client.get<DynamicEnvResponse>('/v1/widget/environment');
+    return res.data;
+  }
+
+  async getProducts() {
+    const res = await this.client.get<GetProductsResponse>('/v1/widget/products');
     return res.data;
   }
 }
