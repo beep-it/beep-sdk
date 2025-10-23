@@ -39,7 +39,7 @@ interface ProductCardProps {
 
 const CART_STORAGE_KEY = 'beep_cw_cart';
 
-const formatAmount = (amount: string, token: string): string => {
+const formatAmount = (amount: string): string => {
   const decimals = 6;
   const numAmount = parseInt(amount) / Math.pow(10, decimals);
   return numAmount.toFixed(6);
@@ -139,8 +139,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </div>
             {activePrice ? (
               <div>
-                <strong>Amount:</strong> {formatAmount(activePrice.amount, activePrice.token)}{' '}
-                {activePrice.token}
+                <strong>Amount:</strong> {formatAmount(activePrice.amount)} {activePrice.token}
               </div>
             ) : (
               <div style={{ color: '#e74c3c' }}>
