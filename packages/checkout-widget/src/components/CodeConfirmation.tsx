@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { styles } from './EmailVerification.styles';
 import { WidgetSteps } from '../constants';
 import { useGenerateOTP } from '../hooks/useGenerateOTP';
 import { useVerifyOTP } from '../hooks/useVerifyOTP';
+import { styles } from './EmailVerification.styles';
 
 const ONE_MINUTE_SECONDS = 60;
 
@@ -14,7 +14,7 @@ export const CodeConfirmation: React.FC<{
   setWidgetStep: (step: WidgetSteps) => void;
   publishableKey: string;
   serverUrl?: string;
-}> = ({ email, tosAccepted, otp, setOTP, setWidgetStep, publishableKey, serverUrl }) => {
+}> = ({ email, tosAccepted, otp: _otp, setOTP, setWidgetStep, publishableKey, serverUrl }) => {
   const [code, setCode] = useState('');
   const [timeUntilResend, setTimeUntilResend] = useState(ONE_MINUTE_SECONDS);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
@@ -25,7 +25,7 @@ export const CodeConfirmation: React.FC<{
     serverUrl,
   });
 
-  const { verifyOTP, isPending: isVerifyOTPPending } = useVerifyOTP({
+  const { verifyOTP, isPending: _isVerifyOTPPending } = useVerifyOTP({
     publishableKey,
     serverUrl,
   });
@@ -88,6 +88,7 @@ export const CodeConfirmation: React.FC<{
       setWidgetStep(WidgetSteps.PaymentQuote);
     } catch (error) {
       setCodeError('Verification failed. Please try again.');
+      console.error('Error verifying OTP:', error);
     }
   }, [code, setWidgetStep]);
 

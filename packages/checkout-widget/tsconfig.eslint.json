@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src",
+    "tests",
+    "examples",
+    "tsup.config.ts",
+    "tsup.lib.config.ts"
+  ]
+}
