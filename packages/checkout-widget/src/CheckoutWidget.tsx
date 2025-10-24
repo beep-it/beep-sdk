@@ -28,7 +28,7 @@ import { MerchantWidgetProps } from './types';
 import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 
 // Safe logo import with fallback
-import beepLogoUrl from './beep_logo_mega.svg';
+import beepLogoUrl from './beep.svg';
 import { WidgetSteps } from './constants';
 import { EmailVerification } from './components/EmailVerification';
 import { CodeConfirmation } from './components/CodeConfirmation';
