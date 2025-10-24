@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { styles } from './EmailVerification.styles';
-import { PAY_WAY_CODE_LABELS, WidgetSteps } from '../constants';
+import { PAY_WAY_CODE_LABELS, PAY_WAY_CODE_LOGOS, WidgetSteps } from '../constants';
 import { useGeneratePaymentQuote } from '../hooks/useGeneratePaymentQuote';
 import { PayWayCode } from '../../../core/src/types/cash-payment';
 import { useCreateCashPaymentOrder } from '../hooks/useCreateCashPaymentOrder';
@@ -243,7 +243,15 @@ export const PaymentQuote: React.FC<{
                     accentColor: '#a855f7',
                   }}
                 />
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <img
+                    src={PAY_WAY_CODE_LOGOS[paymentLimit.payWayCode]}
+                    alt={PAY_WAY_CODE_LABELS[paymentLimit.payWayCode]}
+                    style={{
+                      height: '24px',
+                      width: 'auto',
+                    }}
+                  />
                   <div
                     style={{
                       fontSize: '16px',

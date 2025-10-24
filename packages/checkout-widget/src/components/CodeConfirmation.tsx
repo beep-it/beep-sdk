@@ -141,6 +141,21 @@ export const CodeConfirmation: React.FC<{
 
       <h2 style={styles.title}>Confirm your email</h2>
 
+      <p
+        style={{
+          color: '#6b7280',
+          fontSize: '14px',
+          lineHeight: '1.5',
+          margin: '0 0 24px 0',
+          textAlign: 'center',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        }}
+      >
+        We've sent a verification code to <strong style={{ color: '#374151' }}>{email}</strong>.
+        <br />
+        Please enter it below to verify your email.
+      </p>
+
       <div style={styles.inputGroup}>
         <label style={styles.label}>Enter 6-digit code</label>
         <input
