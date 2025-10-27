@@ -48,18 +48,26 @@ export interface UseDynamicWalletReturn {
  * ```
  */
 export const useDynamicWallet = (): UseDynamicWalletReturn => {
-  const { primaryWallet, setShowAuthFlow, handleLogOut, user } = useDynamicContext();
+  const context = useDynamicContext();
   const [isLoading, setIsLoading] = useState(false);
+
+  const { primaryWallet, setShowAuthFlow, handleLogOut, user, showAuthFlow } = context || {};
 
   const walletAddress = primaryWallet?.address || null;
   const isConnected = Boolean(primaryWallet && walletAddress && user);
 
   const openModal = () => {
+    if (!setShowAuthFlow) {
+      return;
+    }
     setIsLoading(true);
     setShowAuthFlow(true);
   };
 
   const disconnect = async () => {
+    if (!handleLogOut) {
+      return;
+    }
     setIsLoading(true);
     try {
       await handleLogOut();
@@ -76,6 +84,13 @@ export const useDynamicWallet = (): UseDynamicWalletReturn => {
       setIsLoading(false);
     }
   }, [isConnected]);
+
+  // Reset loading state when auth flow modal is closed without connecting
+  useEffect(() => {
+    if (!showAuthFlow && !isConnected && isLoading) {
+      setIsLoading(false);
+    }
+  }, [showAuthFlow, isConnected, isLoading]);
 
   return {
     isConnected,

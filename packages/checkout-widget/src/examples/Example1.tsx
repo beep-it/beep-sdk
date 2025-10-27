@@ -40,7 +40,21 @@ export const Example1: React.FC<Example1Props> = ({ publishableKey }) => {
             labels={{
               scanQr: 'Scan with your phone or copy address',
             }}
-            assets={[{ assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 }]}
+            assets={[
+              { assetId: '4975fcd1-0cbf-4396-b9f5-079a61baf99a', quantity: 1 },
+              {
+                name: 'Premium Dog Hug',
+                price: '0.50',
+                quantity: 1,
+                description: 'Some description',
+              },
+              {
+                name: 'Ultra premium Dog Hug',
+                price: '55',
+                quantity: 1,
+                description: 'Some description',
+              },
+            ]}
             publishableKey={publishableKey}
             serverUrl="http://localhost:4070"
           />
