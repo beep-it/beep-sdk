@@ -57,6 +57,8 @@ export const Example1: React.FC<Example1Props> = ({ publishableKey }) => {
             ]}
             publishableKey={publishableKey}
             serverUrl="http://localhost:4070"
+            onPaymentSuccess={(a) => console.log(`PAYMENT SUCCESS: ${a}`)}
+            onPaymentError={(a) => console.log(`PAYMENT ERROR: ${a}`)}
           />
         </div>
       </div>

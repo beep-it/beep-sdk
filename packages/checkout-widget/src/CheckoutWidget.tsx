@@ -1,5 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ConfigurationError,
   LoadingState,
@@ -83,6 +83,8 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   publishableKey,
   serverUrl,
   assets = [],
+  onPaymentSuccess,
+  onPaymentError,
 }) => {
   // Input validation
   if (!publishableKey || typeof publishableKey !== 'string') {
@@ -138,10 +140,52 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   // Derive state from queries
   const isLoading = paymentSetupLoading || paymentStatusLoading;
   const paymentError = paymentSetupError || paymentStatusError;
-  const isPaymentComplete = Boolean(paymentStatusData === true);
+
+  // Payment is complete when paid is true AND status is 'paid' or 'confirmed'
+  const isPaymentComplete = Boolean(
+    paymentStatusData?.paid &&
+    (paymentStatusData?.status === 'paid' || paymentStatusData?.status === 'confirmed')
+  );
+
+  // Payment failed when status is 'failed'
+  const isPaymentFailed = paymentStatusData?.status === 'failed';
 
   // Get total amount from payment setup data (calculated from actual product pricing)
   const totalAmount = paymentSetupData?.totalAmount ?? 0;
+
+  // Call onPaymentSuccess callback when payment is completed
+  useEffect(() => {
+    if (isPaymentComplete && onPaymentSuccess) {
+      const paymentData = {
+        referenceKey: paymentSetupData?.referenceKey,
+        totalAmount: paymentSetupData?.totalAmount,
+        destinationAddress: paymentSetupData?.destinationAddress,
+        paymentUrl: paymentSetupData?.paymentUrl,
+        paid: paymentStatusData?.paid,
+        status: paymentStatusData?.status,
+      };
+      onPaymentSuccess(paymentData);
+    }
+  }, [isPaymentComplete, onPaymentSuccess, paymentSetupData, paymentStatusData]);
+
+  // Call onPaymentError callback when an error occurs or payment fails
+  useEffect(() => {
+    if (paymentError && onPaymentError) {
+      onPaymentError(paymentError);
+    }
+  }, [paymentError, onPaymentError]);
+
+  // Call onPaymentError callback when payment status is 'failed'
+  useEffect(() => {
+    if (isPaymentFailed && onPaymentError) {
+      const failedError = {
+        message: 'Payment failed',
+        status: paymentStatusData?.status,
+        referenceKey: paymentSetupData?.referenceKey,
+      };
+      onPaymentError(failedError);
+    }
+  }, [isPaymentFailed, onPaymentError, paymentStatusData?.status, paymentSetupData?.referenceKey]);
 
   // Extract wallet address from Solana Pay URI for display
   const destinationAddress = useMemo(
@@ -168,6 +212,16 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
   if (paymentError) {
     return <PaymentError error={paymentError} primaryColor={primaryColor} />;
+  }
+
+  // Show payment failed state
+  if (isPaymentFailed) {
+    return (
+      <PaymentError
+        error={{ message: 'Payment failed. Please try again.' }}
+        primaryColor={primaryColor}
+      />
+    );
   }
 
   return (
