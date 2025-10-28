@@ -95,6 +95,24 @@ export interface MerchantWidgetProps {
    * Total amount is automatically calculated from all asset quantities and prices.
    */
   assets: (BeepPurchaseAsset | CreateProductPayload)[];
+
+  /**
+   * Optional callback invoked when a payment is successfully completed
+   * Called when the payment status indicates completion (isPaymentComplete flag)
+   * Can be synchronous or asynchronous
+   *
+   * @param paymentData - Payment completion data including status information
+   */
+  onPaymentSuccess?: (paymentData: any) => void | Promise<void>;
+
+  /**
+   * Optional callback invoked when a payment error occurs
+   * Called when any error happens during the payment process
+   * Can be synchronous or asynchronous
+   *
+   * @param error - Error object or message describing what went wrong
+   */
+  onPaymentError?: (error: any) => void | Promise<void>;
 }
 
 /**
