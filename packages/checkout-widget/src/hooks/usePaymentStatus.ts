@@ -19,12 +19,20 @@ export const usePaymentStatus = ({
   return useQuery({
     queryKey: ['payment-status', referenceKey],
     queryFn: async () => {
-      if (!referenceKey) return false;
-      const result = await client.widget.getPaymentStatus(referenceKey);
-      return Boolean(result?.paid);
+      if (!referenceKey) {
+        return null;
+      }
+      return client.widget.getPaymentStatus(referenceKey);
     },
     enabled: enabled && !!referenceKey,
-    refetchInterval: 15000, // Poll every 15 seconds
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      // Stop polling if status is 'failed' or 'pending', or if payment is complete
+      if (data?.paid || data?.status === 'failed' || data?.status === 'pending') {
+        return false;
+      }
+      return 15000; // Poll every 15 seconds
+    },
     refetchIntervalInBackground: true,
     retry: false, // Don't retry failed polling requests
   });
