@@ -3,6 +3,7 @@ import { useDynamicWallet } from '../hooks/useDynamicWallet';
 import { PaymentSetupData } from '../hooks/usePaymentSetup';
 import { isSuiWallet } from '@dynamic-labs/sui';
 import { Transaction } from '@mysten/sui/transactions';
+import { useUserWallets, Wallet } from '@dynamic-labs/sdk-react-core';
 
 interface WalletConnectPanelProps {
   destinationAddress: string;
@@ -16,6 +17,26 @@ const TRANSACTION_REFERENCE = 'trx_refr';
 const SUI_USDC_ADDRESS =
   '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC';
 const SUI_USDC_DECIMALS = 6;
+
+const getProviderName = (walletProviderKey: string, address: string): string => {
+  const providerKey = walletProviderKey.toLowerCase();
+
+  if (providerKey.includes('phantom')) {
+    return 'Phantom';
+  } else if (providerKey.includes('metamask')) {
+    return 'MetaMask';
+  } else if (providerKey.includes('slushsui')) {
+    return 'Slush';
+  } else if (providerKey.includes('suietsui')) {
+    return 'Suiet';
+  } else if (providerKey.includes('coinbase')) {
+    return 'Coinbase';
+  } else if (providerKey.includes('walletconnect')) {
+    return 'WalletConnect';
+  }
+
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
 
 /**
  * Scales a decimal value to integer base units using the token's decimals
@@ -32,17 +53,19 @@ const scaleToInteger = (value: number, decimals: number): string => {
 const useConnectButtonText = ({
   isLoading,
   isConnected,
-  walletAddress,
+  wallet,
 }: {
   isLoading: boolean;
   isConnected: boolean;
-  walletAddress: string | null;
+  wallet: Wallet | null;
 }) => {
   if (isLoading) {
     return 'Connecting...';
   }
-  if (isConnected && walletAddress) {
-    return `Pay with ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+  if (isConnected && wallet?.address) {
+    const walletAddress = wallet.address;
+    const walletName = getProviderName(wallet.connector.key, walletAddress);
+    return `Pay with ${walletName} on ${wallet.chain}`;
   }
   return 'Connect your wallet';
 };
@@ -124,8 +147,8 @@ const payToAddress = async ({
       transactionBlock: signedTransaction.bytes,
     });
 
-    return paidTransaction.digest;
     console.log('[WalletConnectButton] Transaction successful');
+    return paidTransaction.digest;
   } catch (error) {
     console.error('[WalletConnectButton] Transaction failed:', error);
     throw error;
@@ -180,7 +203,7 @@ export const WalletConnectPanel: React.FC<WalletConnectPanelProps> = ({
     onPaymentComplete,
   ]);
 
-  const mainButtonText = useConnectButtonText({ isLoading, isConnected, walletAddress });
+  const mainButtonText = useConnectButtonText({ isLoading, isConnected, wallet: primaryWallet });
 
   return (
     <div
@@ -197,34 +220,26 @@ export const WalletConnectPanel: React.FC<WalletConnectPanelProps> = ({
         disabled={isLoading}
         style={{
           width: '80%',
-          background: isConnected
-            ? 'linear-gradient(to right, #10b981, #059669)'
-            : 'linear-gradient(to right, #a855f7, #ec4899)',
+          backgroundColor: isConnected ? '#10b981' : '#26262B',
           color: 'white',
-          fontWeight: '600',
-          padding: '16px',
-          borderRadius: '12px',
+          fontWeight: '500',
+          padding: '14px 16px',
+          borderRadius: '9999px',
           border: 'none',
-          cursor: 'pointer',
+          cursor: isLoading ? 'default' : 'pointer',
           transition: 'all 0.2s',
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          fontSize: '14px',
+          textAlign: 'center',
+          opacity: isLoading ? 0.6 : 1,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = isConnected
-            ? 'linear-gradient(to right, #059669, #047857)'
-            : 'linear-gradient(to right, #9333ea, #db2777)';
-          e.currentTarget.style.transform = 'scale(1.05)';
+          if (!isLoading) {
+            e.currentTarget.style.backgroundColor = isConnected ? '#059669' : '#1a1a1e';
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = isConnected
-            ? 'linear-gradient(to right, #10b981, #059669)'
-            : 'linear-gradient(to right, #a855f7, #ec4899)';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-        onMouseDown={(e) => {
-          e.currentTarget.style.transform = 'scale(0.95)';
-        }}
-        onMouseUp={(e) => {
-          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.backgroundColor = isConnected ? '#10b981' : '#26262B';
         }}
       >
         {mainButtonText}
@@ -235,28 +250,26 @@ export const WalletConnectPanel: React.FC<WalletConnectPanelProps> = ({
           disabled={isLoading}
           style={{
             width: '80%',
-            background: 'linear-gradient(to right, #dc2626, #b91c1c)',
+            backgroundColor: '#dc2626',
             color: 'white',
-            fontWeight: '600',
-            padding: '12px',
-            borderRadius: '12px',
+            fontWeight: '500',
+            padding: '14px 16px',
+            borderRadius: '9999px',
             border: 'none',
-            cursor: 'pointer',
+            cursor: isLoading ? 'default' : 'pointer',
             transition: 'all 0.2s',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            fontSize: '14px',
+            textAlign: 'center',
+            opacity: isLoading ? 0.6 : 1,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(to right, #b91c1c, #991b1b)';
-            e.currentTarget.style.transform = 'scale(1.05)';
+            if (!isLoading) {
+              e.currentTarget.style.backgroundColor = '#b91c1c';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(to right, #dc2626, #b91c1c)';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.transform = 'scale(0.95)';
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.backgroundColor = '#dc2626';
           }}
         >
           Disconnect

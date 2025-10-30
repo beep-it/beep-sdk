@@ -30,9 +30,9 @@ import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 // Safe logo import with fallback
 import beepLogoUrl from './beep.svg';
 import { WidgetSteps } from './constants';
-import { EmailVerification } from './components/EmailVerification';
-import { CodeConfirmation } from './components/CodeConfirmation';
-import { PaymentQuote } from './components/PaymentQuote';
+// import { EmailVerification } from './components/EmailVerification';
+// import { CodeConfirmation } from './components/CodeConfirmation';
+// import { PaymentQuote } from './components/PaymentQuote';
 
 const beepLogo = beepLogoUrl;
 /**
@@ -198,9 +198,9 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
   const [otp, setOTP] = useState<string | null>(null);
 
-  const handlePayWithCash = useCallback(() => {
-    setWidgetStep(WidgetSteps.EmailVerification);
-  }, []);
+  // const handlePayWithCash = useCallback(() => {
+  //   setWidgetStep(WidgetSteps.EmailVerification);
+  // }, []);
 
   const shouldRenderAmountDisplay = useMemo(() => {
     return widgetStep === WidgetSteps.PaymentInterface;
@@ -326,7 +326,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                   </div>
                 </ComponentErrorBoundary>
 
-                {paymentSetupData.isCashPaymentEligible && (
+                {/* {paymentSetupData.isCashPaymentEligible && (
                   <ComponentErrorBoundary componentName="Pay with cash">
                     <div style={{ margin: '30px auto 32px auto' }}>
                       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
@@ -365,13 +365,13 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                       </div>
                     </div>
                   </ComponentErrorBoundary>
-                )}
+                )} */}
               </>
             )}
           </ComponentErrorBoundary>
         )}
         {/* Email Verification Step */}
-        {widgetStep === WidgetSteps.EmailVerification && (
+        {/* {widgetStep === WidgetSteps.EmailVerification && (
           <ComponentErrorBoundary componentName="EmailVerification">
             <EmailVerification
               email={email}
@@ -384,9 +384,9 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
               serverUrl={serverUrl}
             />
           </ComponentErrorBoundary>
-        )}
+        )} */}
         {/* Code Confirmation Step */}
-        {widgetStep === WidgetSteps.CodeConfirmation && (
+        {/* {widgetStep === WidgetSteps.CodeConfirmation && (
           <ComponentErrorBoundary componentName="CodeConfirmation">
             <CodeConfirmation
               email={email}
@@ -398,9 +398,9 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
               serverUrl={serverUrl}
             />
           </ComponentErrorBoundary>
-        )}
+        )} */}
         {/* Payment Quote Step */}
-        {widgetStep === WidgetSteps.PaymentQuote && paymentSetupData && (
+        {/* {widgetStep === WidgetSteps.PaymentQuote && paymentSetupData && (
           <ComponentErrorBoundary componentName="PaymentQuote">
             <PaymentQuote
               email={email}
@@ -412,7 +412,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
               serverUrl={serverUrl}
             />
           </ComponentErrorBoundary>
-        )}
+        )} */}
         {/* Footer */}
         <ComponentErrorBoundary componentName="Footer">
           <div style={footerStyles}>
