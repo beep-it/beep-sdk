@@ -3,6 +3,7 @@ import { useDynamicWallet } from '../hooks/useDynamicWallet';
 import { PaymentSetupData } from '../hooks/usePaymentSetup';
 import { isSuiWallet } from '@dynamic-labs/sui';
 import { Transaction } from '@mysten/sui/transactions';
+import { useUserWallets, Wallet } from '@dynamic-labs/sdk-react-core';
 
 interface WalletConnectPanelProps {
   destinationAddress: string;
@@ -16,6 +17,26 @@ const TRANSACTION_REFERENCE = 'trx_refr';
 const SUI_USDC_ADDRESS =
   '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC';
 const SUI_USDC_DECIMALS = 6;
+
+const getProviderName = (walletProviderKey: string, address: string): string => {
+  const providerKey = walletProviderKey.toLowerCase();
+
+  if (providerKey.includes('phantom')) {
+    return 'Phantom';
+  } else if (providerKey.includes('metamask')) {
+    return 'MetaMask';
+  } else if (providerKey.includes('slushsui')) {
+    return 'Slush';
+  } else if (providerKey.includes('suietsui')) {
+    return 'Suiet';
+  } else if (providerKey.includes('coinbase')) {
+    return 'Coinbase';
+  } else if (providerKey.includes('walletconnect')) {
+    return 'WalletConnect';
+  }
+
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
 
 /**
  * Scales a decimal value to integer base units using the token's decimals
@@ -32,17 +53,19 @@ const scaleToInteger = (value: number, decimals: number): string => {
 const useConnectButtonText = ({
   isLoading,
   isConnected,
-  walletAddress,
+  wallet,
 }: {
   isLoading: boolean;
   isConnected: boolean;
-  walletAddress: string | null;
+  wallet: Wallet | null;
 }) => {
   if (isLoading) {
     return 'Connecting...';
   }
-  if (isConnected && walletAddress) {
-    return `Pay with ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`;
+  if (isConnected && wallet?.address) {
+    const walletAddress = wallet.address;
+    const walletName = getProviderName(wallet.connector.key, walletAddress);
+    return `Pay with ${walletName} on ${wallet.chain}`;
   }
   return 'Connect your wallet';
 };
@@ -124,8 +147,8 @@ const payToAddress = async ({
       transactionBlock: signedTransaction.bytes,
     });
 
-    return paidTransaction.digest;
     console.log('[WalletConnectButton] Transaction successful');
+    return paidTransaction.digest;
   } catch (error) {
     console.error('[WalletConnectButton] Transaction failed:', error);
     throw error;
@@ -180,7 +203,7 @@ export const WalletConnectPanel: React.FC<WalletConnectPanelProps> = ({
     onPaymentComplete,
   ]);
 
-  const mainButtonText = useConnectButtonText({ isLoading, isConnected, walletAddress });
+  const mainButtonText = useConnectButtonText({ isLoading, isConnected, wallet: primaryWallet });
 
   return (
     <div
