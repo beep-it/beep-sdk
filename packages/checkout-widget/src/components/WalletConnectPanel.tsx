@@ -197,34 +197,26 @@ export const WalletConnectPanel: React.FC<WalletConnectPanelProps> = ({
         disabled={isLoading}
         style={{
           width: '80%',
-          background: isConnected
-            ? 'linear-gradient(to right, #10b981, #059669)'
-            : 'linear-gradient(to right, #a855f7, #ec4899)',
+          backgroundColor: isConnected ? '#10b981' : '#26262B',
           color: 'white',
-          fontWeight: '600',
-          padding: '16px',
-          borderRadius: '12px',
+          fontWeight: '500',
+          padding: '14px 16px',
+          borderRadius: '9999px',
           border: 'none',
-          cursor: 'pointer',
+          cursor: isLoading ? 'default' : 'pointer',
           transition: 'all 0.2s',
+          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          fontSize: '14px',
+          textAlign: 'center',
+          opacity: isLoading ? 0.6 : 1,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = isConnected
-            ? 'linear-gradient(to right, #059669, #047857)'
-            : 'linear-gradient(to right, #9333ea, #db2777)';
-          e.currentTarget.style.transform = 'scale(1.05)';
+          if (!isLoading) {
+            e.currentTarget.style.backgroundColor = isConnected ? '#059669' : '#1a1a1e';
+          }
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = isConnected
-            ? 'linear-gradient(to right, #10b981, #059669)'
-            : 'linear-gradient(to right, #a855f7, #ec4899)';
-          e.currentTarget.style.transform = 'scale(1)';
-        }}
-        onMouseDown={(e) => {
-          e.currentTarget.style.transform = 'scale(0.95)';
-        }}
-        onMouseUp={(e) => {
-          e.currentTarget.style.transform = 'scale(1.05)';
+          e.currentTarget.style.backgroundColor = isConnected ? '#10b981' : '#26262B';
         }}
       >
         {mainButtonText}
@@ -235,28 +227,26 @@ export const WalletConnectPanel: React.FC<WalletConnectPanelProps> = ({
           disabled={isLoading}
           style={{
             width: '80%',
-            background: 'linear-gradient(to right, #dc2626, #b91c1c)',
+            backgroundColor: '#dc2626',
             color: 'white',
-            fontWeight: '600',
-            padding: '12px',
-            borderRadius: '12px',
+            fontWeight: '500',
+            padding: '14px 16px',
+            borderRadius: '9999px',
             border: 'none',
-            cursor: 'pointer',
+            cursor: isLoading ? 'default' : 'pointer',
             transition: 'all 0.2s',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            fontSize: '14px',
+            textAlign: 'center',
+            opacity: isLoading ? 0.6 : 1,
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(to right, #b91c1c, #991b1b)';
-            e.currentTarget.style.transform = 'scale(1.05)';
+            if (!isLoading) {
+              e.currentTarget.style.backgroundColor = '#b91c1c';
+            }
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(to right, #dc2626, #b91c1c)';
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-          onMouseDown={(e) => {
-            e.currentTarget.style.transform = 'scale(0.95)';
-          }}
-          onMouseUp={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
+            e.currentTarget.style.backgroundColor = '#dc2626';
           }}
         >
           Disconnect
