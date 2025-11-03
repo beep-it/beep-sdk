@@ -1,9 +1,9 @@
+import { Wallet } from '@dynamic-labs/sdk-react-core';
+import { isSuiWallet } from '@dynamic-labs/sui';
+import { Transaction } from '@mysten/sui/transactions';
 import React, { useCallback } from 'react';
 import { useDynamicWallet } from '../hooks/useDynamicWallet';
 import { PaymentSetupData } from '../hooks/usePaymentSetup';
-import { isSuiWallet } from '@dynamic-labs/sui';
-import { Transaction } from '@mysten/sui/transactions';
-import { useUserWallets, Wallet } from '@dynamic-labs/sdk-react-core';
 
 interface WalletConnectPanelProps {
   destinationAddress: string;

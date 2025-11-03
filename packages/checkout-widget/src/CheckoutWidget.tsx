@@ -9,6 +9,7 @@ import {
   WalletConnectPanel,
 } from './components';
 import { ComponentErrorBoundary } from './components/ComponentErrorBoundary';
+import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { usePaymentSetup, usePaymentStatus } from './hooks';
 import { QueryProvider } from './QueryProvider';
@@ -25,7 +26,6 @@ import {
   qrStyle,
 } from './styles';
 import { MerchantWidgetProps } from './types';
-import { DynamicWalletProvider } from './components/DynamicWalletProvider';
 
 // Safe logo import with fallback
 import beepLogoUrl from './beep.svg';
@@ -144,7 +144,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   // Payment is complete when paid is true AND status is 'paid' or 'confirmed'
   const isPaymentComplete = Boolean(
     paymentStatusData?.paid &&
-    (paymentStatusData?.status === 'paid' || paymentStatusData?.status === 'confirmed')
+      (paymentStatusData?.status === 'paid' || paymentStatusData?.status === 'confirmed'),
   );
 
   // Payment failed when status is 'failed'
@@ -193,10 +193,12 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     [paymentSetupData],
   );
 
-  const [email, setEmail] = useState('');
-  const [tosAccepted, setTosAccepted] = useState(false);
+  // const [email, setEmail] = useState('');
+  // const [tosAccepted, setTosAccepted] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
-  const [otp, setOTP] = useState<string | null>(null);
+  // const [otp, setOTP] = useState<string | null>(null);
 
   // const handlePayWithCash = useCallback(() => {
   //   setWidgetStep(WidgetSteps.EmailVerification);
