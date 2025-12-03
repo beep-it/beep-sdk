@@ -35,7 +35,7 @@ describe('CheckoutWidget', () => {
   beforeEach(() => {
     // Clear all mocks before each test
     jest.clearAllMocks();
-    
+
     // Default mock implementations
     mockUsePaymentSetup.mockReturnValue({
       data: null,
@@ -69,7 +69,8 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'data:image/png;base64,mockqrcode',
         referenceKey: 'test-ref',
-        paymentUrl: 'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref',
+        paymentUrl:
+          'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref',
         processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
         totalAmount: 1.156188, // Amount from the product pricing
       },
@@ -87,7 +88,7 @@ describe('CheckoutWidget', () => {
     render(<CheckoutWidget {...defaultPropsWithExistingAssets} />);
 
     expect(screen.getByText('Scan QR Code to Pay')).toBeInTheDocument();
-    expect(screen.getByText('$1.16')).toBeInTheDocument(); // Now shows calculated total from product
+    expect(screen.getByText('$1.156188')).toBeInTheDocument(); // Now shows calculated total from product
   });
 
   it('renders error state when payment request fails', () => {
@@ -134,7 +135,7 @@ describe('CheckoutWidget', () => {
         referenceKey: 'test-ref',
         paymentUrl: 'solana:test',
         processedAssets: [{ assetId: 'created-product-id', quantity: 1 }],
-        totalAmount: 25.50, // Amount calculated from product pricing
+        totalAmount: 25.5, // Amount calculated from product pricing
       },
       error: null,
       isLoading: false,
@@ -165,7 +166,7 @@ describe('CheckoutWidget', () => {
           { assetId: 'product-1-id', quantity: 1 },
           { assetId: 'product-2-id', quantity: 1 },
         ],
-        totalAmount: 25.50, // 10.00 + 15.50
+        totalAmount: 25.5, // 10.00 + 15.50
       },
       error: null,
       isLoading: false,
@@ -194,7 +195,7 @@ describe('CheckoutWidget', () => {
           { assetId: 'new-product-id', quantity: 1 },
           { assetId: 'existing-asset-id', quantity: 2 },
         ],
-        totalAmount: 30.00, // Assume existing product contributes 10.00 (5.00 × 2)
+        totalAmount: 30.0, // Assume existing product contributes 10.00 (5.00 × 2)
       },
       error: null,
       isLoading: false,
@@ -216,7 +217,7 @@ describe('CheckoutWidget', () => {
     render(<CheckoutWidget {...defaultPropsWithNewProducts} />);
 
     expect(
-      screen.getByText('Failed to create product "Test Product": Product name already exists')
+      screen.getByText('Failed to create product "Test Product": Product name already exists'),
     ).toBeInTheDocument();
   });
 
@@ -231,7 +232,7 @@ describe('CheckoutWidget', () => {
     render(<CheckoutWidget {...defaultPropsWithNewProducts} />);
 
     expect(
-      screen.getByText('Failed to create product "Test Product": Unknown error')
+      screen.getByText('Failed to create product "Test Product": Unknown error'),
     ).toBeInTheDocument();
   });
 
@@ -255,7 +256,7 @@ describe('CheckoutWidget', () => {
           { assetId: 'p2', quantity: 1 },
           { assetId: 'p3', quantity: 1 },
         ],
-        totalAmount: 70.00, // 12.34 + 56.78 + 0.88
+        totalAmount: 70.0, // 12.34 + 56.78 + 0.88
       },
       error: null,
       isLoading: false,
@@ -281,6 +282,6 @@ describe('CheckoutWidget', () => {
 
     render(<CheckoutWidget {...defaultPropsWithExistingAssets} />);
 
-    expect(screen.getByText('$1.16')).toBeInTheDocument(); // Shows calculated total from product
+    expect(screen.getByText('$1.156188')).toBeInTheDocument(); // Shows calculated total from product
   });
 });

@@ -30,6 +30,7 @@ import { MerchantWidgetProps } from './types';
 // Safe logo import with fallback
 import beepLogoUrl from './beep.svg';
 import { WidgetSteps } from './constants';
+import { useFormatCurrency } from './hooks/useFormatCurrency';
 // import { EmailVerification } from './components/EmailVerification';
 // import { CodeConfirmation } from './components/CodeConfirmation';
 // import { PaymentQuote } from './components/PaymentQuote';
@@ -153,6 +154,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   // Get total amount from payment setup data (calculated from actual product pricing)
   const totalAmount = paymentSetupData?.totalAmount ?? 0;
 
+  const formattedAmount = useFormatCurrency(totalAmount);
   // Call onPaymentSuccess callback when payment is completed
   useEffect(() => {
     if (isPaymentComplete && onPaymentSuccess) {
@@ -234,7 +236,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
           <ComponentErrorBoundary componentName="AmountDisplay">
             <div style={mainContentStyles}>
               <p style={labelStyles}>Amount due</p>
-              <h1 style={amountStyles}>${totalAmount > 0 ? totalAmount.toFixed(2) : '...'}</h1>
+              <h1 style={amountStyles}>{formattedAmount}</h1>
             </div>
           </ComponentErrorBoundary>
         )}
@@ -295,38 +297,40 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
                     <WalletAddressLabel walletAddress={destinationAddress} />
                   </div>
                 </ComponentErrorBoundary>
-                <ComponentErrorBoundary componentName="Connect Wallet">
-                  <div style={{ margin: '30px auto 32px auto' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        width: '80%',
-                        margin: '20px auto',
-                      }}
-                    >
-                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
-                      <span
+                {!isPaymentComplete && (
+                  <ComponentErrorBoundary componentName="Connect Wallet">
+                    <div style={{ margin: '30px auto 32px auto' }}>
+                      <div
                         style={{
-                          padding: '0 16px',
-                          color: '#999',
-                          fontSize: '14px',
-                          fontWeight: '500',
+                          display: 'flex',
+                          alignItems: 'center',
+                          width: '80%',
+                          margin: '20px auto',
                         }}
                       >
-                        OR
-                      </span>
-                      <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                        <span
+                          style={{
+                            padding: '0 16px',
+                            color: '#999',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                          }}
+                        >
+                          OR
+                        </span>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: '#d3d3d3' }}></div>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                        <WalletConnectPanel
+                          paymentSetupData={paymentSetupData}
+                          destinationAddress={destinationAddress}
+                          onPaymentComplete={handlePaymentComplete}
+                        />
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-                      <WalletConnectPanel
-                        paymentSetupData={paymentSetupData}
-                        destinationAddress={destinationAddress}
-                        onPaymentComplete={handlePaymentComplete}
-                      />
-                    </div>
-                  </div>
-                </ComponentErrorBoundary>
+                  </ComponentErrorBoundary>
+                )}
 
                 {/* {paymentSetupData.isCashPaymentEligible && (
                   <ComponentErrorBoundary componentName="Pay with cash">
