@@ -10,11 +10,11 @@
     "dev": "pnpm --filter \"./packages/*\" run dev --parallel"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
-    "pnpm": "10.0.0"
+    "pnpm": "10.25.0",
+    "typescript": "^5.5.3"
   },
   "pnpm": {
     "overrides": {
@@ -28,5 +28,5 @@
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "pnpm@8.6.0"
+  "packageManager": "pnpm@10.25.0"
 }
