@@ -11,15 +11,15 @@ jobs:
     
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@1e31de5234b9f8995739874a8ce0492dc87873e2"
 
       - name: Use Node 22.18.0
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65
         with:
           node-version: 22.18.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        uses: pnpm/action-setup@d882d12c64e032187b2edb46d3a0d003b7a43598
         with:
           version: 10
 
