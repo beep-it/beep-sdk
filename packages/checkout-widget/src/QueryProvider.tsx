@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: process.env.NODE_ENV === 'test' ? false : 1, // Disable retries in tests
+      retry: process.env.NODE_ENV === 'test' ? 0 : 1, // Disable retries in tests
       staleTime: 5 * 60 * 1000, // 5 minutes
     },
   },
