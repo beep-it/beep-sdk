@@ -9,6 +9,7 @@ import { PaymentsModule } from './modules/payments';
 import { ProductsModule } from './modules/products';
 import { WidgetModule } from './modules/widget';
 import { UserModule } from './modules/user';
+import { TreasuryModule } from './modules/treasury';
 
 /**
  * Configuration options for initializing the BeepClient
@@ -77,6 +78,8 @@ export class BeepClient {
   public readonly payments: PaymentsModule;
   /** Access to authenticated user info */
   public readonly user: UserModule;
+  /** Access to treasury operations including withdrawals, limits, and webhooks */
+  public readonly treasury: TreasuryModule;
 
   /**
    * Creates a new BEEP client instance
@@ -102,6 +105,7 @@ export class BeepClient {
     this.invoices = new InvoicesModule(this.client);
     this.payments = new PaymentsModule(this.client);
     this.user = new UserModule(this.client);
+    this.treasury = new TreasuryModule(this.client);
   }
 
   /**
@@ -173,6 +177,35 @@ export { SupportedToken, TokenUtils } from './types/token';
 
 // Core response types that consumers might need
 export type { BeepResponse } from './types';
+
+// Treasury types
+export type {
+  TreasuryInfo,
+  TreasuryAccount,
+  YieldHistory,
+  YieldSnapshot,
+  Transaction,
+  TransactionList,
+  AllocationInfo,
+  WithdrawalRequest,
+  WithdrawalStatus,
+  ApprovalTier,
+  WithdrawalLimits,
+  IPWhitelistEntry,
+  TreasuryWebhook,
+  TreasuryEventType,
+  WebhookDelivery,
+  WebhookDeliveryStats,
+  ChainType,
+  TokenType,
+  CreateWithdrawalPayload,
+  CreateWithdrawalResponse,
+  UpdateLimitsPayload,
+  AddIPWhitelistPayload,
+  CreateWebhookPayload,
+  UpdateWebhookPayload,
+  TransactionQueryParams,
+} from './types/treasury';
 
 // ------------------------------
 // Public, browser-safe client

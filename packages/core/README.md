@@ -22,6 +22,16 @@ No banks. No bridges. No nonsense.
   - [Frontend Setup](#frontend-setup)
   - [Frontend Making Money](#frontend-making-money)
   - [Frontend API Reference](#frontend-api-reference)
+- [🏦 Treasury Module](#treasury-module-beepclient-only)
+  - [Overview](#overview)
+  - [Read-Only Operations](#read-only-operations)
+  - [Withdrawal Operations](#withdrawal-operations)
+  - [Security Configuration](#security-configuration)
+  - [Webhooks](#webhooks)
+  - [Complete Withdrawal Flow Example](#complete-withdrawal-flow-example)
+  - [Rate Limits](#rate-limits)
+  - [Error Handling](#error-handling)
+  - [Best Practices](#best-practices)
 - [Token Utilities](#token-utilities)
 - [Resources](#resources)
 
@@ -362,30 +372,456 @@ const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11Mc
 
 ---
 
-## License
+## Treasury Module (BeepClient Only)
 
-MIT. Go wild.
-#### Payouts (BeepClient Only)
+### Overview
 
-Initiate a payout from your treasury wallet to an external address. Requires a secret API key and must be called server-side.
+The Treasury module provides enterprise-grade security for managing treasury accounts and withdrawals. It implements a multi-layered security system with 2FA enforcement, tiered approval flows, IP whitelisting, withdrawal limits, and comprehensive audit logging.
 
-Notes:
-- The server derives the source wallet from your API key's merchant and the requested chain; you do not provide a walletId.
-- `amount` must be provided in the token's smallest units (integer as a string). For USDC with 6 decimals, 1.00 USDC = "1000000".
-- The response indicates acceptance or rejection. Execution happens asynchronously after treasury funds are reserved.
+**Security Features:**
+- **2FA Required**: All withdrawals require two-factor authentication
+- **Tiered Approvals**: Automatic, email confirmation, or manual approval based on amount
+- **IP Whitelisting**: Restrict API access to specific IP addresses or CIDR ranges
+- **Withdrawal Limits**: Daily and per-transaction USD limits
+- **Distributed Locking**: Prevents concurrent withdrawal race conditions
+- **Audit Trail**: Complete compliance logging with never-fail pattern
+- **Webhooks**: Real-time event notifications for deposits, withdrawals, and balance changes
 
-Example:
-```ts
+### Setup
+
+```typescript
+import { BeepClient } from '@beep-it/sdk-core';
+
+const beep = new BeepClient({
+  apiKey: process.env.BEEP_API_KEY!, // Secret key required
+});
+
+// Access treasury module
+const treasury = beep.treasury;
+```
+
+### Read-Only Operations
+
+#### Get Treasury Info
+
+Retrieve account balances, allocations, and total yield earned.
+
+```typescript
+const info = await beep.treasury.getTreasuryInfo();
+
+console.log({
+  totalBalanceUSD: info.totalBalanceUSD,
+  totalYieldEarned: info.totalYieldEarned,
+  currentAPY: info.currentAPY,
+  accounts: info.accounts.map(acc => ({
+    chain: acc.chain,
+    token: acc.token,
+    totalAmount: acc.totalAmount,
+    allocatedAmount: acc.allocatedAmount,
+  })),
+});
+```
+
+#### Get Withdrawal Limits
+
+Check current limits and remaining daily balance.
+
+```typescript
+const limits = await beep.treasury.getLimits();
+
+console.log({
+  dailyLimitUSD: limits.dailyLimitUSD,
+  perTransactionLimitUSD: limits.perTransactionLimitUSD,
+  currentDailyUsageUSD: limits.currentDailyUsageUSD,
+  remainingDailyLimitUSD: limits.remainingDailyLimitUSD,
+  lastResetAt: limits.lastResetAt,
+});
+```
+
+#### Get Yield History
+
+Retrieve historical yield data with snapshots.
+
+```typescript
+const yieldHistory = await beep.treasury.getYieldHistory({
+  startDate: '2025-01-01',
+  endDate: '2025-01-31',
+});
+
+yieldHistory.snapshots.forEach(snapshot => {
+  console.log(`${snapshot.date}: ${snapshot.yieldEarned} (APY: ${snapshot.apy})`);
+});
+```
+
+#### Get Transactions
+
+Paginated transaction history for deposits and withdrawals.
+
+```typescript
+const transactions = await beep.treasury.getTransactions({
+  limit: 50,
+  offset: 0,
+  type: 'withdrawal', // or 'deposit'
+});
+
+transactions.transactions.forEach(tx => {
+  console.log(`${tx.type}: ${tx.amount} ${tx.token} - ${tx.status}`);
+});
+```
+
+#### Get Allocations
+
+Current yield generator allocations with APY.
+
+```typescript
+const allocations = await beep.treasury.getAllocations();
+
+allocations.forEach(allocation => {
+  console.log({
+    protocol: allocation.protocol,
+    chain: allocation.chain,
+    allocatedAmount: allocation.allocatedAmount,
+    currentValue: allocation.currentValue,
+    yieldEarned: allocation.yieldEarned,
+    apy: allocation.apy,
+  });
+});
+```
+
+### Withdrawal Operations
+
+#### Creating a Withdrawal
+
+All withdrawals require 2FA and follow tiered approval flows based on amount.
+
+**Approval Tiers:**
+- **SMALL** (<$1,000): Auto-approved with 2FA
+- **MEDIUM** ($1,000-$10,000): 2FA + email confirmation required
+- **LARGE** (>$10,000): 2FA + manual approval required
+
+```typescript
+// Step 1: Create withdrawal request with 2FA code
+const withdrawal = await beep.treasury.createWithdrawal({
+  amount: '500.00',
+  chain: 'ethereum',
+  token: 'USDC',
+  destinationAddress: '0x1234...5678',
+  twoFactorCode: '123456', // From authenticator app
+});
+
+console.log({
+  withdrawalId: withdrawal.id,
+  status: withdrawal.status,
+  approvalRequired: withdrawal.approvalRequired,
+  approvalTier: withdrawal.approvalTier,
+  estimatedCompletion: withdrawal.estimatedCompletion,
+});
+```
+
+#### Email Confirmation (MEDIUM Tier)
+
+For withdrawals between $1K-$10K, email confirmation is required.
+
+```typescript
+// User receives email with confirmation token
+const confirmationResult = await beep.treasury.confirmWithdrawalEmail(
+  withdrawal.id,
+  'email-confirmation-token-from-link',
+);
+
+console.log('Email confirmed:', confirmationResult.confirmed);
+```
+
+#### Check Withdrawal Status
+
+Monitor withdrawal progress including approval status.
+
+```typescript
+const status = await beep.treasury.getWithdrawalStatus(withdrawal.id);
+
+console.log({
+  status: status.status,
+  twoFactorVerified: status.twoFactorVerified,
+  emailConfirmed: status.emailConfirmed,
+  approvalStatus: status.approvalStatus,
+  txHash: status.txHash,
+});
+```
+
+#### Wait for Completion (Polling)
+
+Automatically poll until withdrawal completes or times out.
+
+```typescript
+const completedWithdrawal = await beep.treasury.waitForWithdrawalCompletion(
+  withdrawal.id,
+  {
+    timeout: 5 * 60 * 1000, // 5 minutes
+    pollInterval: 5000, // Check every 5 seconds
+  },
+);
+
+if (completedWithdrawal.status === 'COMPLETED') {
+  console.log('Withdrawal completed! TX hash:', completedWithdrawal.txHash);
+}
+```
+
+#### Cancel Withdrawal
+
+Cancel a pending withdrawal request.
+
+```typescript
+const cancelResult = await beep.treasury.cancelWithdrawal(withdrawal.id);
+console.log('Cancelled:', cancelResult.cancelled);
+```
+
+### Security Configuration
+
+#### Update Withdrawal Limits
+
+Self-service limit reduction (increases require admin approval).
+
+```typescript
+const updatedLimits = await beep.treasury.updateLimits({
+  dailyLimitUSD: 5000, // Reduce from $10K to $5K
+  perTransactionLimitUSD: 2500, // Reduce from $10K to $2.5K
+});
+
+console.log('New limits:', updatedLimits);
+```
+
+#### IP Whitelisting
+
+Restrict API key access to specific IP addresses or CIDR ranges.
+
+```typescript
+// List current whitelisted IPs
+const whitelist = await beep.treasury.listIPWhitelist();
+
+// Add new IP to whitelist
+const newEntry = await beep.treasury.addIPWhitelist({
+  ipAddress: '192.168.1.100', // Or CIDR: '192.168.1.0/24'
+  label: 'Office Network',
+});
+
+// Enable IP whitelisting for your API key
+await beep.treasury.toggleIPWhitelist(true);
+
+// Remove IP from whitelist
+await beep.treasury.removeIPWhitelist(newEntry.id);
+```
+
+### Webhooks
+
+Configure real-time event notifications for treasury operations.
+
+#### Create Webhook
+
+```typescript
+const webhook = await beep.treasury.createWebhook({
+  url: 'https://your-server.com/treasury-webhook',
+  events: [
+    'treasury.deposit',
+    'treasury.withdrawal.requested',
+    'treasury.withdrawal.approved',
+    'treasury.withdrawal.completed',
+    'treasury.withdrawal.failed',
+    'treasury.balance.changed',
+    'treasury.yield.earned',
+  ],
+  secret: 'your-webhook-secret-for-hmac-verification',
+});
+
+console.log('Webhook created:', webhook.id);
+```
+
+#### List Webhooks
+
+```typescript
+const webhooks = await beep.treasury.listWebhooks();
+webhooks.forEach(wh => {
+  console.log({
+    id: wh.id,
+    url: wh.url,
+    events: wh.events,
+    isActive: wh.isActive,
+    lastDeliveryAt: wh.lastDeliveryAt,
+  });
+});
+```
+
+#### Update Webhook
+
+```typescript
+const updated = await beep.treasury.updateWebhook(webhook.id, {
+  isActive: false, // Temporarily disable
+  // Or update URL/events
+  url: 'https://new-server.com/webhook',
+  events: ['treasury.withdrawal.completed'],
+});
+```
+
+#### Webhook Delivery History
+
+```typescript
+const deliveries = await beep.treasury.getWebhookDeliveries(webhook.id);
+deliveries.forEach(delivery => {
+  console.log({
+    eventType: delivery.eventType,
+    responseStatus: delivery.responseStatus,
+    attempts: delivery.attempts,
+    deliveredAt: delivery.deliveredAt,
+    failedAt: delivery.failedAt,
+  });
+});
+```
+
+#### Verifying Webhook Signatures
+
+On your server, verify webhook signatures to ensure authenticity:
+
+```typescript
+import crypto from 'crypto';
+
+// Express webhook handler example
+app.post('/treasury-webhook', (req, res) => {
+  const signature = req.headers['x-beep-signature'] as string;
+  const payload = JSON.stringify(req.body);
+
+  // Verify HMAC-SHA256 signature
+  const expectedSignature = crypto
+    .createHmac('sha256', 'your-webhook-secret')
+    .update(payload)
+    .digest('hex');
+
+  if (signature !== expectedSignature) {
+    return res.status(401).json({ error: 'Invalid signature' });
+  }
+
+  // Process event
+  const event = req.body;
+  console.log('Treasury event:', event.type, event.data);
+
+  res.json({ received: true });
+});
+```
+
+### Complete Withdrawal Flow Example
+
+```typescript
 import { BeepClient } from '@beep-it/sdk-core';
 
 const beep = new BeepClient({ apiKey: process.env.BEEP_API_KEY! });
 
-const result = await beep.createPayout({
-  amount: '1000000', // 1.00 USDC (6 decimals)
-  destinationWalletAddress: 'DESTINATION_ADDRESS',
-  chain: 'SUI',
-  token: 'USDC',
-});
+async function withdrawFunds() {
+  try {
+    // Step 1: Check current limits
+    const limits = await beep.treasury.getLimits();
+    console.log(`Remaining daily limit: $${limits.remainingDailyLimitUSD}`);
 
-console.log(result.status, result.message);
+    // Step 2: Create withdrawal with 2FA
+    const withdrawal = await beep.treasury.createWithdrawal({
+      amount: '1500.00',
+      chain: 'ethereum',
+      token: 'USDC',
+      destinationAddress: '0x1234...5678',
+      twoFactorCode: '123456',
+    });
+
+    console.log('Withdrawal created:', withdrawal.id);
+    console.log('Approval tier:', withdrawal.approvalTier);
+
+    // Step 3: Handle approval based on tier
+    if (withdrawal.approvalTier === 'MEDIUM') {
+      console.log('Email confirmation required. Check your inbox.');
+      // User clicks link in email, which includes confirmation token
+      // Your webhook or frontend handles the confirmation
+    } else if (withdrawal.approvalTier === 'LARGE') {
+      console.log('Manual approval required. Waiting for approver...');
+    } else {
+      console.log('Auto-approved! Processing...');
+    }
+
+    // Step 4: Wait for completion
+    const completed = await beep.treasury.waitForWithdrawalCompletion(
+      withdrawal.id,
+      { timeout: 10 * 60 * 1000 }, // 10 minutes
+    );
+
+    if (completed.status === 'COMPLETED') {
+      console.log('✅ Withdrawal successful!');
+      console.log('Transaction hash:', completed.txHash);
+    }
+
+  } catch (error) {
+    console.error('Withdrawal failed:', error.message);
+
+    // Handle specific errors
+    if (error.message.includes('limit exceeded')) {
+      console.log('Daily or per-transaction limit exceeded');
+    } else if (error.message.includes('2FA')) {
+      console.log('Invalid 2FA code');
+    } else if (error.message.includes('IP')) {
+      console.log('IP not whitelisted');
+    }
+  }
+}
 ```
+
+### Rate Limits
+
+Treasury endpoints have specific rate limits:
+
+- **Withdrawal operations**: 5 requests/minute per user
+- **Read operations**: 100 requests/minute per user
+- **Approval operations**: 20 requests/minute per admin
+
+Rate limit headers are included in responses:
+- `RateLimit-Limit`: Maximum requests allowed
+- `RateLimit-Remaining`: Requests remaining in window
+- `RateLimit-Reset`: Unix timestamp when limit resets
+
+### Error Handling
+
+Treasury operations may throw specific errors:
+
+```typescript
+try {
+  await beep.treasury.createWithdrawal({ /* ... */ });
+} catch (error) {
+  // Check error type
+  if (error.response?.data?.error === 'TooManyRequests') {
+    const retryAfter = error.response.data.retryAfter;
+    console.log(`Rate limited. Retry after ${retryAfter} seconds`);
+  }
+
+  if (error.response?.data?.error === 'WithdrawalLimitExceeded') {
+    console.log('Withdrawal limit exceeded');
+  }
+
+  if (error.response?.data?.error === 'InvalidTwoFactorCode') {
+    console.log('Invalid 2FA code');
+  }
+
+  if (error.response?.data?.error === 'IPWhitelistViolation') {
+    console.log('IP address not whitelisted');
+  }
+}
+```
+
+### Best Practices
+
+1. **Store API Keys Securely**: Never expose secret API keys in client-side code
+2. **Enable IP Whitelisting**: For production, restrict API access to known IPs
+3. **Set Conservative Limits**: Start with lower withdrawal limits and increase as needed
+4. **Configure Webhooks**: Use webhooks for real-time notifications instead of polling
+5. **Verify Webhook Signatures**: Always validate HMAC signatures on webhook endpoints
+6. **Handle Rate Limits**: Implement exponential backoff for rate-limited requests
+7. **Monitor Audit Logs**: Regularly review audit logs for suspicious activity
+8. **Test in Staging**: Test withdrawal flows thoroughly before production use
+
+---
+
+## License
+
+MIT. Go wild.
