@@ -7,7 +7,11 @@ interface ConfigurationErrorProps {
   primaryColor?: string;
 }
 
-export const ConfigurationError: React.FC<ConfigurationErrorProps> = ({ title, message, primaryColor }) => {
+export const ConfigurationError: React.FC<ConfigurationErrorProps> = ({
+  title,
+  message,
+  primaryColor,
+}) => {
   return (
     <div style={cardStyles({ primaryColor })}>
       <div style={mainContentStyles}>

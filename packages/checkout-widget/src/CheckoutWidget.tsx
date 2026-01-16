@@ -145,7 +145,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
   // Payment is complete when paid is true AND status is 'paid' or 'confirmed'
   const isPaymentComplete = Boolean(
     paymentStatusData?.paid &&
-      (paymentStatusData?.status === 'paid' || paymentStatusData?.status === 'confirmed'),
+    (paymentStatusData?.status === 'paid' || paymentStatusData?.status === 'confirmed'),
   );
 
   // Payment failed when status is 'failed'
