@@ -1,5 +1,10 @@
-# Run lint-staged to lint and build only the changed files
-npx lint-staged
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit hooks..."
+
+# Run lint-staged to lint and format only the changed files
+pnpm lint-staged
 
 # Also run a full test to make sure everything works together
-npm test
+pnpm test
