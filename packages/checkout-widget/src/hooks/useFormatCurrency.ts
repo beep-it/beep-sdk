@@ -1,5 +1,13 @@
-// eslint-disable-next-line max-params
-export const useFormatCurrency = (value: string | number, minDigits = 2, maxDigits = 6): string => {
+interface FormatCurrencyOptions {
+  minDigits?: number;
+  maxDigits?: number;
+}
+
+export const useFormatCurrency = (
+  value: string | number,
+  options: FormatCurrencyOptions = {}
+): string => {
+  const { minDigits = 2, maxDigits = 6 } = options;
   const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value;
 
   if (isNaN(numValue)) {
