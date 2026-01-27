@@ -7,13 +7,19 @@
     "build:cli": "pnpm --filter @beep-it/sdk-core build && pnpm --filter @beep-it/sdk-core run pack && pnpm --filter @beep-it/cli build",
     "release": "node scripts/prepare-release.js",
     "lint": "pnpm --filter \"./packages/*\" run lint",
-    "dev": "pnpm --filter \"./packages/*\" run dev --parallel"
+    "dev": "pnpm --filter \"./packages/*\" run dev --parallel",
+    "format": "prettier --write \"packages/**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx}\"",
+    "prepare": "husky"
   },
   "devDependencies": {
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
-    "pnpm": "10.25.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "pnpm": "10.28.2",
+    "prettier": "^3.8.0",
     "typescript": "^5.5.3"
   },
   "pnpm": {
