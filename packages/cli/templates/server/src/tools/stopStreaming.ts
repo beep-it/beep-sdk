@@ -13,7 +13,6 @@ export type StopStreamingApiParams = z.infer<typeof stopStreamingInputSchema>;
 
 export async function stopStreaming(params: StopStreamingApiParams): Promise<any> {
   const payload: StopStreamingPayload = {
-    apiKey: process.env.BEEP_API_KEY!,
     invoiceId: params.invoiceId,
   };
 
