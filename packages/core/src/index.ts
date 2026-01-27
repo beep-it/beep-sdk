@@ -9,6 +9,8 @@ import { PaymentsModule } from './modules/payments';
 import { ProductsModule } from './modules/products';
 import { WidgetModule } from './modules/widget';
 import { UserModule } from './modules/user';
+import { BeepAuthenticationError, BeepError, BeepErrorCode, createBeepErrorFromAxios } from './errors';
+import { BeepDebugger, BeepDebugOptions, createDebugInterceptors } from './utils/debug';
 
 /**
  * Configuration options for initializing the BeepClient
@@ -21,6 +23,8 @@ export interface BeepClientOptions {
    * @default 'https://api.justbeep.it'
    */
   serverUrl?: string;
+  /** Debug options for enhanced developer experience */
+  debug?: BeepDebugOptions;
 }
 
 /**
@@ -61,6 +65,7 @@ export interface BeepClientOptions {
  */
 export class BeepClient {
   private client: AxiosInstance;
+  private debugger: BeepDebugger;
 
   /** Access to product management functionality (server-side only) */
   public readonly products: ProductsModule;
@@ -86,8 +91,11 @@ export class BeepClient {
    */
   constructor(options: BeepClientOptions) {
     if (!options.apiKey) {
-      throw new Error('API key is required to initialize BeepClient');
+      throw new BeepAuthenticationError('API key is required to initialize BeepClient', BeepErrorCode.MISSING_API_KEY);
     }
+
+    // Initialize debugger
+    this.debugger = new BeepDebugger(options.debug);
 
     this.client = axios.create({
       baseURL: options.serverUrl || 'https://api.justbeep.it',
@@ -97,6 +105,11 @@ export class BeepClient {
         'X-Beep-Client': 'beep-sdk',
       },
     });
+
+    // Add debug interceptors if debugging is enabled
+    if (options.debug?.debug) {
+      createDebugInterceptors(this.client, this.debugger);
+    }
 
     this.products = new ProductsModule(this.client);
     this.invoices = new InvoicesModule(this.client);
@@ -246,7 +259,7 @@ export class BeepPublicClient {
    */
   constructor(options: BeepPublicClientOptions) {
     if (!options.publishableKey) {
-      throw new Error('publishableKey is required to initialize BeepPublicClient');
+      throw new BeepAuthenticationError('publishableKey is required to initialize BeepPublicClient', BeepErrorCode.MISSING_API_KEY);
     }
 
     this.client = axios.create({
@@ -268,3 +281,9 @@ export type {
   PublicPaymentStatusResponse,
   EphemeralItem,
 } from './types/public';
+
+// Export error types and utilities
+export * from './errors';
+
+// Export all types for convenience
+export * from './types';
