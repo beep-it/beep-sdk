@@ -12,6 +12,7 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
   ],
   root: true,
   env: {
@@ -25,6 +26,8 @@ module.exports = {
     '**/node_modules/**/*',
     '.eslintrc.js',
     '**/.eslintrc.js',
+    '**/tsup.config.ts',
+    '**/tsup.*.config.ts',
   ],
   overrides: [
     {
@@ -41,7 +44,8 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': ['error', {
       'argsIgnorePattern': '^_',
-      'varsIgnorePattern': '^_'
+      'varsIgnorePattern': '^_',
+      'caughtErrorsIgnorePattern': '^_'
     }],
     'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
     // Enforce options object pattern for functions with more than 2 parameters

@@ -37,7 +37,7 @@ const loadingStyle = ({ primaryColor }: { primaryColor?: string }): React.CSSPro
 
 const cardStyles = ({ primaryColor }: { primaryColor?: string }): React.CSSProperties => {
   const color = primaryColor || '#007bff';
-  
+
   // Convert color to RGB for alpha transparency
   const colorToRgb = (colorInput: string) => {
     // Handle hex colors
@@ -46,39 +46,39 @@ const cardStyles = ({ primaryColor }: { primaryColor?: string }): React.CSSPrope
       return {
         r: parseInt(hexResult[1], 16),
         g: parseInt(hexResult[2], 16),
-        b: parseInt(hexResult[3], 16)
+        b: parseInt(hexResult[3], 16),
       };
     }
-    
+
     // Handle CSS color names and other formats
     const colorMap: { [key: string]: { r: number; g: number; b: number } } = {
-      'red': { r: 255, g: 0, b: 0 },
-      'green': { r: 0, g: 128, b: 0 },
-      'blue': { r: 0, g: 0, b: 255 },
-      'yellow': { r: 255, g: 255, b: 0 },
-      'purple': { r: 128, g: 0, b: 128 },
-      'orange': { r: 255, g: 165, b: 0 },
-      'pink': { r: 255, g: 192, b: 203 },
-      'cyan': { r: 0, g: 255, b: 255 },
-      'lime': { r: 0, g: 255, b: 0 },
-      'magenta': { r: 255, g: 0, b: 255 },
-      'black': { r: 0, g: 0, b: 0 },
-      'white': { r: 255, g: 255, b: 255 },
-      'gray': { r: 128, g: 128, b: 128 },
-      'grey': { r: 128, g: 128, b: 128 },
+      red: { r: 255, g: 0, b: 0 },
+      green: { r: 0, g: 128, b: 0 },
+      blue: { r: 0, g: 0, b: 255 },
+      yellow: { r: 255, g: 255, b: 0 },
+      purple: { r: 128, g: 0, b: 128 },
+      orange: { r: 255, g: 165, b: 0 },
+      pink: { r: 255, g: 192, b: 203 },
+      cyan: { r: 0, g: 255, b: 255 },
+      lime: { r: 0, g: 255, b: 0 },
+      magenta: { r: 255, g: 0, b: 255 },
+      black: { r: 0, g: 0, b: 0 },
+      white: { r: 255, g: 255, b: 255 },
+      gray: { r: 128, g: 128, b: 128 },
+      grey: { r: 128, g: 128, b: 128 },
     };
-    
+
     const lowerColor = colorInput.toLowerCase();
     if (colorMap[lowerColor]) {
       return colorMap[lowerColor];
     }
-    
+
     // Fallback to blue
     return { r: 0, g: 123, b: 255 };
   };
-  
+
   const rgb = colorToRgb(color);
-  
+
   return {
     width: '100%',
     maxWidth: '400px',
