@@ -24,7 +24,7 @@ async function runExample() {
   await mcpClient.initialize({ type: 'http', url });
 
   // Discovery: list tools from the seller's MCP server
-  const tools = await listSellerTools(mcpClient);
+  const _tools = await listSellerTools(mcpClient);
 
   // Respect DEFAULT_LIST_ONLY to stop after discovery
   if (process.env.DEFAULT_LIST_ONLY === 'true') return;

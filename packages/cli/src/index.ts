@@ -8,24 +8,24 @@ import * as readline from 'readline';
 
 /**
  * @fileoverview BEEP CLI - Scaffolding tool for MCP (Model Context Protocol) servers
- * 
+ *
  * This CLI helps developers integrate BEEP payment functionality into their projects
  * by generating MCP server templates that AI agents can interact with.
- * 
+ *
  * Design principles:
  * - Never overwrite user files by default (non-destructive)
  * - Provide working templates out-of-the-box
  * - Keep all behavior explicit and documented
  * - Support both new projects and existing codebases
- * 
+ *
  * @example CLI usage
  * ```bash
  * # Create new MCP server with HTTPS transport
  * npx @beep-it/cli init-mcp --mode https --path ./my-payment-server
- * 
+ *
  * # Create MCP server with stdio transport (for Claude Desktop)
  * npx @beep-it/cli init-mcp --mode stdio
- * 
+ *
  * # Add BEEP tools to existing MCP server
  * npx @beep-it/cli integrate ./existing-mcp-project
  * ```
@@ -62,7 +62,7 @@ const promptUser = (question: string): Promise<string> => {
 const detectServerFile = async (projectPath: string): Promise<string | null> => {
   const commonServerPaths = [
     'server/index.ts',
-    'server/index.js', 
+    'server/index.js',
     'src/server/index.ts',
     'src/server/index.js',
     'server.ts',
@@ -72,7 +72,7 @@ const detectServerFile = async (projectPath: string): Promise<string | null> => 
     'index.ts',
     'index.js',
     'src/index.ts',
-    'src/index.js'
+    'src/index.js',
   ];
 
   for (const serverPath of commonServerPaths) {
@@ -84,7 +84,7 @@ const detectServerFile = async (projectPath: string): Promise<string | null> => 
       // File doesn't exist, continue checking
     }
   }
-  
+
   return null;
 };
 
@@ -94,37 +94,36 @@ const detectServerFile = async (projectPath: string): Promise<string | null> => 
  */
 const analyzeServerFile = async (serverFilePath: string): Promise<string[]> => {
   const hints: string[] = [];
-  
+
   try {
     const content = await fs.readFile(serverFilePath, 'utf-8');
-    
+
     // Look for common MCP patterns
     if (content.includes('tools:') || content.includes('tools = ')) {
       hints.push('Found tools array/object - add checkBeepApi there');
     }
-    
+
     if (content.includes('register') && content.includes('tool')) {
       hints.push('Found tool registration pattern - follow the same pattern for BEEP tools');
     }
-    
+
     if (content.includes('@modelcontextprotocol') || content.includes('mcp')) {
       hints.push('MCP server detected - integrate BEEP tools with your existing setup');
     }
-    
+
     if (content.includes('express') || content.includes('app.')) {
       hints.push('Express server detected - BEEP tools can be used in your API endpoints');
     }
-    
   } catch (_) {
     // File read failed, return basic hints
   }
-  
-  return hints.length > 0 ? hints : ['Review your existing tool registration patterns and add BEEP tools similarly'];
+
+  return hints.length > 0
+    ? hints
+    : ['Review your existing tool registration patterns and add BEEP tools similarly'];
 };
 
-program
-  .version('0.1.0')
-  .description('A CLI for scaffolding and managing BEEP MCP servers');
+program.version('0.1.0').description('A CLI for scaffolding and managing BEEP MCP servers');
 
 /**
  * Simple test command to verify CLI installation.
@@ -137,14 +136,13 @@ program
     console.log('Hello, from the BEEP CLI!');
   });
 
-
 /**
  * Primary scaffolding command - creates a complete MCP server with BEEP integration.
- * 
+ *
  * Supports two communication modes:
  * - 'https': For web-based AI agents and API integrations
  * - 'stdio': For desktop AI clients like Claude Desktop
- * 
+ *
  * The generated server includes:
  * - Complete MCP server setup with proper error handling
  * - Pre-configured BEEP payment tools
@@ -155,7 +153,10 @@ program
 program
   .command('init-mcp')
   .description('Scaffolds a new BEEP MCP project (mcp-server, mcp-client, or both)')
-  .requiredOption('--mode <https|stdio>', 'Communication protocol: https (web agents) or stdio (desktop clients)')
+  .requiredOption(
+    '--mode <https|stdio>',
+    'Communication protocol: https (web agents) or stdio (desktop clients)',
+  )
   .requiredOption('--role <mcp-server|mcp-client|both>', 'Template role to scaffold')
   .option('--path <directory>', 'Target directory (defaults to current directory)')
   .action(async (options) => {
@@ -199,7 +200,7 @@ program
         try {
           const destRaw = await fs.readFile(destPkgPath, 'utf-8');
           dest = JSON.parse(destRaw);
-        } catch (e) {
+        } catch (_e) {
           // If no existing package.json, use src entirely
           await fs.writeFile(destPkgPath, JSON.stringify(src, null, 2) + '\n');
           console.log('  - Created package.json');
@@ -260,7 +261,9 @@ program
 
             // If the destination file exists and we are inside a types folder,
             // merge by appending the template content rather than skipping.
-            const isTypesFolder = /(^|\\|\/)types(\\|\/)/.test(destPath) || /(^|\\|\/)src(\\|\/)types(\\|\/)/.test(destPath);
+            const isTypesFolder =
+              /(^|\\|\/)types(\\|\/)/.test(destPath) ||
+              /(^|\\|\/)src(\\|\/)types(\\|\/)/.test(destPath);
 
             try {
               await fs.access(destPath);
@@ -326,11 +329,15 @@ program
           await installAt(clientTarget);
         }
         console.log('✅ Dependencies installed successfully');
-      } catch (error) {
+      } catch (_error) {
         console.log('⚠️  Failed to install dependencies automatically. Please run:');
         if (role === 'both') {
-          console.log(`   (server) cd ${path.relative(process.cwd(), serverTarget)} && npm install @beep-it/sdk-core && npm install`);
-          console.log(`   (client) cd ${path.relative(process.cwd(), clientTarget)} && npm install @beep-it/sdk-core && npm install`);
+          console.log(
+            `   (server) cd ${path.relative(process.cwd(), serverTarget)} && npm install @beep-it/sdk-core && npm install`,
+          );
+          console.log(
+            `   (client) cd ${path.relative(process.cwd(), clientTarget)} && npm install @beep-it/sdk-core && npm install`,
+          );
         } else {
           console.log('   npm install @beep-it/sdk-core && npm install');
         }
@@ -339,7 +346,7 @@ program
       // Prompt for API key and create configured .env file
       console.log('\n🔑 Setting up your environment...');
       const apiKey = await promptUser('Enter your BEEP API key (or press Enter to skip): ');
-      
+
       const setupEnv = async (cwdPath: string) => {
         const envExamplePath = path.join(cwdPath, '.env.example');
         const envPath = path.join(cwdPath, '.env');
@@ -348,15 +355,12 @@ program
         // Set communication mode
         envContent = envContent.replace(
           /^COMMUNICATION_MODE=.*/m,
-          `COMMUNICATION_MODE=${options.mode}`
+          `COMMUNICATION_MODE=${options.mode}`,
         );
 
         // Set API key if provided
         if (apiKey) {
-          envContent = envContent.replace(
-            /^BEEP_API_KEY=.*/m,
-            `BEEP_API_KEY=${apiKey}`
-          );
+          envContent = envContent.replace(/^BEEP_API_KEY=.*/m, `BEEP_API_KEY=${apiKey}`);
         }
 
         // Handle .env file: create or merge safely
@@ -382,7 +386,11 @@ program
           await fs.writeFile(envPath, envContent);
           console.log('  - Created .env with your configuration');
         }
-        try { await fs.unlink(envExamplePath); } catch (_) {}
+        try {
+          await fs.unlink(envExamplePath);
+        } catch (_) {
+          // .env.example doesn't exist, nothing to clean up
+        }
       };
 
       if (role === 'both') {
@@ -396,7 +404,7 @@ program
 
       // Detect server file to provide specific integration guidance
       const detectedServer = role === 'mcp-client' ? null : await detectServerFile(serverTarget);
-      
+
       console.log(`\n✅ BEEP MCP project created at: ${targetPath}`);
       console.log('\nNext steps:');
       if (role === 'both') {
@@ -407,7 +415,7 @@ program
         console.log(`\n1. Navigate to your new project:`);
         console.log(`   cd ${options.path || path.basename(targetPath)}`);
       }
-      
+
       if (!apiKey) {
         console.log(`\n2. Configure your API key:`);
         console.log(`   Add your BEEP_API_KEY to the .env file.`);
@@ -416,12 +424,16 @@ program
         console.log(`\n2. Build and run the server:`);
       }
       if (role === 'both') {
-        console.log(`   (server) cd ${path.relative(process.cwd(), serverTarget)} && npm run build && npm start`);
-        console.log(`   (client) cd ${path.relative(process.cwd(), clientTarget)} && npm run build && npm start`);
+        console.log(
+          `   (server) cd ${path.relative(process.cwd(), serverTarget)} && npm run build && npm start`,
+        );
+        console.log(
+          `   (client) cd ${path.relative(process.cwd(), clientTarget)} && npm run build && npm start`,
+        );
       } else {
         console.log(`   npm run build && npm start`);
       }
-      
+
       if (detectedServer) {
         console.log(`\n📋 Your server file is at: ${detectedServer}`);
         console.log('   The BEEP tools are already wired up and ready to use!');
@@ -430,11 +442,14 @@ program
           console.log(`\n📋 BEEP tools are available in: src/tools/`);
           console.log('   Import and register them in your main server file.');
         } else {
-          console.log(`\n📋 Buying agent template ready in: ${path.relative(process.cwd(), clientTarget)}`);
-          console.log('   Configure target MCP server and tool invocation in src/config.ts and src/index.ts.');
+          console.log(
+            `\n📋 Buying agent template ready in: ${path.relative(process.cwd(), clientTarget)}`,
+          );
+          console.log(
+            '   Configure target MCP server and tool invocation in src/config.ts and src/index.ts.',
+          );
         }
       }
-
     } catch (error) {
       console.error('\n❌ An error occurred during scaffolding:', error);
     }
@@ -442,15 +457,15 @@ program
 
 /**
  * Integration command for existing MCP servers.
- * 
+ *
  * Adds BEEP payment tools to projects that already have MCP server infrastructure.
  * This is useful when you want to add payment capabilities to an existing agent/tool setup.
- * 
+ *
  * What it does:
  * - Copies BEEP tool templates to your tools/ directory
  * - Provides the BEEP SDK package for local installation
  * - Gives integration instructions for your existing server
- * 
+ *
  * Note: This command doesn't modify existing files - you'll need to manually
  * integrate the tools into your server's tool registry.
  */
@@ -481,7 +496,7 @@ if (require.main === module) {
         const toolFile = 'checkBeepApi.ts';
         await fs.copyFile(
           path.join(toolTemplateDir, toolFile),
-          path.join(targetToolsDir, toolFile)
+          path.join(targetToolsDir, toolFile),
         );
 
         // 3. Note: SDK is now a peer dependency, no longer bundled
@@ -489,42 +504,43 @@ if (require.main === module) {
         // Install BEEP SDK dependency automatically
         console.log('\n📦 Installing BEEP SDK...');
         try {
-          execSync('npm install @beep-it/sdk-core', { 
-            cwd: fullTargetPath, 
-            stdio: 'inherit' 
+          execSync('npm install @beep-it/sdk-core', {
+            cwd: fullTargetPath,
+            stdio: 'inherit',
           });
           console.log('✅ BEEP SDK installed successfully');
-        } catch (error) {
+        } catch (_error) {
           console.log('⚠️  Failed to install BEEP SDK. Please run manually:');
           console.log('   npm install @beep-it/sdk-core');
         }
 
         // Detect existing server file to provide specific integration guidance
         const detectedServer = await detectServerFile(fullTargetPath);
-        
+
         console.log('\n✅ BEEP integration complete!');
         console.log('\nNext steps:');
-        
+
         if (detectedServer) {
           console.log(`\n1. Open your server file: ${detectedServer}`);
           console.log('\n2. Import the BEEP tool:');
-          console.log('   import { checkBeepApi } from \'./tools/checkBeepApi\';');
+          console.log("   import { checkBeepApi } from './tools/checkBeepApi';");
           console.log('\n3. Register the tool with your MCP server:');
           console.log('   // Add checkBeepApi to your tools registry/list');
-          
+
           // Provide specific hints based on server file analysis
           const serverFilePath = path.join(fullTargetPath, detectedServer);
           const hints = await analyzeServerFile(serverFilePath);
           console.log(`\n💡 Integration hints for ${detectedServer}:`);
-          hints.forEach(hint => console.log(`   • ${hint}`));
+          hints.forEach((hint) => console.log(`   • ${hint}`));
         } else {
           console.log('\n1. Locate your main server file (server.js, index.js, etc.)');
           console.log('\n2. Import the BEEP tool:');
-          console.log('   import { checkBeepApi } from \'./tools/checkBeepApi\'; // Adjust path as needed');
-          console.log('\n3. Add the tool to your MCP server\'s tool registry');
+          console.log(
+            "   import { checkBeepApi } from './tools/checkBeepApi'; // Adjust path as needed",
+          );
+          console.log("\n3. Add the tool to your MCP server's tool registry");
           console.log('\n💡 Look for existing tool registration patterns in your codebase');
         }
-
       } catch (error) {
         console.error('\n❌ Failed to integrate BEEP files:', error);
       }
