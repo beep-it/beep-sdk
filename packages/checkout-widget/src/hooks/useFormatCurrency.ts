@@ -5,7 +5,7 @@ interface FormatCurrencyOptions {
 
 export const useFormatCurrency = (
   value: string | number,
-  options: FormatCurrencyOptions = {}
+  options: FormatCurrencyOptions = {},
 ): string => {
   const { minDigits = 2, maxDigits = 6 } = options;
   const numValue = typeof value === 'string' ? parseFloat(value.replace(/[^0-9.-]/g, '')) : value;
