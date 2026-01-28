@@ -12,19 +12,13 @@
     "format:check": "prettier --check \"packages/**/*.{ts,tsx}\"",
     "prepare": "husky"
   },
-  "lint-staged": {
-    "packages/**/*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  },
   "devDependencies": {
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
-    "pnpm": "10.25.0",
+    "pnpm": "10.28.2",
     "prettier": "^3.8.0",
     "typescript": "^5.5.3"
   },
