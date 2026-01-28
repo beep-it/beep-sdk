@@ -30,7 +30,7 @@ export interface Invoice {
   id?: string;
   /** ID of the merchant who will receive payment from this invoice */
   receivingMerchantId?: string;
-  /** 
+  /**
    * @deprecated Use receivingMerchantId instead
    * Legacy field maintained for backwards compatibility
    */
@@ -72,7 +72,7 @@ export interface CreateInvoiceFromProductPayload {
   productId: string;
   /** Who will be paying for this invoice */
   payerType: PayerType;
-  /** 
+  /**
    * ID of the merchant paying (required when payerType is 'merchant_wallet')
    * @remarks Only relevant for merchant-to-merchant transactions
    */
@@ -88,19 +88,19 @@ export interface CreateCustomInvoicePayload {
   description: string;
   /** Amount to charge as a string (e.g., "10.50") */
   amount: string;
-  /** 
+  /**
    * Token type to use for payment
    * @remarks Preferred over splTokenAddress for supported tokens
    */
   token?: SupportedToken;
-  /** 
+  /**
    * Custom SPL token address (alternative to token)
    * @remarks Use this for tokens not in the SupportedToken enum
    */
   splTokenAddress?: string;
   /** Who will be paying for this invoice */
   payerType: PayerType;
-  /** 
+  /**
    * ID of the merchant paying (required when payerType is 'merchant_wallet')
    * @remarks Only relevant for merchant-to-merchant transactions
    */

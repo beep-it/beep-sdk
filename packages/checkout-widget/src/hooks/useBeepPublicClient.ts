@@ -11,4 +11,3 @@ export const useBeepPublicClient = ({ publishableKey, serverUrl }: UseBeepPublic
     return new BeepPublicClient({ publishableKey, serverUrl });
   }, [publishableKey, serverUrl]);
 };
-

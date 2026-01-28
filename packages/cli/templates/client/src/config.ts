@@ -8,4 +8,3 @@ export const config = {
   pollIntervalMs: Number(process.env.POLL_INTERVAL_MS || 15000),
   pollTimeoutMs: Number(process.env.POLL_TIMEOUT_MS || 300000),
 };
-

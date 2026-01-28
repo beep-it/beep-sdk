@@ -19,6 +19,7 @@
     "dev": "tsup src/index.ts --format cjs --dts --watch",
     "start": "node dist/index.js",
     "test": "jest",
+    "lint": "eslint . --ext .ts",
     "prepare": "pnpm build",
     "prepack": "pnpm build",
     "pack": "npm pack"

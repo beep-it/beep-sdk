@@ -37,7 +37,17 @@ describe('BEEP CLI init-mcp', () => {
 
   it('should scaffold a new server with https mode', async () => {
     const testDir = path.join(baseTestDir, 'https-test');
-    const argv = ['node', 'index.js', 'init-mcp', '--mode', 'https', '--role', 'mcp-server', '--path', testDir];
+    const argv = [
+      'node',
+      'index.js',
+      'init-mcp',
+      '--mode',
+      'https',
+      '--role',
+      'mcp-server',
+      '--path',
+      testDir,
+    ];
 
     await program.parseAsync(argv);
 
@@ -53,7 +63,17 @@ describe('BEEP CLI init-mcp', () => {
 
   it('should scaffold a new server with stdio mode', async () => {
     const testDir = path.join(baseTestDir, 'stdio-test');
-    const argv = ['node', 'index.js', 'init-mcp', '--mode', 'stdio', '--role', 'mcp-server', '--path', testDir];
+    const argv = [
+      'node',
+      'index.js',
+      'init-mcp',
+      '--mode',
+      'stdio',
+      '--role',
+      'mcp-server',
+      '--path',
+      testDir,
+    ];
 
     await program.parseAsync(argv);
 
