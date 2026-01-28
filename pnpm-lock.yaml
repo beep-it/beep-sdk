@@ -47,8 +47,8 @@ importers:
   packages/checkout-widget:
     dependencies:
       '@beep-it/sdk-core':
-        specifier: ^0.1.6
-        version: 0.1.7
+        specifier: workspace:^
+        version: link:../core
       '@dynamic-labs/sdk-react-core':
         specifier: 4.32.0
         version: 4.32.0(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -141,7 +141,7 @@ importers:
   packages/cli:
     dependencies:
       '@beep-it/sdk-core':
-        specifier: ^0.1.4
+        specifier: '>=0.1.4'
         version: 0.1.7
       commander:
         specifier: ^12.0.0
