@@ -30,17 +30,9 @@ program
     subcommandTerm: (cmd) => color.cyan(cmd.name()),
   });
 
-// Add custom help
+// Add custom help - this handler is called when --help flag is used
 program.on('--help', () => {
-  console.log('');
-  output.section('Examples');
-  console.log('  $ beep init-mcp --mode https --role mcp-server');
-  console.log('  $ beep init-mcp --mode stdio --role both --path ./my-project');
-  console.log('  $ beep integrate ./existing-project');
-  console.log('');
-  output.section('Learn More');
-  console.log('  Documentation: https://docs.justbeep.it');
-  console.log('  GitHub: https://github.com/beep-it/beep-sdk');
+  outputCustomHelp();
 });
 
 /**
@@ -105,29 +97,63 @@ program
 // - doctor: Check your BEEP setup and diagnose issues
 
 /**
+ * Output custom help sections (Examples and Learn More)
+ */
+function outputCustomHelp(): void {
+  console.log('');
+  output.section('Examples');
+  console.log('  $ beep init-mcp --mode https --role mcp-server');
+  console.log('  $ beep init-mcp --mode stdio --role both --path ./my-project');
+  console.log('  $ beep integrate ./existing-project');
+  console.log('');
+  output.section('Learn More');
+  console.log('  Documentation: https://docs.justbeep.it');
+  console.log('  GitHub: https://github.com/beep-it/beep-sdk');
+}
+
+/**
  * Run CLI when executed directly (not when imported)
  */
 function runCli(): void {
-  // Error handling
+  // Show help if no command provided (before parsing to avoid exitOverride issues)
+  if (!process.argv.slice(2).length) {
+    // Use helpInformation() to get the help text, then output it manually
+    // This avoids issues with Commander's help() method behavior
+    const helpText = program.helpInformation();
+    console.log(helpText);
+    outputCustomHelp();
+    return;
+  }
+
+  // Error handling - exitOverride lets us catch errors instead of process.exit
   program.exitOverride();
 
   try {
     program.parse();
   } catch (error: any) {
+    // Handle expected exits (help, version) - these are not errors
+    if (
+      error.code === 'commander.helpDisplayed' ||
+      error.code === 'commander.version' ||
+      error.code === 'commander.help'
+    ) {
+      process.exit(0);
+    }
+
+    // Handle actual errors
     if (error.code === 'commander.missingArgument') {
       output.error(error.message);
     } else if (error.code === 'commander.unknownCommand') {
       output.error(`Unknown command: ${error.message}`);
       console.log(`\nRun ${color.cyan('beep --help')} for available commands`);
+    } else if (error.code === 'commander.missingMandatoryOptionValue') {
+      output.error(error.message);
+    } else if (error.code === 'commander.optionMissingArgument') {
+      output.error(error.message);
     } else {
       output.error(error.message);
     }
     process.exit(1);
-  }
-
-  // Show help if no command provided
-  if (!process.argv.slice(2).length) {
-    program.outputHelp();
   }
 }
 
