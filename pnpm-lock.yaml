@@ -144,8 +144,8 @@ importers:
         specifier: '>=0.1.4'
         version: 0.1.7
       commander:
-        specifier: ^12.0.0
-        version: 12.1.0
+        specifier: ^14.0.2
+        version: 14.0.2
       express:
         specifier: ^5.1.0
         version: 5.2.1
