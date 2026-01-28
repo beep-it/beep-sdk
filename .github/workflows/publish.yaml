@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: production  # Requires approval from environment reviewers
     permissions:
-      contents: read
-      id-token: write # For npm provenance
+      contents: write  # For creating releases
+      id-token: write  # For npm provenance
     
     steps:
       - name: "Checkout"
@@ -40,6 +40,10 @@ jobs:
         run: |
           pnpm test
 
+      - name: Get version from package.json
+        id: version
+        run: echo "VERSION=$(node -p "require('./packages/core/package.json').version")" >> $GITHUB_OUTPUT
+
       - name: Publish to npm
         run: |
           # Publish packages in dependency order
@@ -47,17 +51,17 @@ jobs:
           cd packages/core
           npm publish --provenance --access public
           cd ../..
-          
+
           echo "Publishing @beep-it/checkout-widget..."
           cd packages/checkout-widget
           npm publish --provenance --access public
           cd ../..
-          
+
           echo "Publishing @beep-it/cli..."
           cd packages/cli
           npm publish --provenance --access public
           cd ../..
-          
+
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -66,24 +70,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          release_name: Release v${{ steps.version.outputs.VERSION }}
           draft: false
           prerelease: false
           body: |
             ## 🚀 What's New
-            
+
             - Updates and improvements to @beep-it packages
             - See individual package changelogs for details
-            
+
             ## 📦 Packages Published
-            
-            - `@beep-it/sdk-core@${{ github.ref_name }}`
-            - `@beep-it/checkout-widget@${{ github.ref_name }}`  
-            - `@beep-it/cli@${{ github.ref_name }}`
-            
+
+            - `@beep-it/sdk-core@${{ steps.version.outputs.VERSION }}`
+            - `@beep-it/checkout-widget@${{ steps.version.outputs.VERSION }}`
+            - `@beep-it/cli@${{ steps.version.outputs.VERSION }}`
+
             ## Installation
-            
+
             ```bash
             npm install @beep-it/sdk-core
             npm install @beep-it/checkout-widget
