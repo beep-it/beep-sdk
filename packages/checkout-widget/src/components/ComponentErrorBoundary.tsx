@@ -12,7 +12,10 @@ interface ComponentErrorBoundaryState {
   errorInfo?: React.ErrorInfo;
 }
 
-export class ComponentErrorBoundary extends Component<ComponentErrorBoundaryProps, ComponentErrorBoundaryState> {
+export class ComponentErrorBoundary extends Component<
+  ComponentErrorBoundaryProps,
+  ComponentErrorBoundaryState
+> {
   constructor(props: ComponentErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -31,7 +34,7 @@ export class ComponentErrorBoundary extends Component<ComponentErrorBoundaryProp
       componentStack: errorInfo.componentStack,
       props: this.props,
     });
-    
+
     this.setState({ errorInfo });
   }
 

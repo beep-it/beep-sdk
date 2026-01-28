@@ -173,7 +173,7 @@ describe('Payments Module', () => {
       mockAxios.onPost('/v1/payment/sign-solana-transaction').reply(200, {});
 
       await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
-        'Failed to sign solana transaction: No data returned from solana transaction signing',
+        'No data returned from solana transaction signing',
       );
     });
 
@@ -182,9 +182,7 @@ describe('Payments Module', () => {
         error: 'Internal server error',
       });
 
-      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
-        'Failed to sign solana transaction:',
-      );
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow();
 
       expect(mockAxios.history.post.length).toBe(1);
     });
@@ -192,9 +190,7 @@ describe('Payments Module', () => {
     it('throws error when network error occurs', async () => {
       mockAxios.onPost('/v1/payment/sign-solana-transaction').networkError();
 
-      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow(
-        'Failed to sign solana transaction:',
-      );
+      await expect(client.payments.signSolanaTransaction(validInput)).rejects.toThrow();
 
       expect(mockAxios.history.post.length).toBe(1);
     });

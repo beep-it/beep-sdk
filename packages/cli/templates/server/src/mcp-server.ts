@@ -75,7 +75,7 @@ function createMCPServer(): Server {
 
     const tool = tools[name];
     if (!tool) {
-      // TODO SST: Return proper JSONRPC error response.
+      // TODO[BEEP-683] SST: Return proper JSONRPC error response.
       throw new Error(`Tool ${name} not found`);
     }
 

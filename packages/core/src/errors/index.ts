@@ -9,35 +9,45 @@ export enum BeepErrorCode {
   MISSING_API_KEY = 'BEEP_1002',
   UNAUTHORIZED = 'BEEP_1003',
   INVALID_PUBLISHABLE_KEY = 'BEEP_1004',
-  
+
   // Network errors (2xxx)
   NETWORK_ERROR = 'BEEP_2001',
   TIMEOUT = 'BEEP_2002',
   SERVER_ERROR = 'BEEP_2003',
-  
+
   // Payment errors (3xxx)
   PAYMENT_FAILED = 'BEEP_3001',
   PAYMENT_EXPIRED = 'BEEP_3002',
   PAYMENT_NOT_FOUND = 'BEEP_3003',
   INSUFFICIENT_FUNDS = 'BEEP_3004',
   PAYMENT_ALREADY_PROCESSED = 'BEEP_3005',
-  
+
   // Invoice errors (4xxx)
   INVOICE_NOT_FOUND = 'BEEP_4001',
   INVOICE_EXPIRED = 'BEEP_4002',
   INVOICE_ALREADY_PAID = 'BEEP_4003',
-  
+
   // Validation errors (5xxx)
   INVALID_PARAMETER = 'BEEP_5001',
   MISSING_PARAMETER = 'BEEP_5002',
   INVALID_AMOUNT = 'BEEP_5003',
   INVALID_TOKEN = 'BEEP_5004',
-  
+
   // Rate limiting (6xxx)
   RATE_LIMIT_EXCEEDED = 'BEEP_6001',
-  
+
   // Unknown errors (9xxx)
   UNKNOWN_ERROR = 'BEEP_9999',
+}
+
+/**
+ * Options for creating a BeepError
+ */
+export interface BeepErrorOptions {
+  code: BeepErrorCode;
+  statusCode?: number;
+  details?: Record<string, any>;
+  requestId?: string;
 }
 
 /**
@@ -50,28 +60,22 @@ export class BeepError extends Error {
   public readonly details?: Record<string, any>;
   public readonly timestamp: Date;
   public readonly requestId?: string;
-  
-  constructor(
-    message: string,
-    code: BeepErrorCode,
-    statusCode?: number,
-    details?: Record<string, any>,
-    requestId?: string
-  ) {
+
+  constructor(message: string, options: BeepErrorOptions) {
     super(message);
     this.name = 'BeepError';
-    this.code = code;
-    this.statusCode = statusCode;
-    this.details = details;
+    this.code = options.code;
+    this.statusCode = options.statusCode;
+    this.details = options.details;
     this.timestamp = new Date();
-    this.requestId = requestId;
-    
+    this.requestId = options.requestId;
+
     // Maintains proper stack trace for where error was thrown
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, BeepError);
     }
   }
-  
+
   /**
    * Returns a user-friendly error message
    */
@@ -93,7 +97,7 @@ export class BeepError extends Error {
         return this.message || 'An unexpected error occurred.';
     }
   }
-  
+
   /**
    * Returns a JSON representation of the error for logging
    */
@@ -112,11 +116,23 @@ export class BeepError extends Error {
 }
 
 /**
+ * Options for specialized error classes
+ */
+export interface SpecializedErrorOptions {
+  code?: BeepErrorCode;
+  details?: Record<string, any>;
+}
+
+/**
  * Authentication error - thrown when API key is invalid or missing
  */
 export class BeepAuthenticationError extends BeepError {
-  constructor(message: string, code: BeepErrorCode = BeepErrorCode.UNAUTHORIZED, details?: Record<string, any>) {
-    super(message, code, 401, details);
+  constructor(message: string, options: SpecializedErrorOptions = {}) {
+    super(message, {
+      code: options.code ?? BeepErrorCode.UNAUTHORIZED,
+      statusCode: 401,
+      details: options.details,
+    });
     this.name = 'BeepAuthenticationError';
   }
 }
@@ -125,8 +141,12 @@ export class BeepAuthenticationError extends BeepError {
  * Validation error - thrown when request parameters are invalid
  */
 export class BeepValidationError extends BeepError {
-  constructor(message: string, code: BeepErrorCode = BeepErrorCode.INVALID_PARAMETER, details?: Record<string, any>) {
-    super(message, code, 400, details);
+  constructor(message: string, options: SpecializedErrorOptions = {}) {
+    super(message, {
+      code: options.code ?? BeepErrorCode.INVALID_PARAMETER,
+      statusCode: 400,
+      details: options.details,
+    });
     this.name = 'BeepValidationError';
   }
 }
@@ -135,8 +155,12 @@ export class BeepValidationError extends BeepError {
  * Payment error - thrown when payment operations fail
  */
 export class BeepPaymentError extends BeepError {
-  constructor(message: string, code: BeepErrorCode = BeepErrorCode.PAYMENT_FAILED, details?: Record<string, any>) {
-    super(message, code, 402, details);
+  constructor(message: string, options: SpecializedErrorOptions = {}) {
+    super(message, {
+      code: options.code ?? BeepErrorCode.PAYMENT_FAILED,
+      statusCode: 402,
+      details: options.details,
+    });
     this.name = 'BeepPaymentError';
   }
 }
@@ -145,10 +169,20 @@ export class BeepPaymentError extends BeepError {
  * Network error - thrown when network operations fail
  */
 export class BeepNetworkError extends BeepError {
-  constructor(message: string, code: BeepErrorCode = BeepErrorCode.NETWORK_ERROR, details?: Record<string, any>) {
-    super(message, code, undefined, details);
+  constructor(message: string, options: SpecializedErrorOptions = {}) {
+    super(message, {
+      code: options.code ?? BeepErrorCode.NETWORK_ERROR,
+      details: options.details,
+    });
     this.name = 'BeepNetworkError';
   }
+}
+
+/**
+ * Options for rate limit error
+ */
+export interface RateLimitErrorOptions extends SpecializedErrorOptions {
+  retryAfter?: number;
 }
 
 /**
@@ -156,11 +190,15 @@ export class BeepNetworkError extends BeepError {
  */
 export class BeepRateLimitError extends BeepError {
   public readonly retryAfter?: number;
-  
-  constructor(message: string, retryAfter?: number, details?: Record<string, any>) {
-    super(message, BeepErrorCode.RATE_LIMIT_EXCEEDED, 429, details);
+
+  constructor(message: string, options: RateLimitErrorOptions = {}) {
+    super(message, {
+      code: BeepErrorCode.RATE_LIMIT_EXCEEDED,
+      statusCode: 429,
+      details: options.details,
+    });
     this.name = 'BeepRateLimitError';
-    this.retryAfter = retryAfter;
+    this.retryAfter = options.retryAfter;
   }
 }
 
@@ -170,100 +208,93 @@ export class BeepRateLimitError extends BeepError {
 export function createBeepErrorFromAxios(error: any): BeepError {
   const response = error.response;
   const requestId = response?.headers?.['x-request-id'];
-  
+
   if (!response) {
     // Network error
-    return new BeepNetworkError(
-      error.message || 'Network connection failed',
-      BeepErrorCode.NETWORK_ERROR,
-      { originalError: error }
-    );
+    return new BeepNetworkError(error.message || 'Network connection failed', {
+      code: BeepErrorCode.NETWORK_ERROR,
+      details: { originalError: error },
+    });
   }
-  
+
   const status = response.status;
   const data = response.data;
   const message = data?.message || data?.error || error.message;
-  
+
   // Handle specific status codes
   switch (status) {
     case 401:
-      return new BeepAuthenticationError(
-        message,
-        BeepErrorCode.UNAUTHORIZED,
-        { response: data }
-      );
-      
-    case 400:
+      return new BeepAuthenticationError(message, {
+        code: BeepErrorCode.UNAUTHORIZED,
+        details: { response: data },
+      });
+
+    case 400: {
       // Try to determine more specific validation error
       if (message.toLowerCase().includes('api key')) {
-        return new BeepAuthenticationError(
-          message,
-          BeepErrorCode.INVALID_API_KEY,
-          { response: data }
-        );
+        return new BeepAuthenticationError(message, {
+          code: BeepErrorCode.INVALID_API_KEY,
+          details: { response: data },
+        });
       }
-      return new BeepValidationError(
-        message,
-        BeepErrorCode.INVALID_PARAMETER,
-        { response: data, fields: data?.fields }
-      );
-      
+      return new BeepValidationError(message, {
+        code: BeepErrorCode.INVALID_PARAMETER,
+        details: { response: data, fields: data?.fields },
+      });
+    }
+
     case 402:
-      return new BeepPaymentError(
-        message,
-        BeepErrorCode.PAYMENT_FAILED,
-        { response: data }
-      );
-      
-    case 404:
+      return new BeepPaymentError(message, {
+        code: BeepErrorCode.PAYMENT_FAILED,
+        details: { response: data },
+      });
+
+    case 404: {
       // Determine what resource was not found
       if (message.toLowerCase().includes('invoice')) {
-        return new BeepError(
-          message,
-          BeepErrorCode.INVOICE_NOT_FOUND,
-          404,
-          { response: data },
-          requestId
-        );
+        return new BeepError(message, {
+          code: BeepErrorCode.INVOICE_NOT_FOUND,
+          statusCode: 404,
+          details: { response: data },
+          requestId,
+        });
       }
       if (message.toLowerCase().includes('payment')) {
-        return new BeepError(
-          message,
-          BeepErrorCode.PAYMENT_NOT_FOUND,
-          404,
-          { response: data },
-          requestId
-        );
+        return new BeepError(message, {
+          code: BeepErrorCode.PAYMENT_NOT_FOUND,
+          statusCode: 404,
+          details: { response: data },
+          requestId,
+        });
       }
       break;
-      
-    case 429:
+    }
+
+    case 429: {
       const retryAfter = response.headers?.['retry-after'];
-      return new BeepRateLimitError(
-        message,
-        retryAfter ? parseInt(retryAfter) : undefined,
-        { response: data }
-      );
-      
+      return new BeepRateLimitError(message, {
+        retryAfter: retryAfter ? parseInt(retryAfter) : undefined,
+        details: { response: data },
+      });
+    }
+
     case 500:
     case 502:
     case 503:
     case 504:
-      return new BeepError(
-        message,
-        BeepErrorCode.SERVER_ERROR,
-        status,
-        { response: data },
-        requestId
-      );
+      return new BeepError(message, {
+        code: BeepErrorCode.SERVER_ERROR,
+        statusCode: status,
+        details: { response: data },
+        requestId,
+      });
   }
-  
+
   // Default error
-  return new BeepError(
-    message,
-    BeepErrorCode.UNKNOWN_ERROR,
-    status,
-    { response: data },
-    requestId
-  );
+  return new BeepError(message, {
+    code: BeepErrorCode.UNKNOWN_ERROR,
+    statusCode: status,
+    details: { response: data },
+    requestId,
+  });
 }

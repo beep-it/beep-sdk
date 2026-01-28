@@ -9,7 +9,7 @@ import { PaymentsModule } from './modules/payments';
 import { ProductsModule } from './modules/products';
 import { WidgetModule } from './modules/widget';
 import { UserModule } from './modules/user';
-import { BeepAuthenticationError, BeepError, BeepErrorCode, createBeepErrorFromAxios } from './errors';
+import { BeepAuthenticationError, BeepErrorCode } from './errors';
 import { BeepDebugger, BeepDebugOptions, createDebugInterceptors } from './utils/debug';
 
 /**
@@ -91,7 +91,9 @@ export class BeepClient {
    */
   constructor(options: BeepClientOptions) {
     if (!options.apiKey) {
-      throw new BeepAuthenticationError('API key is required to initialize BeepClient', BeepErrorCode.MISSING_API_KEY);
+      throw new BeepAuthenticationError('API key is required to initialize BeepClient', {
+        code: BeepErrorCode.MISSING_API_KEY,
+      });
     }
 
     // Initialize debugger
@@ -259,7 +261,12 @@ export class BeepPublicClient {
    */
   constructor(options: BeepPublicClientOptions) {
     if (!options.publishableKey) {
-      throw new BeepAuthenticationError('publishableKey is required to initialize BeepPublicClient', BeepErrorCode.MISSING_API_KEY);
+      throw new BeepAuthenticationError(
+        'publishableKey is required to initialize BeepPublicClient',
+        {
+          code: BeepErrorCode.MISSING_API_KEY,
+        },
+      );
     }
 
     this.client = axios.create({
