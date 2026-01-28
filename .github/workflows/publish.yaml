@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       - name: Use Node 22.18.0
-        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version: 22.18.0
           registry-url: 'https://registry.npmjs.org'
