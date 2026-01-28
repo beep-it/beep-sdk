@@ -6,6 +6,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: production  # Requires approval from environment reviewers
     permissions:
       contents: read
       id-token: write # For npm provenance
