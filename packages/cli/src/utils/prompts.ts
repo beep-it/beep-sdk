@@ -165,12 +165,16 @@ export async function password(question: string): Promise<string> {
       resolve(answer);
     });
 
-    // Hide input
-    rl._writeToOutput = function _writeToOutput(stringToWrite: string) {
+    // Hide input - using type assertion for internal readline properties
+    const rlAny = rl as unknown as {
+      _writeToOutput: (str: string) => void;
+      output: { write: (str: string) => void };
+    };
+    rlAny._writeToOutput = function _writeToOutput(stringToWrite: string) {
       if (stringToWrite.includes(question)) {
-        rl.output.write(stringToWrite);
+        rlAny.output.write(stringToWrite);
       } else {
-        rl.output.write('*');
+        rlAny.output.write('*');
       }
     };
   });

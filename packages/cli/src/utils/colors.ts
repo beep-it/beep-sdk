@@ -39,6 +39,10 @@ export const color = {
   bold: (text: string) => `${colors.bright}${text}${colors.reset}`,
   blue: (text: string) => `${colors.blue}${text}${colors.reset}`,
   magenta: (text: string) => `${colors.magenta}${text}${colors.reset}`,
+  cyan: (text: string) => `${colors.cyan}${text}${colors.reset}`,
+  green: (text: string) => `${colors.green}${text}${colors.reset}`,
+  red: (text: string) => `${colors.red}${text}${colors.reset}`,
+  yellow: (text: string) => `${colors.yellow}${text}${colors.reset}`,
 };
 
 /**
