@@ -16,7 +16,6 @@ export type StartStreamingApiParams = z.infer<typeof startStreamingInputSchema>;
 
 export async function startStreaming(params: StartStreamingApiParams): Promise<any> {
   const payload: StartStreamingPayload = {
-    apiKey: process.env.BEEP_API_KEY!,
     invoiceId: params.invoiceId,
   };
 
