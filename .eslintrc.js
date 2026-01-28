@@ -48,5 +48,7 @@ module.exports = {
       'caughtErrorsIgnorePattern': '^_'
     }],
     'no-console': ['warn', { allow: ['warn', 'error', 'info'] }],
+    // Enforce options object pattern for functions with more than 2 parameters
+    'max-params': ['error', 2],
   },
 };

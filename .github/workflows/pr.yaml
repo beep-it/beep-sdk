@@ -42,3 +42,27 @@ jobs:
       - name: Run Unit Test
         run: |
           pnpm test
+
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5"
+
+      - name: Use Node 22.18.0
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65
+        with:
+          node-version: 22.18.0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@3236b209b507b249883918e7c4c8c7cdd2c0d5db
+        with:
+          version: 10
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run security audit
+        run: npx audit-ci --config audit-ci.json --package-manager pnpm
