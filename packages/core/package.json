@@ -61,7 +61,7 @@
     "lint-staged": "^16.1.2",
     "ts-jest": "^29.4.0",
     "tsup": "^8.2.2",
-    "glob": "10.5.0",
+    "glob": "13.0.0",
     "typescript": "^5.5.3"
   },
   "dependencies": {
