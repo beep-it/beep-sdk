@@ -15,7 +15,6 @@ export async function pauseStreaming(params: PauseStreamingApiParams): Promise<a
   const invoiceId = params.invoiceId;
 
   const payload: PauseStreamingPayload = {
-    apiKey: process.env.BEEP_API_KEY!,
     invoiceId,
   };
 
