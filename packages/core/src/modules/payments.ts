@@ -19,6 +19,7 @@ import {
   StopStreamingResponse,
 } from '../types';
 import { InvoiceStatus } from '../types/invoice';
+import { BeepErrorCode, BeepPaymentError, createBeepErrorFromAxios } from '../errors';
 
 /**
  * Module for handling payment operations including asset purchases and Solana transactions
@@ -249,13 +250,14 @@ export class PaymentsModule {
       );
 
       if (!response.data || !response.data.data) {
-        throw new Error('No data returned from solana transaction signing');
+        throw new BeepPaymentError('No data returned from solana transaction signing', {
+          code: BeepErrorCode.PAYMENT_FAILED,
+        });
       }
 
       return response.data.data;
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to sign solana transaction: ${errorMessage}`);
+      throw createBeepErrorFromAxios(error);
     }
   }
 

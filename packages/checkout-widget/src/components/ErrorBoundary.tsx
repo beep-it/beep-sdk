@@ -77,7 +77,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 lineHeight: '1.5',
               }}
             >
-              Something went wrong with the payment widget. Please refresh the page or contact support.
+              Something went wrong with the payment widget. Please refresh the page or contact
+              support.
             </p>
           </div>
         </div>

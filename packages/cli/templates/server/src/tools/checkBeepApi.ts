@@ -19,7 +19,7 @@ export type CheckBeepApiParams = z.infer<typeof checkBeepApiSchema>;
  * @returns The API status.
  */
 export async function checkBeepApi(
-  params: CheckBeepApiParams,
+  _params: CheckBeepApiParams,
 ): Promise<CheckBeepApiResult | { error: string }> {
   try {
     const status = await beepClient.healthCheck();
