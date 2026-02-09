@@ -6,9 +6,9 @@ import { createWrapper } from '../utils/testUtils';
 import { WidgetSteps } from '../../src/constants';
 
 // Mocks are configured via moduleNameMapper in jest.config.js
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const validatorMock = require('validator');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('EmailVerification', () => {
@@ -58,10 +58,9 @@ describe('EmailVerification', () => {
     it('shows error for invalid email on blur', () => {
       validatorMock.isEmail.mockReturnValue(false);
 
-      render(
-        <EmailVerification {...defaultProps} email="invalid-email" />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="invalid-email" />, {
+        wrapper: createWrapper(),
+      });
 
       const input = screen.getByPlaceholderText('you@example.com');
       fireEvent.blur(input);
@@ -72,10 +71,9 @@ describe('EmailVerification', () => {
     it('does not show error for valid email', () => {
       validatorMock.isEmail.mockReturnValue(true);
 
-      render(
-        <EmailVerification {...defaultProps} email="valid@email.com" />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="valid@email.com" />, {
+        wrapper: createWrapper(),
+      });
 
       const input = screen.getByPlaceholderText('you@example.com');
       fireEvent.blur(input);
@@ -86,10 +84,9 @@ describe('EmailVerification', () => {
     it('clears error when user starts typing', () => {
       validatorMock.isEmail.mockReturnValue(false);
 
-      const { rerender } = render(
-        <EmailVerification {...defaultProps} email="invalid" />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="invalid" />, {
+        wrapper: createWrapper(),
+      });
 
       const input = screen.getByPlaceholderText('you@example.com');
       fireEvent.blur(input);
@@ -121,10 +118,7 @@ describe('EmailVerification', () => {
 
       fireEvent.click(screen.getByText('Terms & conditions'));
 
-      expect(windowOpenSpy).toHaveBeenCalledWith(
-        'https://justbeep.it/termsofservice',
-        '_blank'
-      );
+      expect(windowOpenSpy).toHaveBeenCalledWith('https://justbeep.it/termsofservice', '_blank');
 
       windowOpenSpy.mockRestore();
     });
@@ -136,10 +130,7 @@ describe('EmailVerification', () => {
 
       fireEvent.click(screen.getByText('Privacy policy'));
 
-      expect(windowOpenSpy).toHaveBeenCalledWith(
-        'https://justbeep.it/privacypolicy',
-        '_blank'
-      );
+      expect(windowOpenSpy).toHaveBeenCalledWith('https://justbeep.it/privacypolicy', '_blank');
 
       windowOpenSpy.mockRestore();
     });
@@ -147,19 +138,17 @@ describe('EmailVerification', () => {
 
   describe('continue button', () => {
     it('is disabled when email is empty', () => {
-      render(
-        <EmailVerification {...defaultProps} tosAccepted={true} />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} tosAccepted={true} />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.getByText('Continue')).toBeDisabled();
     });
 
     it('is disabled when ToS is not accepted', () => {
-      render(
-        <EmailVerification {...defaultProps} email="test@example.com" />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="test@example.com" />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.getByText('Continue')).toBeDisabled();
     });
@@ -167,14 +156,9 @@ describe('EmailVerification', () => {
     it('is disabled when email is invalid', () => {
       validatorMock.isEmail.mockReturnValue(false);
 
-      render(
-        <EmailVerification
-          {...defaultProps}
-          email="invalid"
-          tosAccepted={true}
-        />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="invalid" tosAccepted={true} />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.getByText('Continue')).toBeDisabled();
     });
@@ -182,14 +166,9 @@ describe('EmailVerification', () => {
     it('is enabled when email is valid and ToS is accepted', () => {
       validatorMock.isEmail.mockReturnValue(true);
 
-      render(
-        <EmailVerification
-          {...defaultProps}
-          email="valid@email.com"
-          tosAccepted={true}
-        />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="valid@email.com" tosAccepted={true} />, {
+        wrapper: createWrapper(),
+      });
 
       expect(screen.getByText('Continue')).not.toBeDisabled();
     });
@@ -199,14 +178,9 @@ describe('EmailVerification', () => {
     it('generates OTP and navigates to CodeConfirmation on continue', async () => {
       validatorMock.isEmail.mockReturnValue(true);
 
-      render(
-        <EmailVerification
-          {...defaultProps}
-          email="test@example.com"
-          tosAccepted={true}
-        />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="test@example.com" tosAccepted={true} />, {
+        wrapper: createWrapper(),
+      });
 
       fireEvent.click(screen.getByText('Continue'));
 
@@ -228,14 +202,9 @@ describe('EmailVerification', () => {
         verificationCode: null,
       });
 
-      render(
-        <EmailVerification
-          {...defaultProps}
-          email="test@example.com"
-          tosAccepted={true}
-        />,
-        { wrapper: createWrapper() }
-      );
+      render(<EmailVerification {...defaultProps} email="test@example.com" tosAccepted={true} />, {
+        wrapper: createWrapper(),
+      });
 
       fireEvent.click(screen.getByText('Continue'));
 
@@ -252,25 +221,15 @@ describe('EmailVerification', () => {
 
       // Force the button to be enabled by setting valid props initially
       const { rerender } = render(
-        <EmailVerification
-          {...defaultProps}
-          email="test@example.com"
-          tosAccepted={true}
-        />,
-        { wrapper: createWrapper() }
+        <EmailVerification {...defaultProps} email="test@example.com" tosAccepted={true} />,
+        { wrapper: createWrapper() },
       );
 
       // Make email invalid
       validatorMock.isEmail.mockReturnValue(false);
 
       // Force re-render with same props
-      rerender(
-        <EmailVerification
-          {...defaultProps}
-          email="invalid"
-          tosAccepted={true}
-        />
-      );
+      rerender(<EmailVerification {...defaultProps} email="invalid" tosAccepted={true} />);
 
       // Button should be disabled now
       expect(screen.getByText('Continue')).toBeDisabled();

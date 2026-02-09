@@ -22,23 +22,13 @@ describe('ConfigurationError', () => {
   });
 
   it('displays custom title', () => {
-    render(
-      <ConfigurationError
-        title="Custom Title"
-        message="Some message"
-      />
-    );
+    render(<ConfigurationError title="Custom Title" message="Some message" />);
 
     expect(screen.getByText('Custom Title')).toBeInTheDocument();
   });
 
   it('displays custom message', () => {
-    render(
-      <ConfigurationError
-        title="Title"
-        message="Custom error message here"
-      />
-    );
+    render(<ConfigurationError title="Title" message="Custom error message here" />);
 
     expect(screen.getByText('Custom error message here')).toBeInTheDocument();
   });
@@ -58,12 +48,7 @@ describe('ConfigurationError', () => {
   });
 
   it('accepts primary color prop', () => {
-    render(
-      <ConfigurationError
-        {...defaultProps}
-        primaryColor="#ff0000"
-      />
-    );
+    render(<ConfigurationError {...defaultProps} primaryColor="#ff0000" />);
 
     // Component renders without error
     expect(screen.getByText('Configuration Error')).toBeInTheDocument();

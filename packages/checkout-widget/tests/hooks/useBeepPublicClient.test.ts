@@ -16,7 +16,7 @@ describe('useBeepPublicClient', () => {
   describe('initialization', () => {
     it('creates a BeepPublicClient with publishableKey', () => {
       const { result } = renderHook(() =>
-        useBeepPublicClient({ publishableKey: 'beep_pk_test_key' })
+        useBeepPublicClient({ publishableKey: 'beep_pk_test_key' }),
       );
 
       expect(result.current).toBeDefined();
@@ -28,7 +28,7 @@ describe('useBeepPublicClient', () => {
         useBeepPublicClient({
           publishableKey: 'beep_pk_test_key',
           serverUrl: 'https://custom.api.com',
-        })
+        }),
       );
 
       expect(result.current).toBeDefined();
@@ -37,7 +37,7 @@ describe('useBeepPublicClient', () => {
 
     it('provides access to widget module', () => {
       const { result } = renderHook(() =>
-        useBeepPublicClient({ publishableKey: 'beep_pk_test_key' })
+        useBeepPublicClient({ publishableKey: 'beep_pk_test_key' }),
       );
 
       expect(result.current.widget).toBeDefined();
@@ -46,10 +46,9 @@ describe('useBeepPublicClient', () => {
 
   describe('memoization', () => {
     it('returns the same client instance when props do not change', () => {
-      const { result, rerender } = renderHook(
-        (props) => useBeepPublicClient(props),
-        { initialProps: defaultProps }
-      );
+      const { result, rerender } = renderHook((props) => useBeepPublicClient(props), {
+        initialProps: defaultProps,
+      });
 
       const firstClient = result.current;
       rerender(defaultProps);
@@ -59,10 +58,9 @@ describe('useBeepPublicClient', () => {
     });
 
     it('returns a new client instance when publishableKey changes', () => {
-      const { result, rerender } = renderHook(
-        (props) => useBeepPublicClient(props),
-        { initialProps: { publishableKey: 'beep_pk_key_1' } }
-      );
+      const { result, rerender } = renderHook((props) => useBeepPublicClient(props), {
+        initialProps: { publishableKey: 'beep_pk_key_1' },
+      });
 
       const firstClient = result.current;
       rerender({ publishableKey: 'beep_pk_key_2' });
@@ -72,10 +70,9 @@ describe('useBeepPublicClient', () => {
     });
 
     it('returns a new client instance when serverUrl changes', () => {
-      const { result, rerender } = renderHook(
-        (props) => useBeepPublicClient(props),
-        { initialProps: { publishableKey: 'beep_pk_test', serverUrl: 'https://api1.com' } }
-      );
+      const { result, rerender } = renderHook((props) => useBeepPublicClient(props), {
+        initialProps: { publishableKey: 'beep_pk_test', serverUrl: 'https://api1.com' },
+      });
 
       const firstClient = result.current;
       rerender({ publishableKey: 'beep_pk_test', serverUrl: 'https://api2.com' });
@@ -85,10 +82,9 @@ describe('useBeepPublicClient', () => {
     });
 
     it('returns same client when serverUrl changes from undefined to same undefined', () => {
-      const { result, rerender } = renderHook(
-        (props) => useBeepPublicClient(props),
-        { initialProps: { publishableKey: 'beep_pk_test' } }
-      );
+      const { result, rerender } = renderHook((props) => useBeepPublicClient(props), {
+        initialProps: { publishableKey: 'beep_pk_test' },
+      });
 
       const firstClient = result.current;
       rerender({ publishableKey: 'beep_pk_test' });
@@ -101,7 +97,7 @@ describe('useBeepPublicClient', () => {
   describe('widget access', () => {
     it('provides access to widget methods', () => {
       const { result } = renderHook(() =>
-        useBeepPublicClient({ publishableKey: 'beep_pk_test_key' })
+        useBeepPublicClient({ publishableKey: 'beep_pk_test_key' }),
       );
 
       const widget = result.current.widget;

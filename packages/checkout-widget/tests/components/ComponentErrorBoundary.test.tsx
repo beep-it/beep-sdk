@@ -30,7 +30,7 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="TestComponent">
           <div>Child content</div>
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(screen.getByText('Child content')).toBeInTheDocument();
@@ -40,7 +40,7 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="TestComponent">
           <WorkingComponent />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(screen.getByText('Working content')).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="PaymentPanel">
           <ThrowError />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(screen.getByText('PaymentPanel Error')).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="WalletSection">
           <ThrowError message="Custom error message" />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(screen.getByText('WalletSection Error')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('ComponentErrorBoundary', () => {
           fallback={<div>Custom component error</div>}
         >
           <ThrowError />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(screen.getByText('Custom component error')).toBeInTheDocument();
@@ -89,20 +89,17 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="TestComponent">
           <ThrowError />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Component Error:',
-        expect.any(Error)
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith('Component Error:', expect.any(Error));
     });
 
     it('logs detailed error info in componentDidCatch', () => {
       render(
         <ComponentErrorBoundary componentName="DetailedComponent">
           <ThrowError message="Detailed error" />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -111,7 +108,7 @@ describe('ComponentErrorBoundary', () => {
           error: 'Detailed error',
           stack: expect.any(String),
           componentStack: expect.any(String),
-        })
+        }),
       );
     });
   });
@@ -125,7 +122,7 @@ describe('ComponentErrorBoundary', () => {
             <ThrowError />
           </ComponentErrorBoundary>
           <div>Another sibling</div>
-        </div>
+        </div>,
       );
 
       expect(screen.getByText('Unaffected sibling')).toBeInTheDocument();
@@ -142,7 +139,7 @@ describe('ComponentErrorBoundary', () => {
           <ComponentErrorBoundary componentName="Second">
             <WorkingComponent />
           </ComponentErrorBoundary>
-        </div>
+        </div>,
       );
 
       expect(screen.getByText('First Error')).toBeInTheDocument();
@@ -153,10 +150,10 @@ describe('ComponentErrorBoundary', () => {
 
   describe('default fallback UI', () => {
     it('uses red error styling', () => {
-      const { container } = render(
+      render(
         <ComponentErrorBoundary componentName="StyledComponent">
           <ThrowError />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       // The error container should be present with error styling
@@ -172,7 +169,7 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="EmptyError">
           <EmptyErrorComponent />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       // Falls back to default message
@@ -185,7 +182,7 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="CustomName">
           <ThrowError />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(screen.getByText('CustomName Error')).toBeInTheDocument();
@@ -195,7 +192,7 @@ describe('ComponentErrorBoundary', () => {
       render(
         <ComponentErrorBoundary componentName="Component/With/Path">
           <ThrowError />
-        </ComponentErrorBoundary>
+        </ComponentErrorBoundary>,
       );
 
       expect(screen.getByText('Component/With/Path Error')).toBeInTheDocument();

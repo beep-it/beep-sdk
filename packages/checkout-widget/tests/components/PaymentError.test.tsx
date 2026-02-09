@@ -42,7 +42,7 @@ describe('PaymentError', () => {
 
   it('uses primary color when provided', () => {
     const primaryColor = '#ff5500';
-    const { container } = render(<PaymentError primaryColor={primaryColor} />);
+    render(<PaymentError primaryColor={primaryColor} />);
 
     // The title should have the primary color
     const title = screen.getByText('Payment Error');

@@ -6,7 +6,7 @@ import { createWrapper } from '../utils/testUtils';
 import { WidgetSteps } from '../../src/constants';
 
 // Mocks are configured via moduleNameMapper in jest.config.js
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('CodeConfirmation', () => {
@@ -241,7 +241,9 @@ describe('CodeConfirmation', () => {
       fireEvent.click(screen.getByText('Continue'));
 
       await waitFor(() => {
-        expect(screen.getByText('Invalid verification code. Please try again.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Invalid verification code. Please try again.'),
+        ).toBeInTheDocument();
       });
 
       expect(defaultProps.setWidgetStep).not.toHaveBeenCalled();

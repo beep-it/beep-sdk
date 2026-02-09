@@ -1,7 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useDynamicWallet } from '../../src/hooks/useDynamicWallet';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dynamicMock = require('@dynamic-labs/sdk-react-core');
 
 describe('useDynamicWallet', () => {
@@ -154,7 +154,7 @@ describe('useDynamicWallet', () => {
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         '[useDynamicWallet] Error disconnecting wallet:',
-        expect.any(Error)
+        expect.any(Error),
       );
       expect(result.current.isLoading).toBe(false);
 

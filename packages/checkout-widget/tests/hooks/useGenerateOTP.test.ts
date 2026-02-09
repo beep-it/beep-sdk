@@ -2,7 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useGenerateOTP } from '../../src/hooks/useGenerateOTP';
 import { createWrapper } from '../utils/testUtils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('useGenerateOTP', () => {
@@ -21,10 +21,9 @@ describe('useGenerateOTP', () => {
 
   describe('mutation success', () => {
     it('generates OTP successfully', async () => {
-      const { result } = renderHook(
-        () => useGenerateOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGenerateOTP(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.isPending).toBe(false);
 
@@ -52,10 +51,9 @@ describe('useGenerateOTP', () => {
         newCodeGenerated: false,
       });
 
-      const { result } = renderHook(
-        () => useGenerateOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGenerateOTP(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       let response: any;
       await act(async () => {
@@ -75,10 +73,9 @@ describe('useGenerateOTP', () => {
       const error = new Error('Failed to generate OTP');
       __mockWidget.generateOTP.mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useGenerateOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGenerateOTP(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await expect(
         act(async () => {
@@ -86,7 +83,7 @@ describe('useGenerateOTP', () => {
             email: 'test@example.com',
             tosAccepted: true,
           });
-        })
+        }),
       ).rejects.toThrow('Failed to generate OTP');
     });
 
@@ -94,10 +91,9 @@ describe('useGenerateOTP', () => {
       const error = new Error('API Error');
       __mockWidget.generateOTP.mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useGenerateOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGenerateOTP(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       try {
         await act(async () => {
@@ -106,7 +102,7 @@ describe('useGenerateOTP', () => {
             tosAccepted: true,
           });
         });
-      } catch (e) {
+      } catch (_e) {
         // Expected to throw
       }
 
@@ -118,10 +114,9 @@ describe('useGenerateOTP', () => {
 
   describe('input validation', () => {
     it('passes email and tosAccepted to API', async () => {
-      const { result } = renderHook(
-        () => useGenerateOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGenerateOTP(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await result.current.generateOTP({
@@ -137,10 +132,9 @@ describe('useGenerateOTP', () => {
     });
 
     it('can be called with tosAccepted: false', async () => {
-      const { result } = renderHook(
-        () => useGenerateOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGenerateOTP(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await result.current.generateOTP({

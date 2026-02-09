@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { usePaymentSetup } from '../../src/hooks/usePaymentSetup';
 import { createWrapper } from '../utils/testUtils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('usePaymentSetup', () => {
@@ -28,10 +28,9 @@ describe('usePaymentSetup', () => {
 
   describe('basic functionality', () => {
     it('creates payment session on mount', async () => {
-      const { result } = renderHook(
-        () => usePaymentSetup(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentSetup(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.isLoading).toBe(true);
 
@@ -44,10 +43,9 @@ describe('usePaymentSetup', () => {
     });
 
     it('returns payment setup data correctly', async () => {
-      const { result } = renderHook(
-        () => usePaymentSetup(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentSetup(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -67,11 +65,12 @@ describe('usePaymentSetup', () => {
   describe('asset transformation', () => {
     it('transforms BeepPurchaseAsset correctly', async () => {
       const { result } = renderHook(
-        () => usePaymentSetup({
-          ...defaultProps,
-          assets: [{ assetId: 'product-123', quantity: 2 }],
-        }),
-        { wrapper: createWrapper() }
+        () =>
+          usePaymentSetup({
+            ...defaultProps,
+            assets: [{ assetId: 'product-123', quantity: 2 }],
+          }),
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -81,17 +80,18 @@ describe('usePaymentSetup', () => {
       expect(__mockWidget.createPaymentSession).toHaveBeenCalledWith(
         expect.objectContaining({
           assets: [{ assetId: 'product-123', quantity: 2 }],
-        })
+        }),
       );
     });
 
     it('transforms CreateProductPayload to EphemeralItem', async () => {
       const { result } = renderHook(
-        () => usePaymentSetup({
-          ...defaultProps,
-          assets: [{ name: 'Test Product', price: '19.99', description: 'A test product' }],
-        }),
-        { wrapper: createWrapper() }
+        () =>
+          usePaymentSetup({
+            ...defaultProps,
+            assets: [{ name: 'Test Product', price: '19.99', description: 'A test product' }],
+          }),
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -108,17 +108,18 @@ describe('usePaymentSetup', () => {
               description: 'A test product',
             }),
           ],
-        })
+        }),
       );
     });
 
     it('transforms numeric price to string', async () => {
       const { result } = renderHook(
-        () => usePaymentSetup({
-          ...defaultProps,
-          assets: [{ name: 'Numeric Price Product', price: 29.99 }] as any,
-        }),
-        { wrapper: createWrapper() }
+        () =>
+          usePaymentSetup({
+            ...defaultProps,
+            assets: [{ name: 'Numeric Price Product', price: 29.99 }] as any,
+          }),
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -133,20 +134,21 @@ describe('usePaymentSetup', () => {
               price: '29.99',
             }),
           ],
-        })
+        }),
       );
     });
 
     it('handles mixed asset types', async () => {
       const { result } = renderHook(
-        () => usePaymentSetup({
-          ...defaultProps,
-          assets: [
-            { name: 'New Product', price: '15.00', description: 'Ephemeral item' },
-            { assetId: 'existing-product', quantity: 3 },
-          ],
-        }),
-        { wrapper: createWrapper() }
+        () =>
+          usePaymentSetup({
+            ...defaultProps,
+            assets: [
+              { name: 'New Product', price: '15.00', description: 'Ephemeral item' },
+              { assetId: 'existing-product', quantity: 3 },
+            ],
+          }),
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -163,17 +165,18 @@ describe('usePaymentSetup', () => {
             }),
             { assetId: 'existing-product', quantity: 3 },
           ],
-        })
+        }),
       );
     });
 
     it('uses quantity from CreateProductPayload if provided', async () => {
       const { result } = renderHook(
-        () => usePaymentSetup({
-          ...defaultProps,
-          assets: [{ name: 'Multi-quantity Product', price: '10.00', quantity: 5 }] as any,
-        }),
-        { wrapper: createWrapper() }
+        () =>
+          usePaymentSetup({
+            ...defaultProps,
+            assets: [{ name: 'Multi-quantity Product', price: '10.00', quantity: 5 }] as any,
+          }),
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -188,7 +191,7 @@ describe('usePaymentSetup', () => {
               quantity: 5,
             }),
           ],
-        })
+        }),
       );
     });
   });
@@ -203,10 +206,9 @@ describe('usePaymentSetup', () => {
         destinationAddress: 'dest',
       });
 
-      const { result } = renderHook(
-        () => usePaymentSetup(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentSetup(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -223,10 +225,9 @@ describe('usePaymentSetup', () => {
         destinationAddress: 'dest',
       });
 
-      const { result } = renderHook(
-        () => usePaymentSetup(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentSetup(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -249,10 +250,9 @@ describe('usePaymentSetup', () => {
         destinationAddress: 'destination-wallet',
       });
 
-      const { result } = renderHook(
-        () => usePaymentSetup(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentSetup(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -280,10 +280,9 @@ describe('usePaymentSetup', () => {
         destinationAddress: 'dest',
       });
 
-      const { result } = renderHook(
-        () => usePaymentSetup(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentSetup(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -296,11 +295,12 @@ describe('usePaymentSetup', () => {
   describe('payment label', () => {
     it('passes payment label to API', async () => {
       const { result } = renderHook(
-        () => usePaymentSetup({
-          ...defaultProps,
-          paymentLabel: 'My Store Checkout',
-        }),
-        { wrapper: createWrapper() }
+        () =>
+          usePaymentSetup({
+            ...defaultProps,
+            paymentLabel: 'My Store Checkout',
+          }),
+        { wrapper: createWrapper() },
       );
 
       await waitFor(() => {
@@ -311,7 +311,7 @@ describe('usePaymentSetup', () => {
         expect.objectContaining({
           paymentLabel: 'My Store Checkout',
           generateQrCode: true,
-        })
+        }),
       );
     });
   });
@@ -320,10 +320,9 @@ describe('usePaymentSetup', () => {
     it('handles API errors', async () => {
       __mockWidget.createPaymentSession.mockRejectedValue(new Error('Payment session failed'));
 
-      const { result } = renderHook(
-        () => usePaymentSetup(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentSetup(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.error).toBeDefined();
@@ -338,10 +337,9 @@ describe('usePaymentSetup', () => {
       const wrapper = createWrapper();
       const assets = [{ assetId: 'asset-1', quantity: 1 }];
 
-      const { result: result1 } = renderHook(
-        () => usePaymentSetup({ ...defaultProps, assets }),
-        { wrapper }
-      );
+      const { result: result1 } = renderHook(() => usePaymentSetup({ ...defaultProps, assets }), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result1.current.isLoading).toBe(false);
@@ -350,10 +348,9 @@ describe('usePaymentSetup', () => {
       const callCountAfterFirst = __mockWidget.createPaymentSession.mock.calls.length;
 
       // Same assets should use cache
-      const { result: result2 } = renderHook(
-        () => usePaymentSetup({ ...defaultProps, assets }),
-        { wrapper }
-      );
+      const { result: result2 } = renderHook(() => usePaymentSetup({ ...defaultProps, assets }), {
+        wrapper,
+      });
 
       await waitFor(() => {
         expect(result2.current.isLoading).toBe(false);
@@ -368,7 +365,7 @@ describe('usePaymentSetup', () => {
 
       const { result: result1 } = renderHook(
         () => usePaymentSetup({ ...defaultProps, assets: [{ assetId: 'asset-1', quantity: 1 }] }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {
@@ -377,7 +374,7 @@ describe('usePaymentSetup', () => {
 
       const { result: result2 } = renderHook(
         () => usePaymentSetup({ ...defaultProps, assets: [{ assetId: 'asset-2', quantity: 1 }] }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {

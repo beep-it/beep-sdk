@@ -28,7 +28,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <div>Child content</div>
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Child content')).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe('ErrorBoundary', () => {
         <ErrorBoundary>
           <div>First child</div>
           <div>Second child</div>
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('First child')).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Payment Widget Error')).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary fallback={<div>Custom error message</div>}>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByText('Custom error message')).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -82,17 +82,17 @@ describe('ErrorBoundary', () => {
         expect.any(Error),
         expect.objectContaining({
           componentStack: expect.any(String),
-        })
+        }),
       );
     });
   });
 
   describe('error state management', () => {
     it('captures error in state via getDerivedStateFromError', () => {
-      const { container } = render(
+      render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       // Error state is captured, fallback is rendered
@@ -106,7 +106,7 @@ describe('ErrorBoundary', () => {
           <ErrorBoundary>
             <ThrowError />
           </ErrorBoundary>
-        </div>
+        </div>,
       );
 
       expect(screen.getByText('Sibling outside')).toBeInTheDocument();
@@ -119,7 +119,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       // The emoji is rendered
@@ -130,7 +130,7 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
       expect(screen.getByRole('heading', { name: /Payment Widget Error/i })).toBeInTheDocument();
@@ -140,12 +140,10 @@ describe('ErrorBoundary', () => {
       render(
         <ErrorBoundary>
           <ThrowError />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       );
 
-      expect(
-        screen.getByText(/Please refresh the page or contact support/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/Please refresh the page or contact support/i)).toBeInTheDocument();
     });
   });
 });

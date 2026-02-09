@@ -2,7 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useVerifyOTP } from '../../src/hooks/useVerifyOTP';
 import { createWrapper } from '../utils/testUtils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('useVerifyOTP', () => {
@@ -20,10 +20,7 @@ describe('useVerifyOTP', () => {
 
   describe('mutation success', () => {
     it('verifies OTP successfully', async () => {
-      const { result } = renderHook(
-        () => useVerifyOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerifyOTP(defaultProps), { wrapper: createWrapper() });
 
       expect(result.current.isPending).toBe(false);
 
@@ -45,10 +42,7 @@ describe('useVerifyOTP', () => {
     it('handles successful verification', async () => {
       __mockWidget.verifyOTP.mockResolvedValue({ success: true });
 
-      const { result } = renderHook(
-        () => useVerifyOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerifyOTP(defaultProps), { wrapper: createWrapper() });
 
       let response: any;
       await act(async () => {
@@ -64,10 +58,7 @@ describe('useVerifyOTP', () => {
     it('handles failed verification (invalid OTP)', async () => {
       __mockWidget.verifyOTP.mockResolvedValue({ success: false });
 
-      const { result } = renderHook(
-        () => useVerifyOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerifyOTP(defaultProps), { wrapper: createWrapper() });
 
       let response: any;
       await act(async () => {
@@ -86,10 +77,7 @@ describe('useVerifyOTP', () => {
       const error = new Error('Verification failed');
       __mockWidget.verifyOTP.mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useVerifyOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerifyOTP(defaultProps), { wrapper: createWrapper() });
 
       await expect(
         act(async () => {
@@ -97,7 +85,7 @@ describe('useVerifyOTP', () => {
             email: 'test@example.com',
             otp: '123456',
           });
-        })
+        }),
       ).rejects.toThrow('Verification failed');
     });
 
@@ -105,10 +93,7 @@ describe('useVerifyOTP', () => {
       const error = new Error('API Error');
       __mockWidget.verifyOTP.mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useVerifyOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerifyOTP(defaultProps), { wrapper: createWrapper() });
 
       try {
         await act(async () => {
@@ -117,7 +102,7 @@ describe('useVerifyOTP', () => {
             otp: '123456',
           });
         });
-      } catch (e) {
+      } catch (_e) {
         // Expected to throw
       }
 
@@ -129,10 +114,7 @@ describe('useVerifyOTP', () => {
 
   describe('input parameters', () => {
     it('passes email and otp to API', async () => {
-      const { result } = renderHook(
-        () => useVerifyOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerifyOTP(defaultProps), { wrapper: createWrapper() });
 
       await act(async () => {
         await result.current.verifyOTP({
@@ -148,10 +130,7 @@ describe('useVerifyOTP', () => {
     });
 
     it('handles 6-digit OTP string', async () => {
-      const { result } = renderHook(
-        () => useVerifyOTP(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useVerifyOTP(defaultProps), { wrapper: createWrapper() });
 
       await act(async () => {
         await result.current.verifyOTP({

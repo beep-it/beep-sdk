@@ -2,7 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useCreateCashPaymentOrder } from '../../src/hooks/useCreateCashPaymentOrder';
 import { createWrapper } from '../utils/testUtils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('useCreateCashPaymentOrder', () => {
@@ -20,10 +20,9 @@ describe('useCreateCashPaymentOrder', () => {
 
   describe('mutation success', () => {
     it('creates cash payment order successfully', async () => {
-      const { result } = renderHook(
-        () => useCreateCashPaymentOrder(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useCreateCashPaymentOrder(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       expect(result.current.isPending).toBe(false);
 
@@ -55,10 +54,9 @@ describe('useCreateCashPaymentOrder', () => {
         payUrl: 'https://custom-payment-gateway.com/checkout/abc',
       });
 
-      const { result } = renderHook(
-        () => useCreateCashPaymentOrder(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useCreateCashPaymentOrder(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       let response: any;
       await act(async () => {
@@ -80,10 +78,9 @@ describe('useCreateCashPaymentOrder', () => {
       const error = new Error('Failed to create order');
       __mockWidget.createCashPaymentOrder.mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useCreateCashPaymentOrder(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useCreateCashPaymentOrder(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await expect(
         act(async () => {
@@ -94,7 +91,7 @@ describe('useCreateCashPaymentOrder', () => {
             payWayCode: 'VISA_MASTER_CARD' as any,
             email: 'test@example.com',
           });
-        })
+        }),
       ).rejects.toThrow('Failed to create order');
     });
 
@@ -102,10 +99,9 @@ describe('useCreateCashPaymentOrder', () => {
       const error = new Error('API Error');
       __mockWidget.createCashPaymentOrder.mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useCreateCashPaymentOrder(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useCreateCashPaymentOrder(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       try {
         await act(async () => {
@@ -117,7 +113,7 @@ describe('useCreateCashPaymentOrder', () => {
             email: 'test@example.com',
           });
         });
-      } catch (e) {
+      } catch (_e) {
         // Expected to throw
       }
 
@@ -129,10 +125,9 @@ describe('useCreateCashPaymentOrder', () => {
 
   describe('input parameters', () => {
     it('passes all required parameters to API', async () => {
-      const { result } = renderHook(
-        () => useCreateCashPaymentOrder(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useCreateCashPaymentOrder(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await act(async () => {
         await result.current.createCashPaymentOrder({
@@ -154,10 +149,9 @@ describe('useCreateCashPaymentOrder', () => {
     });
 
     it('handles different payment methods', async () => {
-      const { result } = renderHook(
-        () => useCreateCashPaymentOrder(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useCreateCashPaymentOrder(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       const paymentMethods = ['VISA_MASTER_CARD', 'APPLE_PAY', 'GOOGLE_PAY', 'NETELLER', 'SKRILL'];
 
@@ -177,7 +171,7 @@ describe('useCreateCashPaymentOrder', () => {
         expect(__mockWidget.createCashPaymentOrder).toHaveBeenCalledWith(
           expect.objectContaining({
             payWayCode: method,
-          })
+          }),
         );
       }
     });

@@ -4,9 +4,9 @@ import '@testing-library/jest-dom';
 import { WalletConnectPanel } from '../../src/components/WalletConnectPanel';
 
 // Mocks are configured via moduleNameMapper in jest.config.js
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const dynamicMock = require('@dynamic-labs/sdk-react-core');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const suiMock = require('@dynamic-labs/sui');
 
 describe('WalletConnectPanel', () => {
@@ -132,12 +132,7 @@ describe('WalletConnectPanel', () => {
     });
 
     it('initiates payment when pay button is clicked', async () => {
-      render(
-        <WalletConnectPanel
-          {...defaultProps}
-          onPaymentComplete={mockOnPaymentComplete}
-        />
-      );
+      render(<WalletConnectPanel {...defaultProps} onPaymentComplete={mockOnPaymentComplete} />);
 
       fireEvent.click(screen.getByText(/Pay with Slush/i));
 
@@ -238,12 +233,7 @@ describe('WalletConnectPanel', () => {
     });
 
     it('calls onPaymentComplete with transaction digest on success', async () => {
-      render(
-        <WalletConnectPanel
-          {...defaultProps}
-          onPaymentComplete={mockOnPaymentComplete}
-        />
-      );
+      render(<WalletConnectPanel {...defaultProps} onPaymentComplete={mockOnPaymentComplete} />);
 
       fireEvent.click(screen.getByText(/Pay with Slush/i));
 
@@ -257,19 +247,14 @@ describe('WalletConnectPanel', () => {
 
       mockSuiClient.getCoins.mockResolvedValue({ data: [] });
 
-      render(
-        <WalletConnectPanel
-          {...defaultProps}
-          onPaymentComplete={mockOnPaymentComplete}
-        />
-      );
+      render(<WalletConnectPanel {...defaultProps} onPaymentComplete={mockOnPaymentComplete} />);
 
       fireEvent.click(screen.getByText(/Pay with Slush/i));
 
       await waitFor(() => {
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           '[WalletConnectButton] Payment failed:',
-          expect.any(Error)
+          expect.any(Error),
         );
       });
 
@@ -283,12 +268,7 @@ describe('WalletConnectPanel', () => {
 
       suiMock.isSuiWallet.mockReturnValue(false);
 
-      render(
-        <WalletConnectPanel
-          {...defaultProps}
-          onPaymentComplete={mockOnPaymentComplete}
-        />
-      );
+      render(<WalletConnectPanel {...defaultProps} onPaymentComplete={mockOnPaymentComplete} />);
 
       fireEvent.click(screen.getByText(/Pay with Slush/i));
 
@@ -297,7 +277,7 @@ describe('WalletConnectPanel', () => {
           '[WalletConnectButton] Payment failed:',
           expect.objectContaining({
             message: 'Wallet not connected or not compatible',
-          })
+          }),
         );
       });
 
@@ -311,12 +291,7 @@ describe('WalletConnectPanel', () => {
 
       mockPrimaryWallet.getSuiClient.mockResolvedValue(null);
 
-      render(
-        <WalletConnectPanel
-          {...defaultProps}
-          onPaymentComplete={mockOnPaymentComplete}
-        />
-      );
+      render(<WalletConnectPanel {...defaultProps} onPaymentComplete={mockOnPaymentComplete} />);
 
       fireEvent.click(screen.getByText(/Pay with Slush/i));
 
@@ -325,7 +300,7 @@ describe('WalletConnectPanel', () => {
           '[WalletConnectButton] Payment failed:',
           expect.objectContaining({
             message: 'Failed to get Sui client',
-          })
+          }),
         );
       });
 

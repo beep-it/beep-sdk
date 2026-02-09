@@ -16,7 +16,6 @@ Object.assign(navigator, {
 // Mock window.open
 window.open = jest.fn();
 
-
 // Mock console.error to track error logging in tests
 const originalConsoleError = console.error;
 beforeAll(() => {

@@ -5,7 +5,7 @@ import { DynamicWalletProvider } from '../../src/components/DynamicWalletProvide
 import { createWrapper } from '../utils/testUtils';
 
 // Mocks are configured via moduleNameMapper in jest.config.js
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('DynamicWalletProvider', () => {
@@ -27,7 +27,7 @@ describe('DynamicWalletProvider', () => {
       <DynamicWalletProvider {...defaultProps}>
         <div>Child content</div>
       </DynamicWalletProvider>,
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper() },
     );
 
     expect(screen.getByText('Child content')).toBeInTheDocument();
@@ -38,7 +38,7 @@ describe('DynamicWalletProvider', () => {
       <DynamicWalletProvider {...defaultProps}>
         <div>Loaded child</div>
       </DynamicWalletProvider>,
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper() },
     );
 
     await waitFor(() => {
@@ -51,7 +51,7 @@ describe('DynamicWalletProvider', () => {
       <DynamicWalletProvider {...defaultProps}>
         <div>Test</div>
       </DynamicWalletProvider>,
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper() },
     );
 
     await waitFor(() => {
@@ -67,7 +67,7 @@ describe('DynamicWalletProvider', () => {
       <DynamicWalletProvider {...defaultProps}>
         <div>Fallback child</div>
       </DynamicWalletProvider>,
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper() },
     );
 
     // Children should still render even without environment ID
@@ -84,7 +84,7 @@ describe('DynamicWalletProvider', () => {
       <DynamicWalletProvider {...defaultProps}>
         <div>Error child</div>
       </DynamicWalletProvider>,
-      { wrapper: createWrapper() }
+      { wrapper: createWrapper() },
     );
 
     // Children should still render even on error

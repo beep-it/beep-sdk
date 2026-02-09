@@ -2,7 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { useGeneratePaymentQuote } from '../../src/hooks/useGeneratePaymentQuote';
 import { createWrapper } from '../utils/testUtils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('useGeneratePaymentQuote', () => {
@@ -33,10 +33,9 @@ describe('useGeneratePaymentQuote', () => {
 
   describe('basic functionality', () => {
     it('fetches payment quote when amount and walletAddress are provided', async () => {
-      const { result } = renderHook(
-        () => useGeneratePaymentQuote(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGeneratePaymentQuote(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -65,7 +64,7 @@ describe('useGeneratePaymentQuote', () => {
     it('does not fetch when amount is empty', async () => {
       const { result } = renderHook(
         () => useGeneratePaymentQuote({ ...defaultProps, amount: '' }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       // Give some time for any potential fetch
@@ -78,7 +77,7 @@ describe('useGeneratePaymentQuote', () => {
     it('does not fetch when walletAddress is empty', async () => {
       const { result } = renderHook(
         () => useGeneratePaymentQuote({ ...defaultProps, walletAddress: '' }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       // Give some time for any potential fetch
@@ -99,10 +98,9 @@ describe('useGeneratePaymentQuote', () => {
     });
 
     it('refetches every 15 seconds', async () => {
-      const { result } = renderHook(
-        () => useGeneratePaymentQuote(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGeneratePaymentQuote(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       // Wait for initial fetch
       await waitFor(() => {
@@ -118,7 +116,9 @@ describe('useGeneratePaymentQuote', () => {
 
       // Should have made another call
       await waitFor(() => {
-        expect(__mockWidget.generatePaymentQuote.mock.calls.length).toBeGreaterThan(initialCallCount);
+        expect(__mockWidget.generatePaymentQuote.mock.calls.length).toBeGreaterThan(
+          initialCallCount,
+        );
       });
     });
   });
@@ -129,7 +129,7 @@ describe('useGeneratePaymentQuote', () => {
 
       const { result: result1 } = renderHook(
         () => useGeneratePaymentQuote({ ...defaultProps, amount: '10.00' }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {
@@ -138,7 +138,7 @@ describe('useGeneratePaymentQuote', () => {
 
       const { result: result2 } = renderHook(
         () => useGeneratePaymentQuote({ ...defaultProps, amount: '20.00' }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {
@@ -147,10 +147,10 @@ describe('useGeneratePaymentQuote', () => {
 
       // Each unique parameter combination should trigger a separate API call
       expect(__mockWidget.generatePaymentQuote).toHaveBeenCalledWith(
-        expect.objectContaining({ amount: '10.00' })
+        expect.objectContaining({ amount: '10.00' }),
       );
       expect(__mockWidget.generatePaymentQuote).toHaveBeenCalledWith(
-        expect.objectContaining({ amount: '20.00' })
+        expect.objectContaining({ amount: '20.00' }),
       );
     });
   });
@@ -164,10 +164,9 @@ describe('useGeneratePaymentQuote', () => {
         supportedPaymentMethods: [],
       });
 
-      const { result } = renderHook(
-        () => useGeneratePaymentQuote(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGeneratePaymentQuote(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -201,10 +200,9 @@ describe('useGeneratePaymentQuote', () => {
         supportedPaymentMethods: paymentMethods,
       });
 
-      const { result } = renderHook(
-        () => useGeneratePaymentQuote(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGeneratePaymentQuote(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -220,10 +218,9 @@ describe('useGeneratePaymentQuote', () => {
     it('handles API errors', async () => {
       __mockWidget.generatePaymentQuote.mockRejectedValue(new Error('Quote generation failed'));
 
-      const { result } = renderHook(
-        () => useGeneratePaymentQuote(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useGeneratePaymentQuote(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.error).toBeDefined();

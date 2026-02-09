@@ -33,11 +33,7 @@ export function createWrapper(queryClient?: QueryClient) {
   const client = queryClient ?? createTestQueryClient();
 
   return function Wrapper({ children }: WrapperProps) {
-    return (
-      <QueryClientProvider client={client}>
-        {children}
-      </QueryClientProvider>
-    );
+    return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
   };
 }
 
@@ -46,7 +42,7 @@ export function createWrapper(queryClient?: QueryClient) {
  */
 export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'> & { queryClient?: QueryClient }
+  options?: Omit<RenderOptions, 'wrapper'> & { queryClient?: QueryClient },
 ) {
   const { queryClient, ...renderOptions } = options ?? {};
   const Wrapper = createWrapper(queryClient);

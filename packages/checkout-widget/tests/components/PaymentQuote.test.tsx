@@ -6,7 +6,7 @@ import { createWrapper } from '../utils/testUtils';
 import { WidgetSteps } from '../../src/constants';
 
 // Mocks are configured via moduleNameMapper in jest.config.js
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('PaymentQuote', () => {
@@ -148,7 +148,9 @@ describe('PaymentQuote', () => {
 
       // Should have made another call via react-query refetch
       await waitFor(() => {
-        expect(__mockWidget.generatePaymentQuote.mock.calls.length).toBeGreaterThan(initialCallCount);
+        expect(__mockWidget.generatePaymentQuote.mock.calls.length).toBeGreaterThan(
+          initialCallCount,
+        );
       });
     });
 

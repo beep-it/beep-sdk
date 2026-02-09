@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useDynamicEnvironment } from '../../src/hooks/useDynamicEnvironment';
 import { createWrapper } from '../utils/testUtils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('useDynamicEnvironment', () => {
@@ -20,10 +20,9 @@ describe('useDynamicEnvironment', () => {
 
   describe('successful fetch', () => {
     it('fetches environment ID on mount', async () => {
-      const { result } = renderHook(
-        () => useDynamicEnvironment(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useDynamicEnvironment(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       // Initially loading
       expect(result.current.isLoading).toBe(true);
@@ -41,10 +40,9 @@ describe('useDynamicEnvironment', () => {
         environmentId: 'custom-env-id',
       });
 
-      const { result } = renderHook(
-        () => useDynamicEnvironment(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useDynamicEnvironment(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -56,10 +54,9 @@ describe('useDynamicEnvironment', () => {
 
   describe('query caching', () => {
     it('uses Infinity staleTime for caching', async () => {
-      const { result, rerender } = renderHook(
-        () => useDynamicEnvironment(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result, rerender } = renderHook(() => useDynamicEnvironment(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -79,7 +76,7 @@ describe('useDynamicEnvironment', () => {
 
       const { result: result1 } = renderHook(
         () => useDynamicEnvironment({ publishableKey: 'key1', serverUrl: 'url1' }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {
@@ -89,7 +86,7 @@ describe('useDynamicEnvironment', () => {
       // Different keys should make a new request
       const { result: result2 } = renderHook(
         () => useDynamicEnvironment({ publishableKey: 'key2', serverUrl: 'url2' }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {
@@ -106,14 +103,16 @@ describe('useDynamicEnvironment', () => {
       const error = new Error('Network error');
       __mockWidget.getDynamicEnv.mockRejectedValue(error);
 
-      const { result } = renderHook(
-        () => useDynamicEnvironment(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useDynamicEnvironment(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
-      await waitFor(() => {
-        expect(result.current.error).toBeDefined();
-      }, { timeout: 5000 });
+      await waitFor(
+        () => {
+          expect(result.current.error).toBeDefined();
+        },
+        { timeout: 5000 },
+      );
 
       expect(result.current.data).toBeUndefined();
     });
@@ -125,10 +124,9 @@ describe('useDynamicEnvironment', () => {
         environmentId: null,
       });
 
-      const { result } = renderHook(
-        () => useDynamicEnvironment(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => useDynamicEnvironment(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);

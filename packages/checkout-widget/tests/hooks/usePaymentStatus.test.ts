@@ -2,7 +2,7 @@ import { renderHook, waitFor, act } from '@testing-library/react';
 import { usePaymentStatus } from '../../src/hooks/usePaymentStatus';
 import { createWrapper } from '../utils/testUtils';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { __mockWidget } = require('@beep-it/sdk-core');
 
 describe('usePaymentStatus', () => {
@@ -23,10 +23,9 @@ describe('usePaymentStatus', () => {
 
   describe('basic functionality', () => {
     it('fetches payment status when enabled', async () => {
-      const { result } = renderHook(
-        () => usePaymentStatus(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentStatus(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -40,10 +39,9 @@ describe('usePaymentStatus', () => {
     });
 
     it('does not fetch when disabled', async () => {
-      const { result } = renderHook(
-        () => usePaymentStatus({ ...defaultProps, enabled: false }),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentStatus({ ...defaultProps, enabled: false }), {
+        wrapper: createWrapper(),
+      });
 
       // Give some time for any potential fetch
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -55,7 +53,7 @@ describe('usePaymentStatus', () => {
     it('does not fetch when referenceKey is null', async () => {
       const { result } = renderHook(
         () => usePaymentStatus({ ...defaultProps, referenceKey: null }),
-        { wrapper: createWrapper() }
+        { wrapper: createWrapper() },
       );
 
       // Give some time for any potential fetch
@@ -81,10 +79,9 @@ describe('usePaymentStatus', () => {
         status: 'processing',
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentStatus(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       // Wait for initial fetch
       await waitFor(() => {
@@ -110,10 +107,9 @@ describe('usePaymentStatus', () => {
         status: 'completed',
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentStatus(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -136,10 +132,9 @@ describe('usePaymentStatus', () => {
         status: 'failed',
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentStatus(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -162,10 +157,9 @@ describe('usePaymentStatus', () => {
         status: 'pending',
       });
 
-      const { result } = renderHook(
-        () => usePaymentStatus(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentStatus(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -189,7 +183,7 @@ describe('usePaymentStatus', () => {
 
       const { result: result1 } = renderHook(
         () => usePaymentStatus({ ...defaultProps, referenceKey: 'ref-1' }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {
@@ -198,7 +192,7 @@ describe('usePaymentStatus', () => {
 
       const { result: result2 } = renderHook(
         () => usePaymentStatus({ ...defaultProps, referenceKey: 'ref-2' }),
-        { wrapper }
+        { wrapper },
       );
 
       await waitFor(() => {
@@ -215,10 +209,9 @@ describe('usePaymentStatus', () => {
     it('does not retry on error', async () => {
       __mockWidget.getPaymentStatus.mockRejectedValue(new Error('API Error'));
 
-      const { result } = renderHook(
-        () => usePaymentStatus(defaultProps),
-        { wrapper: createWrapper() }
-      );
+      const { result } = renderHook(() => usePaymentStatus(defaultProps), {
+        wrapper: createWrapper(),
+      });
 
       await waitFor(() => {
         expect(result.current.error).toBeDefined();
