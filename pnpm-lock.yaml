@@ -6,7 +6,7 @@ settings:
 
 overrides:
   valibot: 1.2.0
-  axios: 1.12.0
+  axios: 1.13.5
   esbuild: 0.25.0
   js-yaml: 4.1.1
   body-parser: 2.2.1
@@ -56,8 +56,8 @@ importers:
         specifier: 4.60.0
         version: 4.60.0(bufferutil@4.1.0)(fastestsmallesttextencoderdecoder@1.0.22)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.41.2(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.0.5))
       '@mysten/sui':
-        specifier: 1.24.0
-        version: 1.24.0(typescript@5.9.3)
+        specifier: 1.45.2
+        version: 1.45.2(typescript@5.9.3)
       '@tanstack/react-query':
         specifier: ^5.90.20
         version: 5.90.20(react@18.3.1)
@@ -175,8 +175,8 @@ importers:
   packages/core:
     dependencies:
       axios:
-        specifier: 1.12.0
-        version: 1.12.0
+        specifier: 1.13.5
+        version: 1.13.5
     devDependencies:
       '@types/jest':
         specifier: ^29.5.14
@@ -195,7 +195,7 @@ importers:
         version: 8.54.0(eslint@8.57.1)(typescript@5.9.3)
       axios-mock-adapter:
         specifier: ^1.22.0
-        version: 1.22.0(axios@1.12.0)
+        version: 1.22.0(axios@1.13.5)
       eslint:
         specifier: ^8.57.0
         version: 8.57.1
@@ -1037,15 +1037,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@mysten/bcs@1.5.0':
-    resolution: {integrity: sha512-v39dm5oNfKYMAf2CVI+L0OaJiG9RVXsjqPM4BwTKcHNCZOvr35IIewGtXtWXsI67SQU2TRq8lhQzeibdiC/CNg==}
-
   '@mysten/bcs@1.9.2':
     resolution: {integrity: sha512-kBk5xrxV9OWR7i+JhL/plQrgQ2/KJhB2pB5gj+w6GXhbMQwS3DPpOvi/zN0Tj84jwPvHMllpEl0QHj6ywN7/eQ==}
-
-  '@mysten/sui@1.24.0':
-    resolution: {integrity: sha512-lmJJLM7eMrxM6Qpr6cdLr07UBXlxCM7SJjfcDO7NGrqZTx7/3TD2QhhRpDx0fS2tODxrNwQxCoHPApLVPjokIA==}
-    engines: {node: '>=18'}
 
   '@mysten/sui@1.45.2':
     resolution: {integrity: sha512-gftf7fNpFSiXyfXpbtP2afVEnhc7p2m/MEYc/SO5pov92dacGKOpQIF7etZsGDI1Wvhv+dpph+ulRNpnYSs7Bg==}
@@ -1684,10 +1677,10 @@ packages:
   axios-mock-adapter@1.22.0:
     resolution: {integrity: sha512-dmI0KbkyAhntUR05YY96qg2H6gg0XMl2+qTW0xmYg6Up+BFBAJYRLROMXRdDEL06/Wqwa0TJThAYvFtSFdRCZw==}
     peerDependencies:
-      axios: 1.12.0
+      axios: 1.13.5
 
-  axios@1.12.0:
-    resolution: {integrity: sha512-oXTDccv8PcfjZmPGlWsPSwtOJCZ/b6W5jAMCNcfwJbCzDckwG0jrYJFaWH1yvivfCXjVzV/SPDEhMB3Q+DSurg==}
+  axios@1.13.5:
+    resolution: {integrity: sha512-cz4ur7Vb0xS4/KUN0tPWe44eqxrIu31me+fbang3ijiNscE129POzipJJA6zniq2C/Z6sJCjMimjS8Lc/GAs8Q==}
 
   babel-jest@29.7.0:
     resolution: {integrity: sha512-BrvGY3xZSwEcCzKvKsCi2GgHqDqsYkOP4/by5xCgIwGXQxIEh+8ew3gmrE1y7XRR6LHZIj6yLYnUi/mm2KXKBg==}
@@ -4518,7 +4511,7 @@ snapshots:
 
   '@beep-it/sdk-core@0.1.7':
     dependencies:
-      axios: 1.12.0
+      axios: 1.13.5
     transitivePeerDependencies:
       - debug
 
@@ -4587,7 +4580,7 @@ snapshots:
       '@dynamic-labs/sdk-api-core': 0.0.764
       '@noble/hashes': 1.7.1
       argon2id: 1.0.1
-      axios: 1.12.0
+      axios: 1.13.5
       http-errors: 2.0.0
       semver: 7.7.4
       uuid: 11.1.0
@@ -4601,7 +4594,7 @@ snapshots:
       '@dynamic-labs/sdk-api-core': 0.0.818
       '@noble/hashes': 1.7.1
       argon2id: 1.0.1
-      axios: 1.12.0
+      axios: 1.13.5
       http-errors: 2.0.0
       semver: 7.7.4
       uuid: 11.1.0
@@ -4613,7 +4606,7 @@ snapshots:
   '@dynamic-labs-wallet/core@0.0.167':
     dependencies:
       '@dynamic-labs/sdk-api-core': 0.0.764
-      axios: 1.12.0
+      axios: 1.13.5
       uuid: 11.1.0
     transitivePeerDependencies:
       - debug
@@ -4623,7 +4616,7 @@ snapshots:
       '@dynamic-labs-wallet/forward-mpc-client': 0.1.3(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@dynamic-labs/logger': 4.60.0
       '@dynamic-labs/sdk-api-core': 0.0.818
-      axios: 1.12.0
+      axios: 1.13.5
       http-errors: 2.0.0
       uuid: 11.1.0
     transitivePeerDependencies:
@@ -4636,7 +4629,7 @@ snapshots:
       '@dynamic-labs-wallet/forward-mpc-client': 0.2.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@dynamic-labs/logger': 4.60.0
       '@dynamic-labs/sdk-api-core': 0.0.828
-      axios: 1.12.0
+      axios: 1.13.5
       http-errors: 2.0.0
       uuid: 11.1.0
     transitivePeerDependencies:
@@ -4649,7 +4642,7 @@ snapshots:
       '@dynamic-labs-wallet/forward-mpc-client': 0.2.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@dynamic-labs/logger': 4.60.0
       '@dynamic-labs/sdk-api-core': 0.0.864
-      axios: 1.12.0
+      axios: 1.13.5
       http-errors: 2.0.0
       uuid: 11.1.0
     transitivePeerDependencies:
@@ -5465,32 +5458,10 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@mysten/bcs@1.5.0':
-    dependencies:
-      '@scure/base': 1.2.6
-
   '@mysten/bcs@1.9.2':
     dependencies:
       '@mysten/utils': 0.2.0
       '@scure/base': 1.2.6
-
-  '@mysten/sui@1.24.0(typescript@5.9.3)':
-    dependencies:
-      '@graphql-typed-document-node/core': 3.2.0(graphql@16.12.0)
-      '@mysten/bcs': 1.5.0
-      '@noble/curves': 1.9.7
-      '@noble/hashes': 1.8.0
-      '@scure/base': 1.2.6
-      '@scure/bip32': 1.7.0
-      '@scure/bip39': 1.6.0
-      gql.tada: 1.9.0(graphql@16.12.0)(typescript@5.9.3)
-      graphql: 16.12.0
-      poseidon-lite: 0.2.1
-      valibot: 1.2.0(typescript@5.9.3)
-    transitivePeerDependencies:
-      - '@gql.tada/svelte-support'
-      - '@gql.tada/vue-support'
-      - typescript
 
   '@mysten/sui@1.45.2(typescript@5.9.3)':
     dependencies:
@@ -6194,13 +6165,13 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  axios-mock-adapter@1.22.0(axios@1.12.0):
+  axios-mock-adapter@1.22.0(axios@1.13.5):
     dependencies:
-      axios: 1.12.0
+      axios: 1.13.5
       fast-deep-equal: 3.1.3
       is-buffer: 2.0.5
 
-  axios@1.12.0:
+  axios@1.13.5:
     dependencies:
       follow-redirects: 1.15.11
       form-data: 4.0.5

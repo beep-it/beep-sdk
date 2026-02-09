@@ -72,7 +72,7 @@
     "@beep-it/sdk-core": "workspace:^",
     "@dynamic-labs/sdk-react-core": "4.60.0",
     "@dynamic-labs/sui": "4.60.0",
-    "@mysten/sui": "1.24.0",
+    "@mysten/sui": "1.45.2",
     "@tanstack/react-query": "^5.90.20",
     "qrcode": "^1.5.3",
     "qrcode.react": "^4.2.0",
