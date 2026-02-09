@@ -117,7 +117,7 @@ export interface RequestPaymentPayload {
    * Custom metadata for your records
    * @description This data is returned in webhooks and payment queries
    */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   /**
    * Webhook URL for payment notifications
@@ -202,7 +202,7 @@ export interface PaymentSuccessResponse {
   invoiceId?: UUID;
 
   /** Custom metadata passed during payment creation */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -333,7 +333,7 @@ export interface IssuePaymentPayload {
     /** Client application ID */
     clientId?: string;
     /** Additional custom fields */
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

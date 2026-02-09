@@ -168,7 +168,7 @@ export interface CreateProductPayload {
   /**
    * Custom metadata
    */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 
   /**
    * Product tags for search/filtering

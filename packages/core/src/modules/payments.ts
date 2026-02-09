@@ -1,4 +1,4 @@
-import { AxiosError, AxiosInstance } from 'axios';
+import { AxiosInstance, isAxiosError } from 'axios';
 import {
   BeepPurchaseAsset,
   CheckPaymentStatusPayload,
@@ -105,11 +105,11 @@ export class PaymentsModule {
           );
           last = resp.data.data;
         } catch (err) {
-          const ax = err as AxiosError<any>;
-          const status = ax.response?.status;
+          const status = isAxiosError(err) ? err.response?.status : undefined;
           // Normalize 402 (still pending)
-          if (status === 402) {
-            last = ax.response?.data?.data ?? null;
+          if (status === 402 && isAxiosError(err)) {
+            const body = err.response?.data as Record<string, unknown> | undefined;
+            last = (body?.data as PaymentRequestData) ?? null;
           } else {
             // Fatal classes: 400/401/403/404/422 ⇒ abort early
             if (status && [400, 401, 403, 404, 422].includes(status)) {
@@ -194,8 +194,9 @@ export class PaymentsModule {
     } catch (error) {
       // Normalize HTTP 402 Payment Required by returning its payload so callers
       // can proceed with showing the paymentUrl/qrCode and keep polling.
-      if ((error as any).response?.status === 402) {
-        return (error as any).response?.data?.data;
+      if (isAxiosError(error) && error.response?.status === 402) {
+        const body = error.response.data as Record<string, unknown>;
+        return (body?.data as PaymentRequestData) ?? null;
       }
       console.error('Failed to request and purchase asset:', error);
       return null;
