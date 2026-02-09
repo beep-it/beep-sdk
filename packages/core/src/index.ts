@@ -47,7 +47,7 @@ export interface BeepClientOptions {
  * // Create a payment request
  * const payment = await beep.requestPayment({
  *   amount: 10.00,
- *   token: SupportedToken.USDT,
+ *   token: SupportedToken.USDC,
  *   description: 'Premium subscription'
  * });
  *

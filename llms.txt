@@ -40,7 +40,7 @@ Public Widget Endpoints (CORS-open)
   - Body: { publishableKey, assets, paymentLabel?, generateQrCode? }
   - assets accepts a mix of:
     - { assetId: string, quantity: number } // existing product UUID
-    - { name: string, price: string, quantity?: number, token?: 'USDT'|'USDC', description?: string } // on-the-fly product (server persists product)
+    - { name: string, price: string, quantity?: number, token?: 'USDC', description?: string } // on-the-fly product (server persists product)
   - Response: { referenceKey, paymentUrl, qrCode?, amount, expiresAt, status }
 
 - GET /v1/widget/payment-status/:referenceKey
@@ -130,7 +130,7 @@ Important Notes
 
 ## 💡 Key Concepts
 - **One-time payments only** (no subscriptions/recurring)
-- **SUI/stablecoin transfers** (USDC, USDT)
+- **SUI/stablecoin transfers** (USDC)
 - **QR code integration** via BEEP payment standard
 - **Real-time polling** for payment confirmation
 - **Browser-safe** with publishable keys

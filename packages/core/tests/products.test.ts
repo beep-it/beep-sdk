@@ -27,8 +27,8 @@ describe('Products Module', () => {
       name: 'Test Product',
       description: 'A test product',
       price: '9.99',
-      token: SupportedToken.USDT,
-      splTokenAddress: TOKEN_ADDRESSES[SupportedToken.USDT],
+      token: SupportedToken.USDC,
+      splTokenAddress: TOKEN_ADDRESSES[SupportedToken.USDC],
       isSubscription: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -40,7 +40,7 @@ describe('Products Module', () => {
       name: 'Test Product',
       description: 'A test product',
       price: '9.99',
-      token: SupportedToken.USDT,
+      token: SupportedToken.USDC,
       isSubscription: false,
     });
 
@@ -49,7 +49,7 @@ describe('Products Module', () => {
     // Verify the request
     expect(mockAxios.history.post.length).toBe(1);
     const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.token).toBe(SupportedToken.USDT);
+    expect(requestData.token).toBe(SupportedToken.USDC);
   });
 
   it('createProduct creates a subscription product', async () => {
@@ -64,7 +64,7 @@ describe('Products Module', () => {
       name: 'Premium Subscription',
       description: 'Monthly subscription',
       price: '14.99',
-      token: SupportedToken.USDT,
+      token: SupportedToken.USDC,
       isSubscription: true,
     });
 
@@ -119,11 +119,11 @@ describe('Products Module', () => {
     mockAxios.onPut('/v1/products/prod_test123').reply(200, { id: 'prod_test123' });
 
     await client.products.updateProduct('prod_test123', {
-      token: SupportedToken.USDT,
+      token: SupportedToken.USDC,
     });
 
     const requestData = JSON.parse(mockAxios.history.put[0].data);
-    expect(requestData.splTokenAddress).toBe(TOKEN_ADDRESSES[SupportedToken.USDT]);
+    expect(requestData.splTokenAddress).toBe(TOKEN_ADDRESSES[SupportedToken.USDC]);
   });
 
   it('deleteProduct deletes a product', async () => {

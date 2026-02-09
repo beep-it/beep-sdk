@@ -3,9 +3,8 @@
  * Each token represents a different cryptocurrency that can be used for payments
  */
 export enum SupportedToken {
-  USDC = 'USDC', // Coming soon
-  /** Tether USD - A USD-pegged stablecoin */
-  USDT = 'USDT',
+  /** USD Coin - A USD-pegged stablecoin */
+  USDC = 'USDC',
 }
 
 /**
@@ -14,17 +13,15 @@ export enum SupportedToken {
  */
 export const TOKEN_ADDRESSES: Record<SupportedToken, string> = {
   [SupportedToken.USDC]: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T', // USDC token address
-  [SupportedToken.USDT]: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT token address
 };
 
 /**
  * Decimal precision for each supported token
  * Used for converting between human-readable decimal amounts and blockchain base units
- * For example: 1.0 USDT = 1,000,000 base units (10^6)
+ * For example: 1.0 USDC = 1,000,000 base units (10^6)
  */
 export const TOKEN_DECIMALS: Record<SupportedToken, number> = {
   [SupportedToken.USDC]: 6, // USDC uses 6 decimal places
-  [SupportedToken.USDT]: 6, // USDT uses 6 decimal places
 };
 
 /**
@@ -40,8 +37,8 @@ export class TokenUtils {
    *
    * @example
    * ```typescript
-   * const address = TokenUtils.getTokenAddress(SupportedToken.USDT);
-   * console.log(address); // 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'
+   * const address = TokenUtils.getTokenAddress(SupportedToken.USDC);
+   * console.log(address); // 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T'
    * ```
    */
   static getTokenAddress(token: SupportedToken): string {
@@ -56,8 +53,8 @@ export class TokenUtils {
    *
    * @example
    * ```typescript
-   * const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
-   * console.log(token); // SupportedToken.USDT
+   * const token = TokenUtils.getTokenFromAddress('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T');
+   * console.log(token); // SupportedToken.USDC
    * ```
    */
   static getTokenFromAddress(address: string): SupportedToken | null {
@@ -93,7 +90,7 @@ export class TokenUtils {
    *
    * @example
    * ```typescript
-   * const userInput = 'USDT';
+   * const userInput = 'USDC';
    * if (TokenUtils.isTokenSupported(userInput)) {
    *   // userInput is now typed as SupportedToken
    *   const address = TokenUtils.getTokenAddress(userInput);
@@ -107,7 +104,7 @@ export class TokenUtils {
   /**
    * Returns the default token for operations when no token is specified
    *
-   * @returns The default SupportedToken (currently USDT)
+   * @returns The default SupportedToken (currently USDC)
    *
    * @example
    * ```typescript

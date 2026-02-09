@@ -18,7 +18,7 @@ Quickstarts
 ```ts
 import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
 const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.justbeep.it' });
-const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
+const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDC });
 ```
 
 - Browser (public widget endpoints)
