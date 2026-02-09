@@ -6,7 +6,7 @@
 const mockWidget = {
   createPaymentSession: jest.fn().mockResolvedValue({
     referenceKey: 'mock-ref-key',
-    paymentUrl: 'solana:mock-payment-url',
+    paymentUrl: 'sui:mock-payment-url',
     qrCode: 'data:image/png;base64,mockQrCode',
     amount: '25.00',
     expiresAt: new Date(Date.now() + 3600000).toISOString(),
@@ -75,7 +75,7 @@ const resetAllMocks = () => {
 const setDefaultResponses = () => {
   mockWidget.createPaymentSession.mockResolvedValue({
     referenceKey: 'mock-ref-key',
-    paymentUrl: 'solana:mock-payment-url',
+    paymentUrl: 'sui:mock-payment-url',
     qrCode: 'data:image/png;base64,mockQrCode',
     amount: '25.00',
     expiresAt: new Date(Date.now() + 3600000).toISOString(),

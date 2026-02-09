@@ -134,9 +134,6 @@ export class McpClientInternal {
   async _getAvailableWallets(): Promise<any> {
     return this.callTool('getAvailableWallets');
   }
-  async signSolanaTransaction(params: { walletId: string; transaction: any }): Promise<any> {
-    return this.callTool('signSolanaTransaction', params);
-  }
 }
 
 export const mcpClient = new McpClientInternal();

@@ -1,8 +1,8 @@
 /**
- * @fileoverview Beep Checkout Widget - Embedded Solana payment interface
+ * @fileoverview Beep Checkout Widget - Embedded SUI payment interface
  *
  * A React component library for integrating BEEP payment functionality into web applications.
- * Provides a complete Solana payment interface with QR code generation, status tracking, and customization options.
+ * Provides a complete SUI payment interface with QR code generation, status tracking, and customization options.
  *
  * @example Basic usage with existing products
  * ```tsx
@@ -14,7 +14,7 @@
  *       publishableKey="beep_pk_your_key"
  *       primaryColor="#007bff"
  *       labels={{
- *         scanQr: "Scan to pay with Solana wallet",
+ *         scanQr: "Scan to pay with SUI wallet",
  *         paymentLabel: "Your Store Name"
  *       }}
  *       assets={[{

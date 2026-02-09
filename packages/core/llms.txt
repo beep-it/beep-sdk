@@ -36,7 +36,7 @@ const { paid } = await client.widget.waitForPaid({ referenceKey: session.referen
 
 Modules
 - products: create/get/list/update/delete (server only)
-- payments: requestAndPurchaseAsset, signSolanaTransaction (server only)
+- payments: requestAndPurchaseAsset (server only)
   - requestAndPurchaseAsset → `POST /v1/payments/request` using the invoice creation (HTTP 402) pattern.
 - invoices: create/get/list/delete (server only)
 - widget: createPaymentSession, getPaymentStatus (browser)

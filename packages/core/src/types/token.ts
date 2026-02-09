@@ -1,5 +1,5 @@
 /**
- * Enumeration of SPL tokens supported by the BEEP payment platform
+ * Enumeration of SUI tokens supported by the BEEP payment platform
  * Each token represents a different cryptocurrency that can be used for payments
  */
 export enum SupportedToken {
@@ -9,12 +9,12 @@ export enum SupportedToken {
 }
 
 /**
- * Mapping of supported token enums to their corresponding SPL token addresses on Solana
+ * Mapping of supported token enums to their corresponding token addresses on SUI
  * These addresses are used for blockchain transactions and token identification
  */
 export const TOKEN_ADDRESSES: Record<SupportedToken, string> = {
-  [SupportedToken.USDC]: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T', // USDC mint address
-  [SupportedToken.USDT]: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT mint address
+  [SupportedToken.USDC]: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T', // USDC token address
+  [SupportedToken.USDT]: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT token address
 };
 
 /**
@@ -29,14 +29,14 @@ export const TOKEN_DECIMALS: Record<SupportedToken, number> = {
 
 /**
  * Utility class providing helper methods for token operations
- * Handles conversions between token enums and SPL addresses, decimal calculations, and validation
+ * Handles conversions between token enums and token addresses, decimal calculations, and validation
  */
 export class TokenUtils {
   /**
-   * Retrieves the SPL token address for a supported token
+   * Retrieves the token address for a supported token
    *
    * @param token - The supported token enum value
-   * @returns The corresponding SPL token address on Solana
+   * @returns The corresponding token address on SUI
    *
    * @example
    * ```typescript
@@ -49,9 +49,9 @@ export class TokenUtils {
   }
 
   /**
-   * Performs reverse lookup to find token enum from SPL address
+   * Performs reverse lookup to find token enum from token address
    *
-   * @param address - The SPL token address to look up
+   * @param address - The token address to look up
    * @returns The corresponding SupportedToken enum value, or null if not found
    *
    * @example

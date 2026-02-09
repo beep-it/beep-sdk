@@ -101,7 +101,7 @@ export interface RequestPaymentPayload {
   token?: SupportedToken;
 
   /**
-   * Custom SPL token address
+   * Custom token address
    * @description Alternative to using the token enum
    * @pattern ^[1-9A-HJ-NP-Za-km-z]{32,44}$
    */
@@ -146,7 +146,7 @@ export interface PaymentRequestData {
   /**
    * Deep link URL for payment
    * @format uri
-   * @example "solana:pay?recipient=..."
+   * @example "sui:pay?recipient=..."
    */
   paymentUrl: string;
 

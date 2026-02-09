@@ -41,7 +41,7 @@ export class InvoicesModule {
   async createInvoice(payload: CreateInvoicePayload): Promise<Invoice> {
     const requestPayload = { ...payload };
 
-    // Convert token enum to SPL address for API compatibility
+    // Convert token enum to token address for API compatibility
     if ('token' in requestPayload && !('splTokenAddress' in requestPayload)) {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(
         requestPayload.token as SupportedToken,

@@ -44,7 +44,7 @@ export interface RequestPaymentPayload {
    */
   token?: SupportedToken;
   /**
-   * SPL token address for custom tokens (alternative to using the token enum)
+   * Token address for custom tokens (alternative to using the token enum)
    * @remarks Use either `token` or `splTokenAddress`, not both
    */
   splTokenAddress?: string;
@@ -70,7 +70,7 @@ export interface PaymentRequestData {
   paymentUrl: string;
   /** The payment amount in decimal format */
   amount: number;
-  /** The SPL token address being used for this payment */
+  /** The token address being used for this payment */
   splTokenAddress: string;
   /** When this payment request expires and becomes invalid */
   expiresAt: Date;
@@ -88,38 +88,6 @@ export interface PaymentRequestData {
 export interface PaymentRequestPaidData {
   type: string;
   value: object[];
-}
-
-/**
- * Parameters required to create and sign a Solana transaction
- * Used for direct blockchain transaction processing
- */
-export interface SignSolanaTransactionParams {
-  /** Wallet address that will send the payment */
-  senderAddress: string;
-  /** Wallet address that will receive the payment */
-  recipientAddress: string;
-  /** The SPL token mint address for the token being transferred */
-  tokenMintAddress: string;
-  /** Amount to transfer in base units (not decimal) */
-  amount: number;
-  /** Number of decimal places for the token (e.g., USDT has 6 decimals) */
-  decimals: number;
-}
-
-/**
- * Response data from signing a Solana transaction
- * Contains the signed transaction ready for broadcast to the network
- */
-export interface SignSolanaTransactionData {
-  /** Base64-encoded signed transaction ready for broadcast */
-  signedTransaction: string;
-  /** Proof of payment data for verification */
-  proofOfPayment: string;
-  /** Associated invoice ID for this transaction */
-  invoiceId: string;
-  /** Current status of the associated invoice */
-  status: InvoiceStatus;
 }
 
 /**

@@ -108,7 +108,7 @@ function CheckoutPage() {
   return (
     <CheckoutWidget
       publishableKey="beep_pk_your_key"
-      labels={{ scanQr: 'Pay with Solana wallet' }}
+      labels={{ scanQr: 'Pay with SUI wallet' }}
       assets={[{ name: 'Premium Plan', price: '29.99' }]}
       primaryColor="#3b82f6"
     />

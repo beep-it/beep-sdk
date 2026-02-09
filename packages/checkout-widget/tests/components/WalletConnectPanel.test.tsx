@@ -21,7 +21,7 @@ describe('WalletConnectPanel', () => {
     paymentSetupData: {
       qrCode: 'data:image/png;base64,mockQr',
       referenceKey: 'ref-123',
-      paymentUrl: 'solana:url',
+      paymentUrl: 'sui:url',
       totalAmount: 25.5,
       isCashPaymentEligible: true,
       destinationAddress: 'dest-address-123',

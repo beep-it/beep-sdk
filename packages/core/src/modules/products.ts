@@ -52,7 +52,7 @@ export class ProductsModule {
   async createProduct(payload: CreateProductPayload): Promise<Product> {
     const requestPayload = { ...payload };
 
-    // Convert token enum to SPL address for API compatibility
+    // Convert token enum to token address for API compatibility
     if (requestPayload.token && !requestPayload.splTokenAddress) {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(requestPayload.token);
     }
@@ -138,7 +138,7 @@ export class ProductsModule {
   async updateProduct(productId: string, payload: UpdateProductPayload): Promise<Product> {
     const requestPayload = { ...payload };
 
-    // Convert token enum to SPL address for API compatibility
+    // Convert token enum to token address for API compatibility
     if (requestPayload.token && !requestPayload.splTokenAddress) {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(requestPayload.token);
     }
