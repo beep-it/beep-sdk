@@ -69,8 +69,7 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'data:image/png;base64,mockqrcode',
         referenceKey: 'test-ref',
-        paymentUrl:
-          'solana:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref',
+        paymentUrl: 'sui:9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM?amount=1&reference=test-ref',
         processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
         totalAmount: 1.156188, // Amount from the product pricing
       },
@@ -110,7 +109,7 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'data:image/png;base64,mockqrcode',
         referenceKey: 'test-ref',
-        paymentUrl: 'solana:test',
+        paymentUrl: 'sui:test',
         processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
         totalAmount: 0,
       },
@@ -133,7 +132,7 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'data:image/png;base64,mockqrcode',
         referenceKey: 'test-ref',
-        paymentUrl: 'solana:test',
+        paymentUrl: 'sui:test',
         processedAssets: [{ assetId: 'created-product-id', quantity: 1 }],
         totalAmount: 25.5, // Amount calculated from product pricing
       },
@@ -161,7 +160,7 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'data:image/png;base64,mockqrcode',
         referenceKey: 'test-ref',
-        paymentUrl: 'solana:test',
+        paymentUrl: 'sui:test',
         processedAssets: [
           { assetId: 'product-1-id', quantity: 1 },
           { assetId: 'product-2-id', quantity: 1 },
@@ -190,7 +189,7 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'data:image/png;base64,mockqrcode',
         referenceKey: 'test-ref',
-        paymentUrl: 'solana:test',
+        paymentUrl: 'sui:test',
         processedAssets: [
           { assetId: 'new-product-id', quantity: 1 },
           { assetId: 'existing-asset-id', quantity: 2 },
@@ -250,7 +249,7 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'test-qr',
         referenceKey: 'test-ref',
-        paymentUrl: 'solana:test',
+        paymentUrl: 'sui:test',
         processedAssets: [
           { assetId: 'p1', quantity: 1 },
           { assetId: 'p2', quantity: 1 },
@@ -272,7 +271,7 @@ describe('CheckoutWidget', () => {
       data: {
         qrCode: 'test-qr',
         referenceKey: 'test-ref',
-        paymentUrl: 'solana:test',
+        paymentUrl: 'sui:test',
         processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
         totalAmount: 1.156188, // Amount calculated from fetched product data
       },

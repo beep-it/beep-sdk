@@ -1,6 +1,6 @@
 # BEEP SDK Monorepo — AI Coding Assistant Guide
 
-**Purpose:** Comprehensive TypeScript SDK for Solana/stablecoin payments. One-time transfers only (no subscriptions). Use this file for quick orientation.
+**Purpose:** Comprehensive TypeScript SDK for SUI/stablecoin payments. One-time transfers only (no subscriptions). Use this file for quick orientation.
 
 ## 📦 Package Overview
 
@@ -11,7 +11,7 @@
 - **Install:** `npm install @beep-it/sdk-core`
 
 ### [@beep-it/checkout-widget](./packages/checkout-widget) - React Payment Component
-- **Drop-in React widget** for Solana payment processing
+- **Drop-in React widget** for SUI payment processing
 - **QR code generation** + real-time payment polling
 - **Zero CSS dependencies** (inline styling), customizable theming
 - **Install:** `npm install @beep-it/checkout-widget @beep-it/sdk-core`
@@ -40,7 +40,7 @@ Public Widget Endpoints (CORS-open)
   - Body: { publishableKey, assets, paymentLabel?, generateQrCode? }
   - assets accepts a mix of:
     - { assetId: string, quantity: number } // existing product UUID
-    - { name: string, price: string, quantity?: number, token?: 'USDT'|'USDC', description?: string } // on-the-fly product (server persists product)
+    - { name: string, price: string, quantity?: number, token?: 'USDC', description?: string } // on-the-fly product (server persists product)
   - Response: { referenceKey, paymentUrl, qrCode?, amount, expiresAt, status }
 
 - GET /v1/widget/payment-status/:referenceKey
@@ -54,7 +54,7 @@ import { CheckoutWidget } from '@beep-it/checkout-widget';
 
 <CheckoutWidget
   publishableKey="beep_pk_your_key"
-  labels={{ scanQr: 'Pay with Solana wallet', paymentLabel: 'My Store' }}
+  labels={{ scanQr: 'Pay with SUI wallet', paymentLabel: 'My Store' }}
   assets={[
     { assetId: 'existing-uuid', quantity: 1 },  // existing product
     { name: 'Custom Item', price: '12.50' }     // creates new product
@@ -130,8 +130,8 @@ Important Notes
 
 ## 💡 Key Concepts
 - **One-time payments only** (no subscriptions/recurring)
-- **Solana/stablecoin transfers** (USDC, USDT, SOL)
-- **QR code integration** via Solana Pay standard
+- **SUI/stablecoin transfers** (USDC)
+- **QR code integration** via BEEP payment standard
 - **Real-time polling** for payment confirmation
 - **Browser-safe** with publishable keys
 

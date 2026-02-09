@@ -43,7 +43,7 @@ export interface Invoice {
   description?: string;
   /** Invoice amount (can be number or string depending on context) */
   amount?: number | string;
-  /** SPL token address for the payment token */
+  /** Token address for the payment token */
   splTokenAddress?: string;
   /** Token type for this invoice */
   token?: SupportedToken;
@@ -94,7 +94,7 @@ export interface CreateCustomInvoicePayload {
    */
   token?: SupportedToken;
   /**
-   * Custom SPL token address (alternative to token)
+   * Custom token address (alternative to token)
    * @remarks Use this for tokens not in the SupportedToken enum
    */
   splTokenAddress?: string;

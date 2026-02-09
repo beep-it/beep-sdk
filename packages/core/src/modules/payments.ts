@@ -10,9 +10,6 @@ import {
   PaymentRequestData,
   RequestAndPurchaseAssetRequestParams,
   RequestAndPurchaseAssetResponse,
-  SignSolanaTransactionData,
-  SignSolanaTransactionParams,
-  SignSolanaTransactionResponse,
   StartStreamingPayload,
   StartStreamingResponse,
   StopStreamingPayload,
@@ -21,8 +18,8 @@ import {
 import { InvoiceStatus } from '../types/invoice';
 
 /**
- * Module for handling payment operations including asset purchases and Solana transactions
- * Provides methods for creating payment requests and signing blockchain transactions
+ * Module for handling payment operations including asset purchases and SUI transactions
+ * Provides methods for creating payment requests and processing blockchain transactions
  */
 export class PaymentsModule {
   private client: AxiosInstance;
@@ -150,7 +147,7 @@ export class PaymentsModule {
    *
    * Phase 1 – Request payment (no paymentReference):
    * - Server responds with HTTP 402 Payment Required and a payload containing:
-   *   referenceKey, paymentUrl (Solana Pay), optional qrCode, amount, expiresAt, status.
+   *   referenceKey, paymentUrl, optional qrCode, amount, expiresAt, status.
    * - The SDK normalizes this by returning the payload (even when status code is 402).
    * - The caller must instruct the user to pay via their wallet using paymentUrl/qrCode.
    *
@@ -202,62 +199,6 @@ export class PaymentsModule {
       }
       console.error('Failed to request and purchase asset:', error);
       return null;
-    }
-  }
-
-  /**
-   * Signs a Solana transaction for direct blockchain payment processing
-   *
-   * @param input - Transaction parameters including addresses, amounts, and token details
-   * @returns Promise that resolves to signed transaction data
-   * @throws {Error} When transaction signing fails or required fields are missing
-   *
-   * @example
-   * ```typescript
-   * try {
-   *   const signedTx = await beep.payments.signSolanaTransaction({
-   *     senderAddress: 'sender_wallet_address',
-   *     recipientAddress: 'recipient_wallet_address',
-   *     tokenMintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-   *     amount: 1000000, // 1.0 USDT in base units
-   *     decimals: 6
-   *   });
-   *
-   *   if (signedTx) {
-   *     console.log('Transaction ready for broadcast:', signedTx.signedTransaction);
-   *   }
-   * } catch (error) {
-   *   console.error('Transaction signing failed:', error);
-   * }
-   * ```
-   */
-  public async signSolanaTransaction(
-    input: SignSolanaTransactionParams,
-  ): Promise<SignSolanaTransactionData | null> {
-    if (
-      !input.senderAddress ||
-      !input.recipientAddress ||
-      !input.tokenMintAddress ||
-      !input.amount ||
-      !input.decimals
-    ) {
-      console.error('Missing required fields');
-      return null;
-    }
-    try {
-      const response = await this.client.post<SignSolanaTransactionResponse>(
-        '/v1/payment/sign-solana-transaction',
-        input,
-      );
-
-      if (!response.data || !response.data.data) {
-        throw new Error('No data returned from solana transaction signing');
-      }
-
-      return response.data.data;
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to sign solana transaction: ${errorMessage}`);
     }
   }
 

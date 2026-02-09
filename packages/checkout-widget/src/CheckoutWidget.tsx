@@ -37,7 +37,7 @@ import { useFormatCurrency } from './hooks/useFormatCurrency';
 
 const beepLogo = beepLogoUrl;
 /**
- * CheckoutWidget - A complete Solana payment interface for the BEEP payment system
+ * CheckoutWidget - A complete SUI payment interface for the BEEP payment system
  *
  * This widget provides a full checkout experience supporting both existing product
  * references and on-the-fly product creation. It handles the complete payment flow
@@ -45,7 +45,7 @@ const beepLogo = beepLogoUrl;
  *
  * Key Features:
  * - Asset-based pricing with automatic total calculation
- * - Solana Pay QR code generation with custom labels
+ * - Payment QR code generation with custom labels
  * - Real-time payment status polling (15-second intervals)
  * - Support for mixed asset types (existing + on-the-fly products)
  * - Comprehensive error handling with isolated error boundaries
@@ -53,7 +53,7 @@ const beepLogo = beepLogoUrl;
  * - Zero CSS dependencies (inline styles prevent conflicts)
  *
  * Payment Flow:
- * 1. Setup: Processes assets, calculates totals, generates Solana Pay URL
+ * 1. Setup: Processes assets, calculates totals, generates payment URL
  * 2. Display: Shows QR code, amount, and wallet address to user
  * 3. Poll: Continuously monitors payment status every 15 seconds
  * 4. Complete: Displays success state when payment confirmed on-chain
@@ -189,7 +189,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
     }
   }, [isPaymentFailed, onPaymentError, paymentStatusData?.status, paymentSetupData?.referenceKey]);
 
-  // Extract wallet address from Solana Pay URI for display
+  // Extract wallet address from payment URI for display
   const destinationAddress = useMemo(
     () => paymentSetupData?.destinationAddress || '',
     [paymentSetupData],
@@ -455,9 +455,9 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 };
 
 /**
- * CheckoutWidget - Complete Solana payment interface for BEEP merchants
+ * CheckoutWidget - Complete SUI payment interface for BEEP merchants
  *
- * A React component that provides a complete Solana-based payment interface with QR code generation,
+ * A React component that provides a complete SUI-based payment interface with QR code generation,
  * payment status tracking, and customizable theming. Supports both existing product references and
  * dynamic product creation with automatic total calculation.
  *
@@ -494,7 +494,7 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
  * @param props.assets - Array of products/services to purchase
  * @param props.serverUrl - Optional custom BEEP server URL
  *
- * @returns A fully functional Solana payment widget with QR code and status tracking
+ * @returns A fully functional SUI payment widget with QR code and status tracking
  */
 export const CheckoutWidget: React.FC<MerchantWidgetProps> = (props) => {
   return (

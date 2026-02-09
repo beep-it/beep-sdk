@@ -10,7 +10,7 @@ function PaymentPage() {
       publishableKey="beep_pk_your_key_here"
       primaryColor="#3b82f6"
       labels={{
-        scanQr: "Scan QR to pay with Solana wallet",
+        scanQr: "Scan QR to pay with SUI wallet",
         paymentLabel: "Your Store Name"
       }}
       assets={[
@@ -31,7 +31,7 @@ Full types exported. Import: `import type { MerchantWidgetProps } from '@beep-it
 
 ## Key Props Reference
 - **publishableKey**: string (beep_pk_...) - REQUIRED, browser-safe key
-- **assets**: Array - REQUIRED (products to sell via Solana/stablecoins)
+- **assets**: Array - REQUIRED (products to sell via SUI/stablecoins)
 - **labels**: { scanQr: string } - REQUIRED (UI text)
 - **primaryColor**?: string (hex color for theming)
 - **serverUrl**?: string (defaults to production)
@@ -41,9 +41,9 @@ Full types exported. Import: `import type { MerchantWidgetProps } from '@beep-it
 2. **New products**: `{ name: "string", price: "decimal", quantity?: number }`
 
 ## Payment Flow
-One-time Solana/stablecoin transfers only. No subscriptions or recurring payments.
-1. Generates Solana Pay QR code
-2. User scans with wallet (Phantom, Solflare, etc.)
+One-time SUI/stablecoin transfers only. No subscriptions or recurring payments.
+1. Generates BEEP payment QR code
+2. User scans with wallet (Slush, Suiet, etc.)
 3. Authorizes one-time transfer
 4. Payment confirmed on-chain
 

@@ -23,7 +23,7 @@ export function StyledBasicExample() {
       publishableKey="beep_pk_demo"
       primaryColor="#10b981"
       labels={{
-        scanQr: 'Scan QR with your Solana wallet',
+        scanQr: 'Scan QR with your SUI wallet',
         paymentLabel: 'Demo Coffee Shop',
       }}
       assets={[

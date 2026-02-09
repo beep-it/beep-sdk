@@ -114,7 +114,7 @@ curl -X POST https://api.justbeep.it/mcp \
       "arguments": {
         "apiKey": "your-api-key",
         "amount": 1000000,
-        "currency": "USDT",
+        "currency": "USDC",
         "referenceId": "payment-123"
       }
     }
