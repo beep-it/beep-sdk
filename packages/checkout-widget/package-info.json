@@ -3,8 +3,8 @@
   "category": "payment",
   "ui-component": true,
   "typescript": true,
-  "blockchain": "solana",
-  "payment-methods": ["solana-pay", "stablecoins", "spl-tokens"],
+  "blockchain": "sui",
+  "payment-methods": ["sui-pay", "stablecoins", "sui-tokens"],
   "dependencies": {
     "peer": ["react", "react-dom"],
     "bundled": ["@beep-it/sdk-core", "@tanstack/react-query", "qrcode.react"]
@@ -12,7 +12,7 @@
   "features": [
     "qr-code-generation",
     "real-time-payment-polling",
-    "solana-pay-integration",
+    "sui-pay-integration",
     "inline-styling",
     "typescript-support"
   ],

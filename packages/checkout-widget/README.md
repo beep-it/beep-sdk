@@ -79,7 +79,7 @@ const assets = [
 | `primaryColor`        | `string`                                        | ❌       | Primary color for styling (hex format, e.g., "#007bff")          |
 | `labels`              | `object`                                        | ✅       | Customizable text labels                                         |
 | `labels.scanQr`       | `string`                                        | ✅       | Text shown above QR code                                         |
-| `labels.paymentLabel` | `string`                                        | ❌       | Label displayed in Solana Pay wallets (default: "Beep Checkout") |
+| `labels.paymentLabel` | `string`                                        | ❌       | Label displayed in SUI wallets (default: "Beep Checkout") |
 | `assets`              | `(BeepPurchaseAsset \| CreateProductPayload)[]` | ✅       | Items to purchase                                                |
 | `serverUrl`           | `string`                                        | ❌       | Custom BEEP server URL (defaults to production)                  |
 
@@ -237,7 +237,7 @@ The widget generates SUI-native Payment URLs with:
 
 - **Recipient**: Developer's SUI wallet address
 - **Amount**: Total calculated from all assets in USDC
-- **SPL Token**: Token address for payment
+- **Token**: Token address for payment
 - **Reference**: Unique tracking identifier
 - **Label**: Custom payment label for wallet display
 - **Message**: Descriptive payment message

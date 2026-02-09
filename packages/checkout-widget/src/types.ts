@@ -3,14 +3,14 @@ import { BeepPurchaseAsset, CreateProductPayload } from '@beep-it/sdk-core';
 /**
  * Props for the CheckoutWidget component.
  *
- * The CheckoutWidget provides a complete Solana-based payment interface with support
+ * The CheckoutWidget provides a complete SUI-based payment interface with support
  * for both existing product references and dynamic product creation. It automatically
- * calculates totals, generates Solana Pay QR codes, and polls for payment completion.
+ * calculates totals, generates payment QR codes, and polls for payment completion.
  *
  * Payment Flow:
  * 1. Asset Processing: Validates and processes all assets (existing/new products)
  * 2. Total Calculation: Computes total amount from all asset quantities and prices
- * 3. QR Code Generation: Creates Solana Pay URL with embedded payment details
+ * 3. QR Code Generation: Creates payment URL with embedded payment details
  * 4. Status Polling: Monitors payment status every 15 seconds until completion
  * 5. Success Display: Shows confirmation when payment is verified on-chain
  *
@@ -65,7 +65,7 @@ export interface MerchantWidgetProps {
     scanQr: string;
 
     /**
-     * Label shown in Solana Pay wallets and transaction descriptions
+     * Label shown in SUI wallets and transaction descriptions
      * This appears when users scan the QR code or review the transaction
      * @default "Beep Checkout"
      */
@@ -134,7 +134,7 @@ export interface MerchantWidgetProps {
 export interface MerchantWidgetState {
   /**
    * SVG QR code data ready for display, or null during initial loading
-   * Generated from the Solana Pay URL for mobile wallet scanning
+   * Generated from the payment URL for mobile wallet scanning
    */
   qrCode: string | null;
 
@@ -157,13 +157,13 @@ export interface MerchantWidgetState {
   referenceKey: string | null;
 
   /**
-   * Complete Solana Pay URI containing payment details
-   * Format: solana:<recipient>?amount=<amount>&spl-token=<token>&reference=<ref>&label=<label>&message=<msg>
+   * Complete payment URI containing payment details
+   * Format: sui:<recipient>?amount=<amount>&token=<token>&reference=<ref>&label=<label>&message=<msg>
    */
   paymentUrl: string | null;
 
   /**
-   * True when payment has been successfully confirmed on the Solana blockchain
+   * True when payment has been successfully confirmed on the SUI blockchain
    * Triggers the success state display in the widget
    */
   paymentSuccess: boolean;

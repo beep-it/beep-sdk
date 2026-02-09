@@ -11,17 +11,15 @@ jobs:
     
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5"
+        uses: "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd"
 
       - name: Use Node 22.18.0
-        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version: 22.18.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@3236b209b507b249883918e7c4c8c7cdd2c0d5db
-        with:
-          version: 10
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
 
       - name: Prepare
         run: |
@@ -49,17 +47,15 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5"
+        uses: "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd"
 
       - name: Use Node 22.18.0
-        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238
         with:
           node-version: 22.18.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@3236b209b507b249883918e7c4c8c7cdd2c0d5db
-        with:
-          version: 10
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile

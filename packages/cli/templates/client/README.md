@@ -23,7 +23,7 @@ Quick Start
   ```
 - Expected output:
   - Connects to `SERVER_URL`
-  - Buyer MCP server exposes local tools: checkBeepApi, getAvailableWallets, signSolanaTransaction
+  - Buyer MCP server exposes local tools: checkBeepApi, getAvailableWallets
   - When invoked by an orchestrator, local tools can call out to the seller MCP as needed
   - Prints discovered tools from the seller (name, description) when using the discovery helper
   - With `DEFAULT_LIST_ONLY=true`, it stops after discovery

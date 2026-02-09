@@ -18,7 +18,7 @@ Quickstarts
 ```ts
 import { BeepClient, SupportedToken } from '@beep-it/sdk-core';
 const beep = new BeepClient({ apiKey: 'beep_sk_…', serverUrl: 'https://api.justbeep.it' });
-const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDT });
+const product = await beep.products.createProduct({ name: 'Pro', price: '9.99', token: SupportedToken.USDC });
 ```
 
 - Browser (public widget endpoints)
@@ -36,7 +36,7 @@ const { paid } = await client.widget.waitForPaid({ referenceKey: session.referen
 
 Modules
 - products: create/get/list/update/delete (server only)
-- payments: requestAndPurchaseAsset, signSolanaTransaction (server only)
+- payments: requestAndPurchaseAsset (server only)
   - requestAndPurchaseAsset → `POST /v1/payments/request` using the invoice creation (HTTP 402) pattern.
 - invoices: create/get/list/delete (server only)
 - widget: createPaymentSession, getPaymentStatus (browser)

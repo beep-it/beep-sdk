@@ -117,7 +117,7 @@ export interface ProductWithPrices {
   prices: Array<{
     /** External UUID for API references */
     uuid: string;
-    /** The currency token (USDT, USDC, etc.) */
+    /** The currency token (USDC) */
     token: string;
     /** Blockchain network (SOLANA, BASE, SUI) */
     chain: string;

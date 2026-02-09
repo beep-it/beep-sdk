@@ -1,282 +1,113 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { BeepClient } from '../src';
-import { SupportedToken } from '../src/types';
+import { BeepClient, BeepPublicClient } from '../src';
 
-describe.skip('BeepClient', () => {
-  let client: BeepClient;
+describe('BeepClient', () => {
   let mockAxios: MockAdapter;
 
   beforeEach(() => {
-    // Create a fresh mock for each test
     mockAxios = new MockAdapter(axios);
-
-    // Initialize the client with test values
-    client = new BeepClient({
-      apiKey: 'test-api-key',
-      serverUrl: 'https://test-api.beep.com',
-    });
   });
 
   afterEach(() => {
     mockAxios.restore();
   });
 
-  it('healthCheck should check API health', async () => {
-    // Mock a successful health check response
-    mockAxios.onGet('/healthz').reply(200, 'API is healthy');
+  describe('constructor', () => {
+    it('throws when API key is missing', () => {
+      expect(() => new BeepClient({ apiKey: '' })).toThrow('API key is required');
+    });
 
-    const result = await client.healthCheck();
+    it('uses default server URL when not provided', () => {
+      const client = new BeepClient({ apiKey: 'test-key' });
+      expect(client).toBeDefined();
+    });
 
-    expect(result).toBeDefined();
-    expect(result).toBe('API is healthy');
+    it('uses custom server URL when provided', () => {
+      const client = new BeepClient({ apiKey: 'test-key', serverUrl: 'https://custom.api.com' });
+      expect(client).toBeDefined();
+    });
+
+    it('exposes products, invoices, payments, and user modules', () => {
+      const client = new BeepClient({ apiKey: 'test-key' });
+      expect(client.products).toBeDefined();
+      expect(client.invoices).toBeDefined();
+      expect(client.payments).toBeDefined();
+      expect(client.user).toBeDefined();
+    });
   });
 
-  it('requestPayment creates an invoice with token', async () => {
-    // Mock the response for the API call
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      referenceKey: 'ref_abc123',
-      paymentUrl: 'https://pay.beep.com/abc123',
-      qrCode: 'data:image/png;base64,abc123==',
-      amount: '10.99',
-      token: SupportedToken.USDT,
-      splTokenAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-      status: 'pending',
-      expiresAt: new Date().toISOString(),
-      receivingMerchantId: 'merch_123',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+  describe('healthCheck', () => {
+    it('returns health status on success', async () => {
+      const client = new BeepClient({ apiKey: 'test-key', serverUrl: 'https://test.api.com' });
+      mockAxios.onGet('/healthz').reply(200, 'API is healthy');
+
+      const result = await client.healthCheck();
+
+      expect(result).toBe('API is healthy');
     });
 
-    // Call the method being tested
-    const result = await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
+    it('throws formatted error on Axios error', async () => {
+      const client = new BeepClient({ apiKey: 'test-key', serverUrl: 'https://test.api.com' });
+      mockAxios.onGet('/healthz').reply(503, { message: 'Service unavailable' });
+
+      await expect(client.healthCheck()).rejects.toThrow('API Error: Service unavailable');
     });
 
-    // Assertions
-    expect(result).toBeDefined();
-    expect(result?.invoiceId).toBe('inv_test123');
-    expect(result?.amount).toBe('10.99');
-    expect(result?.status).toBe('pending');
+    it('throws formatted error with fallback message when no response message', async () => {
+      const client = new BeepClient({ apiKey: 'test-key', serverUrl: 'https://test.api.com' });
+      mockAxios.onGet('/healthz').reply(500);
 
-    // Verify the request was made with correct data
-    expect(mockAxios.history.post.length).toBe(1);
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.token).toBe(SupportedToken.USDT);
-    expect(requestData.amount).toBe(10990000);
+      await expect(client.healthCheck()).rejects.toThrow('API Error:');
+    });
+
+    it('throws generic error for non-Axios errors', async () => {
+      const client = new BeepClient({ apiKey: 'test-key', serverUrl: 'https://test.api.com' });
+      mockAxios.onGet('/healthz').reply(() => {
+        throw new TypeError('Network failure');
+      });
+
+      await expect(client.healthCheck()).rejects.toThrow(
+        'An unexpected error occurred during health check',
+      );
+    });
+  });
+});
+
+describe('BeepPublicClient', () => {
+  let mockAxios: MockAdapter;
+
+  beforeEach(() => {
+    mockAxios = new MockAdapter(axios);
   });
 
-  it('requestPayment falls back to splTokenAddress if token not provided', async () => {
-    const splTokenAddress = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      merchantId: 'merch_123',
-      payerType: 'customer_wallet',
-      payerMerchantId: null,
-      description: 'Test payment',
-      amount: '10.99',
-      splTokenAddress: splTokenAddress,
-      status: 'pending',
-      referenceKey: 'ref_abc123',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-
-    const result = await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
-    });
-
-    expect(result).toBeDefined();
-    expect(result?.splTokenAddress).toBe(splTokenAddress);
-
-    // Verify the request was made with correct data
-    expect(mockAxios.history.post.length).toBe(1);
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.splTokenAddress).toBe(splTokenAddress);
+  afterEach(() => {
+    mockAxios.restore();
   });
 
-  it('requestAndPurchaseAsset defaults to USDT if no token or splTokenAddress provided', async () => {
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      merchantId: 'merch_123',
-      status: 'pending',
+  describe('constructor', () => {
+    it('throws when publishable key is missing', () => {
+      expect(() => new BeepPublicClient({ publishableKey: '' })).toThrow(
+        'publishableKey is required',
+      );
     });
 
-    await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
+    it('uses default server URL when not provided', () => {
+      const client = new BeepPublicClient({ publishableKey: 'beep_pk_test' });
+      expect(client).toBeDefined();
     });
 
-    // Verify the request was made with USDT token
-    expect(mockAxios.history.post.length).toBe(1);
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.token).toBe(SupportedToken.USDT);
-  });
-
-  it('requestAndPurchaseAsset throws error when API request fails', async () => {
-    mockAxios.onPost('/v1/payment/request-payment').reply(500);
-
-    await expect(
-      client.payments.requestAndPurchaseAsset({
-        paymentReference: 'pay_ref_123',
-        assets: [
-          { assetId: 'asset_1', quantity: 1 },
-          { assetId: 'asset_2', quantity: 1 },
-        ],
-      }),
-    ).rejects.toThrow();
-  });
-
-  it('requestAndPurchaseAsset throws error when response has no data', async () => {
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, null);
-
-    await expect(
-      client.payments.requestAndPurchaseAsset({
-        paymentReference: 'pay_ref_123',
-        assets: [
-          { assetId: 'asset_1', quantity: 1 },
-          { assetId: 'asset_2', quantity: 1 },
-        ],
-      }),
-    ).rejects.toThrow('No data returned from payment request');
-  });
-
-  it('converts amount to base units correctly for different tokens', async () => {
-    // Setup mock for USDT test
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      referenceKey: 'ref_abc123',
-      status: 'pending',
-      expiresAt: new Date().toISOString(),
-      receivingMerchantId: 'merch_123',
+    it('uses custom server URL when provided', () => {
+      const client = new BeepPublicClient({
+        publishableKey: 'beep_pk_test',
+        serverUrl: 'https://custom.api.com',
+      });
+      expect(client).toBeDefined();
     });
 
-    // Test USDT (6 decimals)
-    await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
+    it('exposes widget module', () => {
+      const client = new BeepPublicClient({ publishableKey: 'beep_pk_test' });
+      expect(client.widget).toBeDefined();
     });
-
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    // 0.01 with 6 decimals should be 10000
-    expect(requestData.amount).toBe(10000);
-  });
-
-  it('converts amount to base units correctly for USDT', async () => {
-    // Setup mock for USDT test
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      referenceKey: 'ref_abc123',
-      status: 'pending',
-      expiresAt: new Date().toISOString(),
-      receivingMerchantId: 'merch_123',
-    });
-
-    // Test USDT (6 decimals)
-    await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
-    });
-
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    // 0.000001 with 6 decimals should be 1
-    expect(requestData.amount).toBe(1);
-  });
-
-  it('handles payerType correctly when provided', async () => {
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      referenceKey: 'ref_abc123',
-      status: 'pending',
-    });
-
-    await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
-    });
-
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.payerType).toBe('merchant_wallet');
-  });
-
-  it('handles empty description by setting a default', async () => {
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      referenceKey: 'ref_abc123',
-      status: 'pending',
-    });
-
-    await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
-    });
-
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.description).toBe('Payment request');
-  });
-
-  it('handles undefined description by setting a default', async () => {
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      referenceKey: 'ref_abc123',
-      status: 'pending',
-    });
-
-    await client.payments.requestAndPurchaseAsset({
-      paymentReference: 'pay_ref_123',
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
-      // description omitted
-    });
-
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.description).toBe('Payment request');
-  });
-
-  it('handles large amounts correctly', async () => {
-    mockAxios.onPost('/v1/payment/request-payment').reply(200, {
-      invoiceId: 'inv_test123',
-      referenceKey: 'ref_abc123',
-      status: 'pending',
-    });
-
-    // Test with a large amount (1000 USDT)
-    await client.payments.requestAndPurchaseAsset({
-      assets: [
-        { assetId: 'asset_1', quantity: 1 },
-        { assetId: 'asset_2', quantity: 1 },
-      ],
-    });
-
-    const requestData = JSON.parse(mockAxios.history.post[0].data);
-    // 1000 with 6 decimals should be 1000000000
-    expect(requestData.amount).toBe(1000000000);
   });
 });

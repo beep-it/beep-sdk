@@ -45,7 +45,7 @@ describe.skip('Integration Tests', () => {
       name: `Test Product ${Date.now()}`, // Unique name
       description: 'Created by integration test',
       price: '0.01',
-      token: SupportedToken.USDT,
+      token: SupportedToken.USDC,
       isSubscription: false,
     });
 
@@ -66,7 +66,7 @@ describe.skip('Integration Tests', () => {
     const product = await client.products.createProduct({
       name: 'Integration Test Product',
       price: '0.01',
-      token: SupportedToken.USDT,
+      token: SupportedToken.USDC,
       description: 'Test product for integration tests',
     });
 
