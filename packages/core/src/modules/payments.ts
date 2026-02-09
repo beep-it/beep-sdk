@@ -37,14 +37,16 @@ export class PaymentsModule {
    *
    * Notes:
    * - Do not pass walletId. The server derives the wallet based on your API key's merchant and requested chain.
-   * - amount must be in smallest units for the token (e.g., 6‑decimals USDC amount as an integer string).
+   * - amount is a human-readable decimal string (e.g., "1.0" for 1 USDC, "0.5" for 0.5 SUI).
+   *   The server converts to the token's base units internally.
+   * - Minimum: 0.01 per transaction. Maximum: 100,000 per transaction.
    * - This endpoint responds immediately with acceptance/rejection. Actual transfer executes asynchronously after funds are reserved.
    *
    * Example:
    * const res = await beep.payments.createPayout({
-   *   amount: '1000000', // 1.0 USDC with 6 decimals
+   *   amount: '1.50',  // 1.50 USDC (human-readable)
    *   destinationWalletAddress: 'DEST_ADDRESS',
-   *   chain: 'SOLANA',
+   *   chain: 'SUI',
    *   token: 'USDC',
    * });
    */
