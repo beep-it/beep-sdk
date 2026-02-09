@@ -115,6 +115,17 @@ describe('Products Module', () => {
     expect(result).toEqual(mockUpdatedProduct);
   });
 
+  it('updateProduct converts token to splTokenAddress', async () => {
+    mockAxios.onPut('/v1/products/prod_test123').reply(200, { id: 'prod_test123' });
+
+    await client.products.updateProduct('prod_test123', {
+      token: SupportedToken.USDT,
+    });
+
+    const requestData = JSON.parse(mockAxios.history.put[0].data);
+    expect(requestData.splTokenAddress).toBe(TOKEN_ADDRESSES[SupportedToken.USDT]);
+  });
+
   it('deleteProduct deletes a product', async () => {
     mockAxios.onDelete('/v1/products/prod_test123').reply(200, { deleted: true });
 
