@@ -16,17 +16,6 @@ Object.assign(navigator, {
 // Mock window.open
 window.open = jest.fn();
 
-// Mock window.location
-const mockLocation = {
-  href: '',
-  assign: jest.fn(),
-  replace: jest.fn(),
-  reload: jest.fn(),
-};
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true,
-});
 
 // Mock console.error to track error logging in tests
 const originalConsoleError = console.error;
@@ -52,5 +41,4 @@ afterAll(() => {
 // Reset mocks between tests
 beforeEach(() => {
   jest.clearAllMocks();
-  mockLocation.href = '';
 });
