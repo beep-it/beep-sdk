@@ -47,7 +47,7 @@ export interface BeepClientOptions {
  * // Create a payment request
  * const payment = await beep.requestPayment({
  *   amount: 10.00,
- *   token: SupportedToken.USDT,
+ *   token: SupportedToken.USDC,
  *   description: 'Premium subscription'
  * });
  *
@@ -117,7 +117,7 @@ export class BeepClient {
    * const res = await beep.payments.createPayout({
    *   amount: '1000000', // 1.0 USDC with 6 decimals
    *   destinationWalletAddress: 'DEST_ADDRESS',
-   *   chain: 'SOLANA',
+   *   chain: 'SUI',
    *   token: 'USDC',
    * });
    */

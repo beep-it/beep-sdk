@@ -46,7 +46,7 @@ describe('Invoices Module', () => {
     const mockInvoice = {
       id: 'inv_custom123',
       amount: '25.99',
-      token: SupportedToken.USDT,
+      token: SupportedToken.USDC,
       payerType: 'customer_wallet',
       // other fields...
     };
@@ -55,7 +55,7 @@ describe('Invoices Module', () => {
 
     const result = await client.invoices.createInvoice({
       amount: '25.99',
-      token: SupportedToken.USDT,
+      token: SupportedToken.USDC,
       description: 'Custom invoice',
       payerType: 'customer_wallet',
     });
@@ -63,7 +63,7 @@ describe('Invoices Module', () => {
     expect(result).toEqual(mockInvoice);
 
     const requestData = JSON.parse(mockAxios.history.post[0].data);
-    expect(requestData.token).toBe(SupportedToken.USDT);
+    expect(requestData.token).toBe(SupportedToken.USDC);
     expect(requestData.payerType).toBe('customer_wallet');
   });
 

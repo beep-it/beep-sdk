@@ -84,7 +84,7 @@ export const defaultTestProps = {
 export const mockPaymentSetupData = {
   qrCode: 'data:image/png;base64,mockQrCode',
   referenceKey: 'test-ref-key-123',
-  paymentUrl: 'solana:mock-payment-url',
+  paymentUrl: 'sui:mock-payment-url',
   paymentLabel: 'Test Payment',
   processedAssets: [{ assetId: 'asset_1', quantity: 1 }],
   totalAmount: 25.5,

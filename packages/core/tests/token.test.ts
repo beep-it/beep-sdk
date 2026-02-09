@@ -2,13 +2,13 @@ import { SupportedToken } from '../src/types';
 import { TokenUtils } from '../src/types/token';
 
 describe('TokenUtils', () => {
-  it('getTokenAddress returns correct address for USDT', () => {
-    const address = TokenUtils.getTokenAddress(SupportedToken.USDT);
-    expect(address).toBe('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
+  it('getTokenAddress returns correct address for USDC', () => {
+    const address = TokenUtils.getTokenAddress(SupportedToken.USDC);
+    expect(address).toBe('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T');
   });
 
   it('isTokenSupported returns true for supported tokens', () => {
-    expect(TokenUtils.isTokenSupported(SupportedToken.USDT)).toBe(true);
+    expect(TokenUtils.isTokenSupported(SupportedToken.USDC)).toBe(true);
   });
 
   it('isTokenSupported returns false for unsupported tokens', () => {
@@ -16,8 +16,8 @@ describe('TokenUtils', () => {
   });
 
   it('getTokenFromAddress returns correct token for address', () => {
-    const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
-    expect(token).toBe(SupportedToken.USDT);
+    const token = TokenUtils.getTokenFromAddress('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T');
+    expect(token).toBe(SupportedToken.USDC);
   });
 
   it('getTokenFromAddress returns null for unknown address', () => {
@@ -25,7 +25,7 @@ describe('TokenUtils', () => {
     expect(token).toBeNull();
   });
 
-  it('getDefaultToken returns USDT', () => {
+  it('getDefaultToken returns USDC', () => {
     expect(TokenUtils.getDefaultToken()).toBe(SupportedToken.USDC);
   });
 });

@@ -87,7 +87,7 @@ const beep = new BeepClient({
 
 ### Server-Side Making Money
 
-Let's say you want to charge someone 5 USDT for a pack of 100 magic crystals in your game. Here's the complete server-side flow:
+Let's say you want to charge someone 5 USDC for a pack of 100 magic crystals in your game. Here's the complete server-side flow:
 
 #### The Server-Side Payment Flow
 
@@ -110,7 +110,7 @@ Seriously, all _you_ need to worry about is step 1. We handle 2-7 because we're 
 const invoiceDetails = {
   description: 'A pack of 100 magic crystals',
   amount: '5.00',
-  token: SupportedToken.USDT,
+  token: SupportedToken.USDC,
   payerType: 'customer_wallet' as const,
 };
 
@@ -142,7 +142,7 @@ try {
 ```typescript
 const invoice = await beep.invoices.createInvoice({
   amount: '19.99',
-  token: SupportedToken.USDT,
+  token: SupportedToken.USDC,
   description: 'VIP Battle Pass',
   payerType: 'customer_wallet',
 });
@@ -155,7 +155,7 @@ const invoice = await beep.invoices.createInvoice({
 const product = await beep.products.createProduct({
   name: 'Magic Sword',
   price: '9.99',
-  token: SupportedToken.USDT,
+  token: SupportedToken.USDC,
   isSubscription: false,
 });
 
@@ -334,7 +334,7 @@ Clean token enum instead of remembering addresses:
 ```typescript
 import { SupportedToken } from '@beep-it/sdk-core';
 
-const token = SupportedToken.USDT; // Much cleaner!
+const token = SupportedToken.USDC; // Much cleaner!
 ```
 
 ### `TokenUtils`
@@ -345,13 +345,13 @@ Advanced token utilities:
 import { TokenUtils, SupportedToken } from '@beep-it/sdk-core';
 
 // Get the address from a token enum
-const address = TokenUtils.getTokenAddress(SupportedToken.USDT);
+const address = TokenUtils.getTokenAddress(SupportedToken.USDC);
 
 // Check if we support a token
-const isSupported = TokenUtils.isTokenSupported(SupportedToken.USDT);
+const isSupported = TokenUtils.isTokenSupported(SupportedToken.USDC);
 
 // Get a token enum from an address (reverse lookup)
-const token = TokenUtils.getTokenFromAddress('Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB');
+const token = TokenUtils.getTokenFromAddress('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyB7u6T');
 ```
 
 ---

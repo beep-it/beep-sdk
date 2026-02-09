@@ -16,7 +16,7 @@ describe('usePaymentSetup', () => {
     jest.clearAllMocks();
     __mockWidget.createPaymentSession.mockResolvedValue({
       referenceKey: 'test-ref-123',
-      paymentUrl: 'solana:mock-payment-url',
+      paymentUrl: 'sui:mock-payment-url',
       qrCode: 'data:image/png;base64,mockQrCode',
       amount: '25.50',
       expiresAt: new Date(Date.now() + 3600000).toISOString(),
@@ -54,7 +54,7 @@ describe('usePaymentSetup', () => {
       expect(result.current.data).toMatchObject({
         qrCode: 'data:image/png;base64,mockQrCode',
         referenceKey: 'test-ref-123',
-        paymentUrl: 'solana:mock-payment-url',
+        paymentUrl: 'sui:mock-payment-url',
         totalAmount: 25.5,
         isCashPaymentEligible: true,
         destinationAddress: 'dest-address-123',
@@ -200,7 +200,7 @@ describe('usePaymentSetup', () => {
     it('parses string amount from response', async () => {
       __mockWidget.createPaymentSession.mockResolvedValue({
         referenceKey: 'ref-123',
-        paymentUrl: 'solana:url',
+        paymentUrl: 'sui:url',
         amount: '123.45',
         isCashPaymentEligible: false,
         destinationAddress: 'dest',
@@ -220,7 +220,7 @@ describe('usePaymentSetup', () => {
     it('handles missing amount in response', async () => {
       __mockWidget.createPaymentSession.mockResolvedValue({
         referenceKey: 'ref-123',
-        paymentUrl: 'solana:url',
+        paymentUrl: 'sui:url',
         isCashPaymentEligible: false,
         destinationAddress: 'dest',
       });
@@ -241,7 +241,7 @@ describe('usePaymentSetup', () => {
     it('maps all response fields correctly', async () => {
       __mockWidget.createPaymentSession.mockResolvedValue({
         referenceKey: 'unique-ref',
-        paymentUrl: 'solana:payment-url',
+        paymentUrl: 'sui:payment-url',
         qrCode: 'base64-qr-code',
         amount: '99.99',
         expiresAt: '2025-01-01T00:00:00Z',
@@ -261,7 +261,7 @@ describe('usePaymentSetup', () => {
       expect(result.current.data).toMatchObject({
         qrCode: 'base64-qr-code',
         referenceKey: 'unique-ref',
-        paymentUrl: 'solana:payment-url',
+        paymentUrl: 'sui:payment-url',
         totalAmount: 99.99,
         isCashPaymentEligible: true,
         destinationAddress: 'destination-wallet',

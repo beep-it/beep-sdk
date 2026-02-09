@@ -7,7 +7,7 @@ export * from './token';
 // Export common utility types and helpers
 export * from './common';
 
-import { PaymentRequestData, SignSolanaTransactionData } from './payment';
+import { PaymentRequestData } from './payment';
 /**
  * Standard response wrapper for BEEP API endpoints
  * All API responses follow this structure
@@ -26,13 +26,4 @@ export interface BeepResponse {
 export interface RequestAndPurchaseAssetResponse extends BeepResponse {
   /** Payment request data containing invoice details and payment URLs */
   data: PaymentRequestData;
-}
-
-/**
- * Typed response for Solana transaction signing endpoints
- * Contains the signed transaction ready for broadcast
- */
-export interface SignSolanaTransactionResponse extends BeepResponse {
-  /** Signed transaction data and associated invoice information */
-  data: SignSolanaTransactionData;
 }

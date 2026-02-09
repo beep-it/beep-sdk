@@ -35,7 +35,7 @@ export class ProductsModule {
    *   name: 'Premium License',
    *   description: 'Lifetime access to premium features',
    *   price: '99.99',
-   *   token: SupportedToken.USDT,
+   *   token: SupportedToken.USDC,
    *   isSubscription: false
    * });
    *
@@ -44,7 +44,7 @@ export class ProductsModule {
    *   name: 'Monthly Pro Plan',
    *   description: 'Monthly subscription with full access',
    *   price: '19.99',
-   *   token: SupportedToken.USDT,
+   *   token: SupportedToken.USDC,
    *   isSubscription: true
    * });
    * ```
@@ -52,7 +52,7 @@ export class ProductsModule {
   async createProduct(payload: CreateProductPayload): Promise<Product> {
     const requestPayload = { ...payload };
 
-    // Convert token enum to SPL address for API compatibility
+    // Convert token enum to token address for API compatibility
     if (requestPayload.token && !requestPayload.splTokenAddress) {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(requestPayload.token);
     }
@@ -66,7 +66,7 @@ export class ProductsModule {
           ? parseFloat(requestPayload.price)
           : requestPayload.price;
 
-      // Convert to base units (e.g., 0.01 USDT with 6 decimals becomes 10000)
+      // Convert to base units (e.g., 0.01 USDC with 6 decimals becomes 10000)
       const priceInBaseUnits = Math.round(priceValue * 10 ** decimals);
       requestPayload.price = priceInBaseUnits.toString();
     }
@@ -138,7 +138,7 @@ export class ProductsModule {
   async updateProduct(productId: string, payload: UpdateProductPayload): Promise<Product> {
     const requestPayload = { ...payload };
 
-    // Convert token enum to SPL address for API compatibility
+    // Convert token enum to token address for API compatibility
     if (requestPayload.token && !requestPayload.splTokenAddress) {
       requestPayload.splTokenAddress = TokenUtils.getTokenAddress(requestPayload.token);
     }

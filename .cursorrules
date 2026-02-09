@@ -40,8 +40,8 @@ const client = new BeepPublicClient({publishableKey: 'beep_pk_...'});
 - `pnpm dev` - Development mode (all packages)
 
 ## Payment Concepts
-- One-time Solana/stablecoin payments only (no subscriptions)
-- QR code based via Solana Pay standard
+- One-time SUI/stablecoin payments only (no subscriptions)
+- QR code based via BEEP payment standard
 - Assets: existing products (assetId) or dynamic creation (name+price)
 
 ## Reference Files

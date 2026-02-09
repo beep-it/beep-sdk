@@ -15,7 +15,7 @@ export interface Product {
   name: string;
   /** Optional description explaining what the product is */
   description: string | null;
-  /** SPL token address for payments */
+  /** Token address for payments */
   splTokenAddress: string;
   /** Token type for this product (derived from splTokenAddress) */
   token?: SupportedToken;
@@ -42,7 +42,7 @@ export interface CreateProductPayload {
    */
   price: string;
   /**
-   * Custom SPL token address (optional if token is provided)
+   * Custom token address (optional if token is provided)
    * @remarks Use this for tokens not in the SupportedToken enum
    */
   splTokenAddress?: string;
@@ -72,7 +72,7 @@ export interface UpdateProductPayload {
   name?: string;
   /** New description (can be set to null to remove) */
   description?: string | null;
-  /** New SPL token address */
+  /** New token address */
   splTokenAddress?: string;
   /** New token type */
   token?: SupportedToken;
