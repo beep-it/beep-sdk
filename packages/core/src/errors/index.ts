@@ -3,6 +3,8 @@
  * Provides typed, semantic errors with proper error codes and context
  */
 
+import { isAxiosError } from 'axios';
+
 export enum BeepErrorCode {
   // Authentication errors (1xxx)
   INVALID_API_KEY = 'BEEP_1001',
@@ -46,7 +48,7 @@ export enum BeepErrorCode {
 export interface BeepErrorOptions {
   code: BeepErrorCode;
   statusCode?: number;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   requestId?: string;
 }
 
@@ -57,7 +59,7 @@ export interface BeepErrorOptions {
 export class BeepError extends Error {
   public readonly code: BeepErrorCode;
   public readonly statusCode?: number;
-  public readonly details?: Record<string, any>;
+  public readonly details?: Record<string, unknown>;
   public readonly timestamp: Date;
   public readonly requestId?: string;
 
@@ -101,7 +103,7 @@ export class BeepError extends Error {
   /**
    * Returns a JSON representation of the error for logging
    */
-  public toJSON(): Record<string, any> {
+  public toJSON(): Record<string, unknown> {
     return {
       name: this.name,
       message: this.message,
@@ -120,7 +122,7 @@ export class BeepError extends Error {
  */
 export interface SpecializedErrorOptions {
   code?: BeepErrorCode;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 /**
@@ -205,21 +207,29 @@ export class BeepRateLimitError extends BeepError {
 /**
  * Utility function to create appropriate error from axios error response
  */
-export function createBeepErrorFromAxios(error: any): BeepError {
+export function createBeepErrorFromAxios(error: unknown): BeepError {
+  if (!isAxiosError(error)) {
+    const message = error instanceof Error ? error.message : 'Network connection failed';
+    return new BeepNetworkError(message, {
+      code: BeepErrorCode.NETWORK_ERROR,
+      details: { originalError: String(error) },
+    });
+  }
+
   const response = error.response;
-  const requestId = response?.headers?.['x-request-id'];
+  const requestId = (response?.headers as Record<string, string> | undefined)?.['x-request-id'];
 
   if (!response) {
     // Network error
     return new BeepNetworkError(error.message || 'Network connection failed', {
       code: BeepErrorCode.NETWORK_ERROR,
-      details: { originalError: error },
+      details: { originalError: error.message },
     });
   }
 
   const status = response.status;
-  const data = response.data;
-  const message = data?.message || data?.error || error.message;
+  const data = response.data as Record<string, unknown> | undefined;
+  const message = String(data?.message || data?.error || error.message || 'Unknown error');
 
   // Handle specific status codes
   switch (status) {

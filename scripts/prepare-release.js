@@ -22,13 +22,7 @@ function updatePackageVersion(packagePath, version) {
   
   packageJson.version = version;
   
-  // Update workspace dependencies to use the new version
-  if (packageJson.dependencies && packageJson.dependencies['@beep-it/sdk-core']) {
-    packageJson.dependencies['@beep-it/sdk-core'] = `^${version}`;
-  }
-  if (packageJson.devDependencies && packageJson.devDependencies['@beep-it/sdk-core']) {
-    packageJson.devDependencies['@beep-it/sdk-core'] = `^${version}`;
-  }
+  // Skip workspace: protocol dependencies — pnpm resolves these automatically during publish
   
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
   console.log(`✅ Updated ${packagePath}/package.json to version ${version}`);

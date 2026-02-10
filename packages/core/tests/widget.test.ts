@@ -1,6 +1,7 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import { BeepPublicClient } from '../src';
+import { PayWayCode } from '../src/types/cash-payment';
 
 describe('Widget Module', () => {
   let client: BeepPublicClient;
@@ -144,7 +145,7 @@ describe('Widget Module', () => {
         reference: 'ref_123',
         walletAddress: '0xabc',
         amount: '50.00',
-        payWayCode: 10001 as any,
+        payWayCode: PayWayCode.VISA_MASTER_CARD,
         email: 'test@example.com',
       });
 

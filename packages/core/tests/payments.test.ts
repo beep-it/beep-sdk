@@ -1,6 +1,6 @@
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { BeepClient } from '../src';
+import { BeepClient, PayoutStatus } from '../src';
 
 describe('Payments Module', () => {
   let client: BeepClient;
@@ -126,17 +126,17 @@ describe('Payments Module', () => {
 
   describe('createPayout', () => {
     it('creates a payout successfully', async () => {
-      const mockResponse = {
+      const payoutData = {
         payoutId: 'payout_123',
-        status: 'accepted',
-        message: 'Payout accepted',
+        status: PayoutStatus.PENDING,
+        message: 'The request is being processed',
         withdrawRequestId: 42,
         requestedAmount: '1000000',
         reservedAmount: '1000000',
         createdAt: '2025-01-01T00:00:00Z',
       };
 
-      mockAxios.onPost('/v1/payouts').reply(200, mockResponse);
+      mockAxios.onPost('/v1/payouts').reply(200, { success: true, data: payoutData });
 
       const result = await client.payments.createPayout({
         amount: '1000000',
@@ -145,8 +145,8 @@ describe('Payments Module', () => {
         token: 'USDC',
       });
 
-      expect(result).toEqual(mockResponse);
-      expect(result.status).toBe('accepted');
+      expect(result).toEqual(payoutData);
+      expect(result.status).toBe(PayoutStatus.PENDING);
       const requestData = JSON.parse(mockAxios.history.post[0].data);
       expect(requestData.amount).toBe('1000000');
       expect(requestData.chain).toBe('SUI');
