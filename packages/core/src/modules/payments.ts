@@ -8,6 +8,7 @@ import {
   PauseStreamingPayload,
   PauseStreamingResponse,
   PaymentRequestData,
+  PayoutStatus,
   RequestAndPurchaseAssetRequestParams,
   RequestAndPurchaseAssetResponse,
   StartStreamingPayload,
@@ -54,7 +55,7 @@ export class PaymentsModule {
     token: string;
   }): Promise<{
     payoutId: string;
-    status: 'accepted' | 'rejected';
+    status: PayoutStatus;
     message: string;
     withdrawRequestId?: number;
     requestedAmount?: string;
@@ -62,8 +63,8 @@ export class PaymentsModule {
     createdAt: string;
     error?: string;
   }> {
-    const { data } = await this.client.post('/v1/payouts', params);
-    return data;
+    const resp = await this.client.post('/v1/payouts', params);
+    return resp.data.data;
   }
 
   /**
