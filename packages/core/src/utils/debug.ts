@@ -2,6 +2,7 @@
  * @fileoverview Debug utilities for enhanced developer experience
  */
 
+import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axios';
 import { BeepError } from '../errors';
 
 export interface BeepDebugOptions {
@@ -18,20 +19,20 @@ export interface BeepDebugOptions {
 export interface LogOptions {
   level: string;
   message: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface ApiRequestLogOptions {
   method: string;
   url: string;
-  data?: any;
+  data?: unknown;
 }
 
 export interface ApiResponseLogOptions {
   method: string;
   url: string;
   status: number;
-  data?: any;
+  data?: unknown;
 }
 
 /**
@@ -53,9 +54,11 @@ const defaultLogger = (options: LogOptions) => {
       console.info(prefix, message, data);
       break;
     case 'debug':
+      // eslint-disable-next-line no-console
       console.debug(prefix, message, data);
       break;
     default:
+      // eslint-disable-next-line no-console
       console.log(prefix, message, data);
   }
 };
@@ -75,7 +78,7 @@ export class BeepDebugger {
   /**
    * Log an error with context
    */
-  public error(message: string, error?: any): void {
+  public error(message: string, error?: unknown): void {
     if (error instanceof BeepError) {
       this.logger({
         level: 'error',
@@ -96,14 +99,14 @@ export class BeepDebugger {
   /**
    * Log a warning
    */
-  public warn(message: string, data?: any): void {
+  public warn(message: string, data?: unknown): void {
     this.logger({ level: 'warn', message, data });
   }
 
   /**
    * Log info message
    */
-  public info(message: string, data?: any): void {
+  public info(message: string, data?: unknown): void {
     if (this.options.debug) {
       this.logger({ level: 'info', message, data });
     }
@@ -112,7 +115,7 @@ export class BeepDebugger {
   /**
    * Log debug message
    */
-  public debug(message: string, data?: any): void {
+  public debug(message: string, data?: unknown): void {
     if (this.options.debug) {
       this.logger({ level: 'debug', message, data });
     }
@@ -158,7 +161,7 @@ export class BeepDebugger {
   /**
    * Sanitize sensitive data before logging
    */
-  private sanitizeData(data: any): any {
+  private sanitizeData(data: unknown): unknown {
     if (!data) return data;
 
     const sensitiveFields = ['apiKey', 'api_key', 'authorization', 'password', 'secret'];
@@ -172,9 +175,9 @@ export class BeepDebugger {
     }
 
     if (typeof data === 'object') {
-      const sanitized: any = {};
+      const sanitized: Record<string, unknown> = {};
 
-      for (const [key, value] of Object.entries(data)) {
+      for (const [key, value] of Object.entries(data as Record<string, unknown>)) {
         if (sensitiveFields.some((field) => key.toLowerCase().includes(field))) {
           sanitized[key] = '[REDACTED]';
         } else {
@@ -192,10 +195,10 @@ export class BeepDebugger {
 /**
  * Create axios interceptors for debugging
  */
-export function createDebugInterceptors(axios: any, beepDebugger: BeepDebugger) {
+export function createDebugInterceptors(instance: AxiosInstance, beepDebugger: BeepDebugger) {
   // Request interceptor
-  axios.interceptors.request.use(
-    (config: any) => {
+  instance.interceptors.request.use(
+    (config: InternalAxiosRequestConfig) => {
       beepDebugger.logRequest({
         method: config.method?.toUpperCase() || 'GET',
         url: config.url || '',
@@ -203,15 +206,15 @@ export function createDebugInterceptors(axios: any, beepDebugger: BeepDebugger) 
       });
       return config;
     },
-    (error: any) => {
+    (error: unknown) => {
       beepDebugger.error('Request interceptor error', error);
       return Promise.reject(error);
     },
   );
 
   // Response interceptor
-  axios.interceptors.response.use(
-    (response: any) => {
+  instance.interceptors.response.use(
+    (response: AxiosResponse) => {
       beepDebugger.logResponse({
         method: response.config.method?.toUpperCase() || 'GET',
         url: response.config.url || '',
@@ -220,13 +223,14 @@ export function createDebugInterceptors(axios: any, beepDebugger: BeepDebugger) 
       });
       return response;
     },
-    (error: any) => {
-      if (error.response) {
+    (error: unknown) => {
+      const axError = error as AxiosError;
+      if (axError.response) {
         beepDebugger.logResponse({
-          method: error.config?.method?.toUpperCase() || 'GET',
-          url: error.config?.url || '',
-          status: error.response.status,
-          data: error.response.data,
+          method: axError.config?.method?.toUpperCase() || 'GET',
+          url: axError.config?.url || '',
+          status: axError.response.status,
+          data: axError.response.data,
         });
       }
       beepDebugger.error('API Error', error);

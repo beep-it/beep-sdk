@@ -1,4 +1,4 @@
-import { AxiosError, AxiosInstance } from 'axios';
+import { AxiosInstance, isAxiosError } from 'axios';
 import {
   GenerateOTPRequest,
   GenerateOTPResponse,
@@ -116,8 +116,7 @@ export class WidgetModule {
         currentIntervalMs = baseIntervalMs;
       } catch (err) {
         options.onError?.(err);
-        const ax = err as AxiosError<any>;
-        const status = ax.response?.status;
+        const status = isAxiosError(err) ? err.response?.status : undefined;
         // Fatal for invalid/missing reference keys: abort early
         if (status && [400, 401, 403, 404, 422].includes(status)) {
           return { paid: false, last };

@@ -112,7 +112,7 @@ export interface ProductWithPrices {
   /** Array of image URLs for product display */
   images: string[];
   /** Flexible key-value data for additional product information */
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   /** Associated price information (most recent active price) */
   prices: Array<{
     /** External UUID for API references */

@@ -57,7 +57,7 @@ export interface ApiResponse<T> {
   /** Error message when unsuccessful */
   error?: string;
   /** Additional error details */
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
   /** Request tracking ID for support */
   requestId?: string;
 }
@@ -153,7 +153,7 @@ export interface FilterParams extends PaginationParams, SortParams {
   /** Search query */
   search?: string;
   /** Additional custom filters */
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
 }
 
 /**
@@ -198,7 +198,7 @@ export interface WebhookPayload<T> {
 /**
  * Type guard to check if a value is a valid UUID
  */
-export function isUUID(value: any): value is UUID {
+export function isUUID(value: unknown): value is UUID {
   if (typeof value !== 'string') return false;
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidRegex.test(value);
@@ -207,7 +207,7 @@ export function isUUID(value: any): value is UUID {
 /**
  * Type guard to check if a value is a valid money amount
  */
-export function isMoneyAmount(value: any): value is MoneyAmount {
+export function isMoneyAmount(value: unknown): value is MoneyAmount {
   if (typeof value !== 'string') return false;
   const moneyRegex = /^\d+(\.\d{1,2})?$/;
   return moneyRegex.test(value);
