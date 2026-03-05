@@ -5,26 +5,15 @@ import { MCPToolDefinition, MCPErrorResponse, MCPResponse } from '../types';
 
 // Zod schema for callLLMWithPayment
 export const callLLMWithPaymentSchema = z.object({
-  model: z
-    .string()
-    .describe('Model ID to use (e.g., "claude-sonnet-4-20250514", "gpt-4o")'),
+  model: z.string().describe('Model ID to use (e.g., "claude-sonnet-4-20250514", "gpt-4o")'),
   prompt: z.string().describe('The user prompt to send to the LLM'),
-  systemPrompt: z
-    .string()
-    .optional()
-    .describe('Optional system prompt for the LLM'),
+  systemPrompt: z.string().optional().describe('Optional system prompt for the LLM'),
   gatewayUrl: z
     .string()
     .optional()
     .describe('AI gateway URL (defaults to BEEP_AI_GATEWAY_URL env var or https://ai.justbeep.it)'),
-  maxTokens: z
-    .number()
-    .optional()
-    .describe('Maximum output tokens (default: 4096)'),
-  temperature: z
-    .number()
-    .optional()
-    .describe('Temperature for generation (0-2, default: 1)'),
+  maxTokens: z.number().optional().describe('Maximum output tokens (default: 4096)'),
+  temperature: z.number().optional().describe('Temperature for generation (0-2, default: 1)'),
   sessionId: z
     .string()
     .optional()
@@ -43,8 +32,7 @@ export async function callLLMWithPayment(
     return { error: 'BEEP_API_KEY is not configured in the .env file.' };
   }
 
-  const gateway =
-    gatewayUrl || process.env.BEEP_AI_GATEWAY_URL || 'https://ai.justbeep.it';
+  const gateway = gatewayUrl || process.env.BEEP_AI_GATEWAY_URL || 'https://ai.justbeep.it';
 
   const client = new BeepClient({
     apiKey,
