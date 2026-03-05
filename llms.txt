@@ -1,0 +1,145 @@
+# BEEP SDK Monorepo — AI Coding Assistant Guide
+
+**Purpose:** Comprehensive TypeScript SDK for SUI/stablecoin payments. One-time transfers only (no subscriptions). Use this file for quick orientation.
+
+## 📦 Package Overview
+
+### [@beep-it/sdk-core](./packages/core) - Core TypeScript SDK
+- **Server-side:** Full API client (beep_sk_* keys) for invoices, products, payments
+- **Browser-safe:** Public client (beep_pk_* keys) for widget integration
+- **Features:** TypeScript types, error handling, 402 payment flow helpers
+- **Install:** `npm install @beep-it/sdk-core`
+
+### [@beep-it/checkout-widget](./packages/checkout-widget) - React Payment Component
+- **Drop-in React widget** for SUI payment processing
+- **QR code generation** + real-time payment polling
+- **Zero CSS dependencies** (inline styling), customizable theming
+- **Install:** `npm install @beep-it/checkout-widget @beep-it/sdk-core`
+
+### [@beep-it/cli](./packages/cli) - MCP Server Scaffolding
+- **Generate MCP server templates** for AI agent integrations
+- **Multiple transports:** HTTP, stdio, SSE
+- **Install:** `npm install -g @beep-it/cli`
+
+### [packages/mcp](./packages/mcp) - MCP Documentation
+- **Integration guides** for Model Context Protocol servers
+- **Authentication patterns** and best practices
+
+## 🔐 Authentication
+
+### Key Types
+- **beep_sk_*** - Secret keys (server-side only, never expose to browsers)
+- **beep_pk_*** - Publishable keys (browser-safe, for frontend/widget use)
+
+### Security Rules
+- Secret keys: Full API access, server-side only
+- Publishable keys: Widget endpoints only, CORS-enabled, browser-safe
+
+Public Widget Endpoints (CORS-open)
+- POST /v1/widget/payment-session
+  - Body: { publishableKey, assets, paymentLabel?, generateQrCode? }
+  - assets accepts a mix of:
+    - { assetId: string, quantity: number } // existing product UUID
+    - { name: string, price: string, quantity?: number, token?: 'USDC', description?: string } // on-the-fly product (server persists product)
+  - Response: { referenceKey, paymentUrl, qrCode?, amount, expiresAt, status }
+
+- GET /v1/widget/payment-status/:referenceKey
+  - Response: { paid: boolean, status?: string }
+
+## 🚀 Quick Start Examples
+
+### 1. React Widget (Recommended)
+```tsx
+import { CheckoutWidget } from '@beep-it/checkout-widget';
+
+<CheckoutWidget
+  publishableKey="beep_pk_your_key"
+  labels={{ scanQr: 'Pay with SUI wallet', paymentLabel: 'My Store' }}
+  assets={[
+    { assetId: 'existing-uuid', quantity: 1 },  // existing product
+    { name: 'Custom Item', price: '12.50' }     // creates new product
+  ]}
+  primaryColor="#3b82f6"
+/>
+```
+
+### 2. Browser SDK (Advanced)
+```ts
+import { BeepPublicClient } from '@beep-it/sdk-core';
+
+const client = new BeepPublicClient({
+  publishableKey: 'beep_pk_…',
+  serverUrl: 'https://api.justbeep.it'
+});
+
+const session = await client.widget.createPaymentSession({
+  assets: [{ name: 'Service', price: '25.00' }],
+  paymentLabel: 'My Store',
+});
+```
+
+### 3. Server SDK (Backend)
+```ts
+import { BeepClient } from '@beep-it/sdk-core';
+
+const beep = new BeepClient({
+  apiKey: 'beep_sk_your_secret_key',
+  serverUrl: 'https://api.justbeep.it'
+});
+
+// Create invoice
+const invoice = await beep.invoices.create({
+  merchantId: 'your-merchant-id',
+  items: [{ name: 'Product', price: '25.00', quantity: 1 }]
+});
+```
+
+### 4. MCP Server (AI Agents)
+```bash
+npm install -g @beep-it/cli
+beep init my-payment-server --transport=http
+cd my-payment-server && npm run dev
+```
+
+402 Payment Flow (server)
+- Invoice creation pattern (HTTP 402)
+  - Create invoice: Call `beep.payments.requestAndPurchaseAsset` with `assets` and optional `paymentLabel`.
+    - If unpaid, server responds HTTP 402 with `{ referenceKey, paymentUrl, qrCode? }` (invoice created; no charge performed).
+  - Poll status: Call the same method with `paymentReference: <referenceKey>` until it returns 200 (paid) without `referenceKey`.
+ 
+Helper
+```ts
+const { paid } = await beep.payments.waitForPaymentCompletion({
+  assets: [{ assetId: 'uuid', quantity: 1 }],
+  paymentReference: ref,
+  intervalMs: 15000,
+  timeoutMs: 300000,
+});
+```
+
+Important Notes
+- On-the-fly items sent from the browser are persisted as products server-side (often hidden from listings by default).
+- Widget endpoints are CORS-open and CSRF-exempt; publishable keys are safe in browsers.
+- Secret keys must never be embedded in client apps.
+
+## 🔗 Package Documentation
+- **Core SDK**: [packages/core/README.md](./packages/core/README.md)
+- **Checkout Widget**: [packages/checkout-widget/README.md](./packages/checkout-widget/README.md)
+- **CLI Tool**: [packages/cli/README.md](./packages/cli/README.md)
+- **MCP Integration**: [packages/mcp/README.md](./packages/mcp/README.md)
+
+## 💡 Key Concepts
+- **One-time payments only** (no subscriptions/recurring)
+- **SUI/stablecoin transfers** (USDC)
+- **QR code integration** via BEEP payment standard
+- **Real-time polling** for payment confirmation
+- **Browser-safe** with publishable keys
+
+## 🎯 Common Use Cases
+- **E-commerce checkout** (shopping cart → payment)
+- **Service payments** (consulting, freelance)
+- **Digital products** (courses, downloads)
+- **Event ticketing** (one-time purchases)
+- **AI agent payments** (MCP integration)
+
+Last updated: 2025-09-24

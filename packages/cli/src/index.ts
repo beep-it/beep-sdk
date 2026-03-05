@@ -1,317 +1,163 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import * as fs from 'fs/promises';
-import * as path from 'path';
-import { execSync } from 'child_process';
-import * as readline from 'readline';
+import { color, output } from './utils/colors';
+import { initMcp } from './commands/init-mcp';
+import { integrate } from './commands/integrate';
 
 /**
- * BEEP CLI
+ * @fileoverview Enhanced BEEP CLI with improved developer experience
  *
- * This CLI scaffolds and integrates a minimal BEEP MCP server into existing projects.
- * Design principles:
- *  - Never overwrite a user's files by default.
- *  - Provide sensible templates that can run out-of-the-box.
- *  - Keep behavior explicit and documented.
+ * Key improvements:
+ * - Colored output for better readability
+ * - Interactive prompts with validation
+ * - Progress tracking for long operations
+ * - Better error handling and recovery
+ * - Configuration management
+ * - Smart template merging
+ * - Package manager detection
  */
 
-// This is the main entry point for the CLI
 export const program = new Command();
 
+// Configure CLI
+program
+  .name('beep')
+  .description(color.bold('BEEP CLI - Scaffold AI payment servers with ease'))
+  .version('0.2.0')
+  .configureHelp({
+    sortSubcommands: true,
+    subcommandTerm: (cmd) => color.cyan(cmd.name()),
+  });
+
+// Add custom help - this handler is called when --help flag is used
+program.on('--help', () => {
+  outputCustomHelp();
+});
+
 /**
- * Prompt user for input
+ * Enhanced init-mcp command
  */
-const promptUser = (question: string): Promise<string> => {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  return new Promise((resolve) => {
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    });
-  });
-};
-
-program
-  .version('0.1.0')
-  .description('A CLI for scaffolding and managing BEEP MCP servers');
-
-// A simple command to test the CLI
-program
-  .command('hello')
-  .description('Prints a greeting')
-  .action(() => {
-    console.log('Hello, from the BEEP CLI!');
-  });
-
-
-// The main command for scaffolding a new MCP server
 program
   .command('init-mcp')
-  .description('Scaffolds a new BEEP MCP server in a target repository')
-  .requiredOption('--mode <https|stdio>', 'The communication protocol for the server')
-  .option('--path <directory>', 'The path to create the server in. Defaults to the current directory.')
+  .description('Create a new BEEP MCP project with payment capabilities')
+  .requiredOption('--mode <mode>', 'Communication protocol', (value) => {
+    if (!['https', 'stdio'].includes(value)) {
+      throw new Error(`Invalid mode: ${value}. Must be 'https' or 'stdio'`);
+    }
+    return value as 'https' | 'stdio';
+  })
+  .requiredOption('--role <role>', 'Project role', (value) => {
+    if (!['mcp-server', 'mcp-client', 'both'].includes(value)) {
+      throw new Error(`Invalid role: ${value}. Must be 'mcp-server', 'mcp-client', or 'both'`);
+    }
+    return value as 'mcp-server' | 'mcp-client' | 'both';
+  })
+  .option('--path <directory>', 'Target directory (defaults to current)')
+  .option('-f, --force', 'Overwrite existing files')
+  .option('--dry-run', 'Preview changes without creating files')
+  .option('--skip-install', 'Skip dependency installation')
+  .option('--package-manager <pm>', 'Package manager to use', (value) => {
+    if (!['npm', 'pnpm', 'yarn'].includes(value)) {
+      throw new Error(`Invalid package manager: ${value}`);
+    }
+    return value as 'npm' | 'pnpm' | 'yarn';
+  })
   .action(async (options) => {
-    /**
-     * Initialize an MCP server in the given target path.
-     *
-     * Behavior:
-     *  - Copies template files but will NOT overwrite existing files.
-     *  - Special-cases package.json to MERGE dependencies/devDependencies/scripts.
-     *  - Creates an .env from .env.example if .env is missing.
-     *  - Prefers creating a file named `mcp-server.ts` (not `server.ts`).
-     */
-    const targetPath = options.path ? path.resolve(options.path) : process.cwd();
-    const templatePath = path.resolve(__dirname, '../templates');
-
-    console.log(`Scaffolding new BEEP MCP server at: ${targetPath}`);
-
     try {
-      /** Ensure a directory exists (mkdir -p) */
-      const ensureDir = async (dir: string) => {
-        await fs.mkdir(dir, { recursive: true });
-      };
-
-      /**
-       * Merge package.json from template into destination.
-       *
-       * Strategy:
-       *  - If dest package.json does not exist: write template as-is.
-       *  - If dest exists: merge dependencies, devDependencies, scripts (non-destructive — do not overwrite existing keys).
-       */
-      const mergePackageJson = async (srcPkgPath: string, destPkgPath: string) => {
-        const srcRaw = await fs.readFile(srcPkgPath, 'utf-8');
-        const src = JSON.parse(srcRaw);
-
-        let dest: any = {};
-        try {
-          const destRaw = await fs.readFile(destPkgPath, 'utf-8');
-          dest = JSON.parse(destRaw);
-        } catch (e) {
-          // If no existing package.json, use src entirely
-          await fs.writeFile(destPkgPath, JSON.stringify(src, null, 2) + '\n');
-          console.log('  - Created package.json');
-          return;
-        }
-
-        const merged = { ...dest };
-        const mergeField = (field: 'dependencies' | 'devDependencies' | 'scripts') => {
-          const srcField = src[field] || {};
-          const destField = dest[field] || {};
-          const out: Record<string, string> = { ...destField };
-          for (const [k, v] of Object.entries(srcField)) {
-            if (!(k in out)) {
-              out[k] = v as string;
-            }
-          }
-          if (Object.keys(out).length > 0) merged[field] = out;
-        };
-
-        mergeField('dependencies');
-        mergeField('devDependencies');
-        mergeField('scripts');
-
-        await fs.writeFile(destPkgPath, JSON.stringify(merged, null, 2) + '\n');
-        console.log('  - Updated package.json (merged dependencies, devDependencies, scripts)');
-      };
-
-      /**
-       * Recursively copy template files into target directory.
-       *
-       * Rules:
-       *  - package.json => merge via mergePackageJson
-       *  - server.ts => SKIP (we use mcp-server.ts instead)
-       *  - all other files => copy only if not present
-       */
-      const copyTemplates = async (srcDir: string, destDir: string) => {
-        await ensureDir(destDir);
-        const entries = await fs.readdir(srcDir, { withFileTypes: true });
-        for (const entry of entries) {
-          const srcPath = path.join(srcDir, entry.name);
-          const destPath = path.join(destDir, entry.name);
-
-          if (entry.isDirectory()) {
-            await copyTemplates(srcPath, destPath);
-          } else if (entry.isFile()) {
-            if (entry.name === 'package.json') {
-              await mergePackageJson(srcPath, path.join(destDir, 'package.json'));
-              continue;
-            }
-
-            // Skip legacy server.ts from templates; we provide mcp-server.ts instead
-            if (entry.name === 'server.ts') {
-              console.log('  - Skipped template server.ts (replaced by mcp-server.ts)');
-              continue;
-            }
-
-            // Do not overwrite existing files
-            try {
-              await fs.access(destPath);
-              // If exists, skip
-              console.log(`  - Skipped existing ${path.relative(destDir, destPath)}`);
-              continue;
-            } catch (_) {
-              // does not exist, proceed to copy
-            }
-
-            const fileData = await fs.readFile(srcPath);
-            await ensureDir(path.dirname(destPath));
-            await fs.writeFile(destPath, fileData);
-            console.log(`  - Added ${path.relative(destDir, destPath)}`);
-          }
-        }
-      };
-
-      await copyTemplates(templatePath, targetPath);
-
-      // Install dependencies automatically
-      console.log('\n📦 Installing dependencies...');
-      try {
-        execSync('npm install', { 
-          cwd: targetPath, 
-          stdio: 'inherit' 
-        });
-        console.log('✅ Dependencies installed successfully');
-      } catch (error) {
-        console.log('⚠️  Failed to install dependencies automatically. Please run "npm install" manually.');
-      }
-
-      // Prompt for API key and create configured .env file
-      console.log('\n🔑 Setting up your environment...');
-      const apiKey = await promptUser('Enter your BEEP API key (or press Enter to skip): ');
-      
-      const envExamplePath = path.join(targetPath, '.env.example');
-      const envPath = path.join(targetPath, '.env');
-      let envContent = await fs.readFile(envExamplePath, 'utf-8');
-      
-      // Set communication mode
-      envContent = envContent.replace(
-        /^COMMUNICATION_MODE=.*/m,
-        `COMMUNICATION_MODE=${options.mode}`
-      );
-      
-      // Set API key if provided
-      if (apiKey) {
-        envContent = envContent.replace(
-          /^BEEP_API_KEY=.*/m,
-          `BEEP_API_KEY=${apiKey}`
-        );
-      }
-      
-      // Handle .env file: create or merge safely
-      try {
-        // Check if .env already exists
-        const existingEnv = await fs.readFile(envPath, 'utf-8');
-        
-        // Merge: only add missing BEEP variables
-        let updatedEnv = existingEnv;
-        let hasUpdates = false;
-        
-        // Add COMMUNICATION_MODE if not present
-        if (!existingEnv.includes('COMMUNICATION_MODE=')) {
-          updatedEnv += `\n# BEEP MCP Server configuration\nCOMMUNICATION_MODE=${options.mode}\n`;
-          hasUpdates = true;
-        }
-        
-        // Add BEEP_API_KEY if not present and user provided one
-        if (apiKey && !existingEnv.includes('BEEP_API_KEY=')) {
-          updatedEnv += `BEEP_API_KEY=${apiKey}\n`;
-          hasUpdates = true;
-        }
-        
-        if (hasUpdates) {
-          await fs.writeFile(envPath, updatedEnv);
-          console.log('  - Updated existing .env with BEEP configuration');
-        } else {
-          console.log('  - .env already contains BEEP configuration, leaving unchanged');
-        }
-      } catch (_) {
-        // .env doesn't exist, create it
-        await fs.writeFile(envPath, envContent);
-        console.log('  - Created .env with your configuration');
-      }
-      // Clean up the example file only if it was copied
-      try {
-        await fs.unlink(envExamplePath);
-      } catch (_) {
-        /* ignore */
-      }
-
-      console.log(`\n✅ BEEP MCP server created at: ${targetPath}`);
-      console.log('\nNext steps:');
-      console.log(`\n1. Navigate to your new server:`);
-      console.log(`   cd ${options.path || path.basename(targetPath)}`);
-      
-      if (!apiKey) {
-        console.log(`\n2. Configure your API key:`);
-        console.log(`   Add your BEEP_API_KEY to the .env file.`);
-        console.log(`\n3. Build and run the server:`);
-      } else {
-        console.log(`\n2. Build and run the server:`);
-      }
-      console.log(`   npm run build && npm start`);
-
+      await initMcp(options);
     } catch (error) {
-      console.error('\n❌ An error occurred during scaffolding:', error);
+      const message = error instanceof Error ? error.message : String(error);
+      output.error(`Setup failed: ${message}`);
+      process.exit(1);
     }
   });
 
-// This allows the CLI to be executed directly, but also to be imported for testing
+/**
+ * Enhanced integrate command
+ */
+program
+  .command('integrate <path>')
+  .description('Add BEEP payment tools to an existing project')
+  .option('-f, --force', 'Overwrite existing files')
+  .option('--dry-run', 'Preview changes without creating files')
+  .action(async (targetPath, options) => {
+    try {
+      await integrate(targetPath, options);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      output.error(`Integration failed: ${message}`);
+      process.exit(1);
+    }
+  });
+
+// TODO: Future commands to implement
+// - interactive: Start interactive setup wizard
+// - config: Manage BEEP configuration
+// - doctor: Check your BEEP setup and diagnose issues
+
+/**
+ * Output custom help sections (Examples and Learn More)
+ */
+function outputCustomHelp(): void {
+  console.log('');
+  output.section('Examples');
+  console.log('  $ beep init-mcp --mode https --role mcp-server');
+  console.log('  $ beep init-mcp --mode stdio --role both --path ./my-project');
+  console.log('  $ beep integrate ./existing-project');
+  console.log('');
+  output.section('Learn More');
+  console.log('  Documentation: https://docs.justbeep.it');
+  console.log('  GitHub: https://github.com/beep-it/beep-sdk');
+}
+
+/**
+ * Run CLI when executed directly (not when imported)
+ */
+function runCli(): void {
+  // Show help if no command provided (before parsing to avoid exitOverride issues)
+  if (!process.argv.slice(2).length) {
+    // Use helpInformation() to get the help text, then output it manually
+    // This avoids issues with Commander's help() method behavior
+    const helpText = program.helpInformation();
+    console.log(helpText);
+    outputCustomHelp();
+    return;
+  }
+
+  // Error handling - exitOverride lets us catch errors instead of process.exit
+  program.exitOverride();
+
+  try {
+    program.parse();
+  } catch (error: any) {
+    // Handle expected exits (help, version) - these are not errors
+    if (
+      error.code === 'commander.helpDisplayed' ||
+      error.code === 'commander.version' ||
+      error.code === 'commander.help'
+    ) {
+      process.exit(0);
+    }
+
+    // Handle actual errors
+    if (error.code === 'commander.missingArgument') {
+      output.error(error.message);
+    } else if (error.code === 'commander.unknownCommand') {
+      output.error(`Unknown command: ${error.message}`);
+      console.log(`\nRun ${color.cyan('beep --help')} for available commands`);
+    } else if (error.code === 'commander.missingMandatoryOptionValue') {
+      output.error(error.message);
+    } else if (error.code === 'commander.optionMissingArgument') {
+      output.error(error.message);
+    } else {
+      output.error(error.message);
+    }
+    process.exit(1);
+  }
+}
+
+// Only run CLI when this file is executed directly, not when imported
 if (require.main === module) {
-  program
-    .command('integrate <path>')
-    .description('Integrate BEEP MCP into an existing project')
-    .action(async (targetPath) => {
-      /**
-       * Integrate helper files into an existing project:
-       *  - Copies the example tool into <project>/tools/
-       *  - Copies the BEEP SDK tarball next to the project (for local installs)
-       *
-       * Note: We do not modify package.json here; instructions are printed for the user.
-       */
-      const fullTargetPath = path.resolve(targetPath);
-      console.log(`\nIntegrating BEEP files into: ${fullTargetPath}`);
-
-      try {
-        const templatesDir = path.resolve(__dirname, '../templates');
-        const toolTemplateDir = path.resolve(templatesDir, 'src/tools');
-
-        // 1. Create tools directory
-        const targetToolsDir = path.resolve(fullTargetPath, 'tools');
-        await fs.mkdir(targetToolsDir, { recursive: true });
-
-        // 2. Copy tool file
-        const toolFile = 'checkBeepApi.ts';
-        await fs.copyFile(
-          path.join(toolTemplateDir, toolFile),
-          path.join(targetToolsDir, toolFile)
-        );
-
-        // 3. Copy SDK tarball
-        const sdkTarball = 'beep-sdk-core-0.1.0.tgz';
-        await fs.copyFile(
-          path.join(templatesDir, sdkTarball),
-          path.join(fullTargetPath, sdkTarball)
-        );
-
-        console.log('\n✅ BEEP integration files created!');
-        console.log('\nNext steps:');
-        console.log('\n1. Add the BEEP SDK dependency to your project.');
-        console.log('   In your package.json, add the following to your \'dependencies\':');
-        console.log('   \'@beep/sdk-core\': \'file:beep-sdk-core-0.1.0.tgz\'');
-        console.log('\n2. Run \'npm install\' or \'pnpm install\' to install the new dependency.');
-        console.log('\n3. Integrate the BEEP tool into your server file:');
-        console.log('   import { checkBeepApi } from \'./tools/checkBeepApi\'; // Adjust path if needed');
-        console.log('   // Add the tool to your MCP\'s tool registry.');
-
-      } catch (error) {
-        console.error('\n❌ Failed to integrate BEEP files:', error);
-      }
-    });
-
-  program.parse(process.argv);
+  runCli();
 }

@@ -1,0 +1,17 @@
+# @beep-it/cli — LLM Guide
+
+Purpose: Command-line tooling to scaffold and integrate BEEP components (MCP servers, examples).
+
+Install
+```bash
+npm install -g @beep-it/cli
+```
+
+Capabilities
+- Scaffold MCP server templates
+- Generate example integrations
+- Helper tasks for local development
+
+Docs: README.md in this package
+Last updated: 2025-09-17
+
