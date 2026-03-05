@@ -8,6 +8,7 @@ import { checkBeepApiTool } from './tools/checkBeepApi';
 import { getAvailableWalletsTool } from './tools/getAvailableWallets';
 import { requestAndPurchaseAssetTool } from './tools/requestAndPurchaseAsset';
 import { signSolanaTransactionTool } from './tools/signSolanaTransaction';
+import { callLLMWithPaymentTool } from './tools/callLLMWithPayment';
 
 /**
  * MCP Tool Definition with Zod schema support
@@ -35,6 +36,7 @@ const tools: MCPToolRegistry = {
   requestAndPurchaseAsset: requestAndPurchaseAssetTool,
   signSolanaTransaction: signSolanaTransactionTool,
   getAvailableWallets: getAvailableWalletsTool,
+  callLLMWithPayment: callLLMWithPaymentTool,
 };
 
 /**

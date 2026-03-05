@@ -4,6 +4,7 @@ import axios, { AxiosInstance } from 'axios';
 import { InvoicesModule } from './modules/invoices';
 import { PaymentsModule } from './modules/payments';
 import { ProductsModule } from './modules/products';
+import { AiModule } from './modules/ai';
 
 // Configuration for the BeepClient
 interface BeepClientOptions {
@@ -17,6 +18,7 @@ export class BeepClient {
   public products: ProductsModule;
   public invoices: InvoicesModule;
   public payments: PaymentsModule;
+  public ai: AiModule;
 
   constructor(options: BeepClientOptions) {
     this.client = axios.create({
@@ -31,6 +33,7 @@ export class BeepClient {
     this.products = new ProductsModule(this.client);
     this.invoices = new InvoicesModule(this.client);
     this.payments = new PaymentsModule(this.client);
+    this.ai = new AiModule(this.client);
   }
 
   // Example function
