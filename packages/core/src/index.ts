@@ -7,6 +7,7 @@ import axios, { AxiosInstance } from 'axios';
 import { InvoicesModule } from './modules/invoices';
 import { PaymentsModule } from './modules/payments';
 import { ProductsModule } from './modules/products';
+import { AiModule } from './modules/ai';
 import { WidgetModule } from './modules/widget';
 import { UserModule } from './modules/user';
 import { BeepAuthenticationError, BeepErrorCode } from './errors';
@@ -82,6 +83,8 @@ export class BeepClient {
   public readonly payments: PaymentsModule;
   /** Access to authenticated user info */
   public readonly user: UserModule;
+  /** Access to AI gateway inference with a402 payment */
+  public readonly ai: AiModule;
 
   /**
    * Creates a new BEEP client instance
@@ -117,6 +120,7 @@ export class BeepClient {
     this.invoices = new InvoicesModule(this.client);
     this.payments = new PaymentsModule(this.client);
     this.user = new UserModule(this.client);
+    this.ai = new AiModule(this.client);
   }
 
   /**

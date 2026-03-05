@@ -18,6 +18,7 @@ import { pauseStreamingTool } from './tools/pauseStreaming';
 import { requestAndPurchaseAssetTool } from './tools/requestAndPurchaseAsset';
 import { startStreamingTool } from './tools/startStreaming';
 import { stopStreamingTool } from './tools/stopStreaming';
+import { callLLMWithPaymentTool } from './tools/callLLMWithPayment';
 import { McpHttpHandlerParams, McpServerError, MCPToolDefinition } from './types';
 
 /**
@@ -39,6 +40,7 @@ const tools: MCPToolRegistry = {
   pauseStreaming: pauseStreamingTool,
   startStreaming: startStreamingTool,
   stopStreaming: stopStreamingTool,
+  callLLMWithPayment: callLLMWithPaymentTool,
 };
 
 /**
