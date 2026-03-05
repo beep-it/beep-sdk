@@ -17,7 +17,6 @@
   "references": [
     { "path": "./packages/core" },
     { "path": "./packages/cli" },
-    { "path": "./packages/checkout-widget" },
-    { "path": "./packages/ai-gateway" }
+    { "path": "./packages/checkout-widget" }
   ]
 }
