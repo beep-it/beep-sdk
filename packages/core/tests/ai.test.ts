@@ -70,11 +70,11 @@ describe('AI Module', () => {
     });
 
     it('parses remaining_balance from response body', async () => {
-      mockAxios.onPost(COMPLETIONS_URL).reply(
-        200,
-        makeCompletionResponse({ remaining_balance: '0.99' }),
-        { 'x-session-id': 'session-xyz' },
-      );
+      mockAxios
+        .onPost(COMPLETIONS_URL)
+        .reply(200, makeCompletionResponse({ remaining_balance: '0.99' }), {
+          'x-session-id': 'session-xyz',
+        });
 
       const result = await client.ai.chat({
         ...makeChatBody(),
@@ -100,11 +100,9 @@ describe('AI Module', () => {
       });
 
       // Retry after payment: 200
-      mockAxios.onPost(COMPLETIONS_URL).replyOnce(
-        200,
-        makeCompletionResponse(),
-        { 'x-session-id': 'session-abc' },
-      );
+      mockAxios
+        .onPost(COMPLETIONS_URL)
+        .replyOnce(200, makeCompletionResponse(), { 'x-session-id': 'session-abc' });
 
       const result = await client.ai.chat({
         ...makeChatBody(),
@@ -141,11 +139,9 @@ describe('AI Module', () => {
       mockAxios.onPost('/v1/payment/a402/pay').replyOnce(200, {
         txDigest: 'tx-123',
       });
-      mockAxios.onPost(COMPLETIONS_URL).replyOnce(
-        200,
-        makeCompletionResponse(),
-        { 'x-session-id': 'session-abc' },
-      );
+      mockAxios
+        .onPost(COMPLETIONS_URL)
+        .replyOnce(200, makeCompletionResponse(), { 'x-session-id': 'session-abc' });
 
       await client.ai.chat({ ...makeChatBody(), gatewayUrl: GATEWAY_URL });
 
@@ -218,19 +214,17 @@ describe('AI Module', () => {
     it('throws descriptive error when 402 has no payment_request', async () => {
       mockAxios.onPost(COMPLETIONS_URL).reply(402, { error: 'Payment required' });
 
-      await expect(
-        client.ai.chat({ ...makeChatBody(), gatewayUrl: GATEWAY_URL }),
-      ).rejects.toThrow('Gateway returned 402 without a payment_request');
+      await expect(client.ai.chat({ ...makeChatBody(), gatewayUrl: GATEWAY_URL })).rejects.toThrow(
+        'Gateway returned 402 without a payment_request',
+      );
     });
   });
 
   describe('response parsing edge cases', () => {
     it('returns empty content when no choices', async () => {
-      mockAxios.onPost(COMPLETIONS_URL).reply(
-        200,
-        makeCompletionResponse({ choices: [] }),
-        { 'x-session-id': 'session-1' },
-      );
+      mockAxios
+        .onPost(COMPLETIONS_URL)
+        .reply(200, makeCompletionResponse({ choices: [] }), { 'x-session-id': 'session-1' });
 
       const result = await client.ai.chat({
         ...makeChatBody(),
@@ -241,7 +235,7 @@ describe('AI Module', () => {
     });
 
     it('defaults usage to zeros when missing', async () => {
-      const { usage, ...noUsage } = makeCompletionResponse();
+      const { usage: _usage, ...noUsage } = makeCompletionResponse();
       mockAxios.onPost(COMPLETIONS_URL).reply(200, noUsage, {
         'x-session-id': 'session-1',
       });

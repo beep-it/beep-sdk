@@ -87,11 +87,9 @@ export class AiModule {
 
     // Step 1: Try the request (may succeed if session has balance)
     try {
-      const response = await this.client.post(
-        `${gatewayUrl}/v1/chat/completions`,
-        requestBody,
-        { headers },
-      );
+      const response = await this.client.post(`${gatewayUrl}/v1/chat/completions`, requestBody, {
+        headers,
+      });
 
       const newSessionId = response.headers['x-session-id'];
       if (newSessionId) {
@@ -105,8 +103,7 @@ export class AiModule {
       }
 
       // Step 2: Parse the 402 Payment-Request
-      const paymentRequest = error.response.data
-        ?.payment_request as PaymentRequestInfo;
+      const paymentRequest = error.response.data?.payment_request as PaymentRequestInfo;
       if (!paymentRequest) {
         throw new Error('Gateway returned 402 without a payment_request');
       }
@@ -124,8 +121,7 @@ export class AiModule {
         { headers },
       );
 
-      const retrySessionId =
-        retryResponse.headers['x-session-id'] || paymentRequest.sessionId;
+      const retrySessionId = retryResponse.headers['x-session-id'] || paymentRequest.sessionId;
       this.sessionCache.set(gatewayUrl, retrySessionId);
 
       return this.parseCompletionResponse(retryResponse.data, retrySessionId);
@@ -152,10 +148,7 @@ export class AiModule {
     };
   }
 
-  private parseCompletionResponse(
-    data: any,
-    sessionId?: string,
-  ): AiChatResponse {
+  private parseCompletionResponse(data: any, sessionId?: string): AiChatResponse {
     const choice = data.choices?.[0];
     return {
       id: data.id,
