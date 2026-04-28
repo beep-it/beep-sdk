@@ -19,7 +19,7 @@ jobs:
           node-version: 22.18.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e
 
       - name: Prepare
         run: |
@@ -55,7 +55,7 @@ jobs:
           node-version: 22.18.0
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        uses: pnpm/action-setup@903f9c1a6ebcba6cf41d87230be49611ac97822e
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
