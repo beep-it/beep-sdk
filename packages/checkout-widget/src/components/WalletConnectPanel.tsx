@@ -45,9 +45,13 @@ const getProviderName = (walletProviderKey: string, address: string): string => 
  * @returns The scaled integer value as a string
  */
 const scaleToInteger = (value: number, decimals: number): string => {
-  const scaleFactor = Math.pow(10, decimals);
-  const scaled = Math.floor(value * scaleFactor);
-  return scaled.toString();
+  // Convert via string manipulation to avoid floating-point precision errors
+  // (e.g. 1.005 * 1e6 === 1004999.9999999999 in JS floating point arithmetic)
+  const valueStr = value.toString();
+  const [wholePart, fracPart = ''] = valueStr.split('.');
+  const paddedFrac = fracPart.padEnd(decimals, '0').slice(0, decimals);
+  const combined = `${wholePart}${paddedFrac}`.replace(/^0+(?=\d)/, '');
+  return combined;
 };
 
 const useConnectButtonText = ({
