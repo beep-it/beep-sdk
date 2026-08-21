@@ -24,12 +24,14 @@
   },
   "pnpm": {
     "overrides": {
-      "valibot": "1.2.0",
-      "axios": "1.13.5",
+      "valibot": "1.4.2",
+      "axios": "1.19.0",
       "esbuild": "0.25.0",
       "js-yaml": "4.1.1",
-      "body-parser": "2.2.1",
-      "qs@<6.14.1": ">=6.14.1",
+      "body-parser": "2.3.0",
+      "qs@<6.15.2": ">=6.15.2",
+      "form-data@<4.0.6": ">=4.0.6",
+      "path-to-regexp@>=8.0.0 <8.4.0": ">=8.4.0",
       "pnpm@>=10.0.0 <10.26.0": ">=10.26.0",
       "pnpm@<10.26.0": ">=10.26.0",
       "pnpm@>=6.25.0 <10.27.0": ">=10.27.0"
@@ -38,5 +40,5 @@
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "pnpm@10.25.0"
+  "packageManager": "pnpm@10.29.2"
 }
