@@ -1,6 +1,6 @@
 import { Wallet } from '@dynamic-labs/sdk-react-core';
 import { isSuiWallet } from '@dynamic-labs/sui';
-import { Transaction } from '@mysten/sui/transactions';
+import { coinWithBalance, Transaction } from '@mysten/sui/transactions';
 import React, { useCallback } from 'react';
 import { useDynamicWallet } from '../hooks/useDynamicWallet';
 import { PaymentSetupData } from '../hooks/usePaymentSetup';
@@ -71,6 +71,24 @@ const useConnectButtonText = ({
 };
 
 /**
+ * Builds the transaction to BCS bytes, resolving the CoinWithBalance intent against the chain.
+ *
+ * The SDK reports a coin shortfall as "Not enough coins of type <type>..."; surface that as the
+ * wording the widget used before coin selection moved into the SDK.
+ */
+const buildPaymentTransaction = async (tx: Transaction, suiClient: any): Promise<Uint8Array> => {
+  try {
+    return await tx.build({ client: suiClient });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('Not enough coins of type')) {
+      throw new Error('No USDC funds in your wallet');
+    }
+    throw error;
+  }
+};
+
+/**
  * Sends a Sui USDC payment transaction
  * @param paymentSetupData - Payment setup data containing amount and recipient
  * @param primaryWallet - The connected Dynamic wallet
@@ -95,27 +113,11 @@ const payToAddress = async ({
       throw new Error('Failed to get Sui client');
     }
 
-    // Fetch USDC coins owned by the user
-    const { data: coins } = await suiClient.getCoins({
-      owner: primaryWallet.address,
-      coinType: SUI_USDC_ADDRESS,
-    });
-
-    if (!coins.length) {
-      throw new Error('No USDC funds in your wallet');
-    }
-
     // Create transaction
     const tx = new Transaction();
-
-    // Merge all coins into the first one if multiple exist
-    const mergeCoin = coins[0];
-    if (coins.length > 1) {
-      tx.mergeCoins(
-        tx.object(mergeCoin.coinObjectId),
-        coins.map((c) => tx.object(c.coinObjectId)).slice(1),
-      );
-    }
+    // Required before build: the CoinWithBalance resolver looks up the sender's coins.
+    tx.setSender(primaryWallet.address);
+    tx.setGasBudget(10_000_000);
 
     if (paymentSetupData.referenceKey) {
       const eventId = Array.from(new TextEncoder().encode(TRANSACTION_REFERENCE));
@@ -129,18 +131,25 @@ const payToAddress = async ({
     // Calculate amount in base units
     const baseUnits = scaleToInteger(paymentSetupData.totalAmount, SUI_USDC_DECIMALS);
 
-    // Split the amount to send
-    const [sendCoin] = tx.splitCoins(tx.object(mergeCoin.coinObjectId), [baseUnits]);
-
-    // Set transaction parameters
-    tx.setSender(primaryWallet.address);
-    tx.setGasBudget(10_000_000);
+    // `coinWithBalance` is an unresolved intent: coin selection, merging and splitting are
+    // resolved by the SDK at build time, taking only as many coins as the balance needs.
+    const sendCoin = coinWithBalance({
+      balance: BigInt(baseUnits),
+      type: SUI_USDC_ADDRESS,
+      useGasCoin: false,
+    });
 
     // Transfer to recipient
     tx.transferObjects([sendCoin], tx.pure.address(destinationAddress));
 
+    // Build here rather than handing the wallet an unresolved transaction: resolving the intent
+    // needs a client, and only the dapp is guaranteed to have one.
+    const transactionBytes = await buildPaymentTransaction(tx, suiClient);
+
     // Sign and execute transaction
-    const signedTransaction = await primaryWallet.signTransaction(tx);
+    const signedTransaction = await primaryWallet.signTransaction(
+      Transaction.from(transactionBytes),
+    );
     const paidTransaction = await suiClient.executeTransactionBlock({
       options: {},
       signature: signedTransaction.signature,

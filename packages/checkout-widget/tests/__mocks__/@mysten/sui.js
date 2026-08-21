@@ -3,12 +3,53 @@
  * Provides mock implementations for Transaction and SuiClient
  */
 
+/**
+ * Mock of the `coinWithBalance` intent. Like the real one it resolves nothing on its own — the
+ * command is a placeholder until `build()` runs against a client.
+ */
+const coinWithBalance = jest.fn(({ balance, type, useGasCoin }) => ({
+  type: 'coinWithBalance',
+  balance,
+  coinType: type,
+  useGasCoin,
+}));
+
 // Mock Transaction class
 class Transaction {
   constructor() {
     this.sender = null;
     this.gasBudget = null;
     this.operations = [];
+  }
+
+  /**
+   * Rebuilds a transaction from built bytes — what the dapp hands the wallet to sign.
+   */
+  static from(bytes) {
+    const tx = new Transaction();
+    tx.bytes = bytes;
+    return tx;
+  }
+
+  /**
+   * Resolves the `coinWithBalance` intents against the client, mirroring the real resolver's
+   * coin lookup and its shortfall error, then returns opaque bytes.
+   */
+  async build({ client } = {}) {
+    if (!client) {
+      throw new Error('No sui client passed to Transaction#build');
+    }
+    for (const op of this.operations) {
+      for (const coin of op.objects ?? []) {
+        if (coin?.type !== 'coinWithBalance') continue;
+        const { data } = await client.getCoins({ owner: this.sender, coinType: coin.coinType });
+        const total = data.reduce((sum, c) => sum + BigInt(c.balance), 0n);
+        if (total < BigInt(coin.balance)) {
+          throw new Error(`Not enough coins of type ${coin.coinType} to satisfy requested balance`);
+        }
+      }
+    }
+    return new Uint8Array([1, 2, 3]);
   }
 
   setSender(address) {
@@ -89,4 +130,5 @@ class SuiClient {
 module.exports = {
   Transaction,
   SuiClient,
+  coinWithBalance,
 };
