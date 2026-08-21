@@ -45,34 +45,34 @@ const getProviderName = (walletProviderKey: string, address: string): string => 
  * @returns The scaled integer value as a string
  */
 export const expandExponential = (numStr: string): string => {
-    const match = numStr.match(/^(-?)(\d+)(?:\.(\d+))?e([+-]?\d+)$/i);
-    if (!match) return numStr;
-    const [, sign, intPart, fracPart = '', expStr] = match;
-    const exp = parseInt(expStr, 10);
-    const digits = intPart + fracPart;
-    const pointPos = intPart.length + exp;
-    if (pointPos <= 0) {
-      return `${sign}0.${'0'.repeat(-pointPos)}${digits}`;
-    }
-    if (pointPos >= digits.length) {
-      return `${sign}${digits}${'0'.repeat(pointPos - digits.length)}`;
-    }
-    return `${sign}${digits.slice(0, pointPos)}.${digits.slice(pointPos)}`;
+  const match = numStr.match(/^(-?)(\d+)(?:\.(\d+))?e([+-]?\d+)$/i);
+  if (!match) return numStr;
+  const [, sign, intPart, fracPart = '', expStr] = match;
+  const exp = parseInt(expStr, 10);
+  const digits = intPart + fracPart;
+  const pointPos = intPart.length + exp;
+  if (pointPos <= 0) {
+    return `${sign}0.${'0'.repeat(-pointPos)}${digits}`;
+  }
+  if (pointPos >= digits.length) {
+    return `${sign}${digits}${'0'.repeat(pointPos - digits.length)}`;
+  }
+  return `${sign}${digits.slice(0, pointPos)}.${digits.slice(pointPos)}`;
 };
 
 export const scaleToInteger = (value: number, decimals: number): string => {
-    // Convert via string manipulation to avoid floating-point precision errors
-    // (e.g. 1.005 * 1e6 === 1004999.9999999999 in JS floating point arithmetic).
-    // Numbers outside [1e-6, 1e21) serialize to scientific notation (e.g.
-    // "1e-7", "1e+21"), so expand those to plain decimal form first.
-    const valueStr = expandExponential(value.toString());
-    const isNegative = valueStr.startsWith('-');
-    const unsigned = isNegative ? valueStr.slice(1) : valueStr;
-    const [wholePart, fracPart = ''] = unsigned.split('.');
-    const paddedFrac = fracPart.padEnd(decimals, '0').slice(0, decimals);
-    const combined = `${wholePart}${paddedFrac}`.replace(/^0+(?=\d)/, '');
-    return isNegative ? `-${combined}` : combined;
-  };
+  // Convert via string manipulation to avoid floating-point precision errors
+  // (e.g. 1.005 * 1e6 === 1004999.9999999999 in JS floating point arithmetic).
+  // Numbers outside [1e-6, 1e21) serialize to scientific notation (e.g.
+  // "1e-7", "1e+21"), so expand those to plain decimal form first.
+  const valueStr = expandExponential(value.toString());
+  const isNegative = valueStr.startsWith('-');
+  const unsigned = isNegative ? valueStr.slice(1) : valueStr;
+  const [wholePart, fracPart = ''] = unsigned.split('.');
+  const paddedFrac = fracPart.padEnd(decimals, '0').slice(0, decimals);
+  const combined = `${wholePart}${paddedFrac}`.replace(/^0+(?=\d)/, '');
+  return isNegative ? `-${combined}` : combined;
+};
 const useConnectButtonText = ({
   isLoading,
   isConnected,
