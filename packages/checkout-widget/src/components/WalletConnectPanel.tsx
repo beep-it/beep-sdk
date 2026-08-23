@@ -67,6 +67,7 @@ export const scaleToInteger = (value: number, decimals: number): string => {
   const combined = `${wholePart}${paddedFrac}`.replace(/^0+(?=\d)/, '');
   return isNegative ? `-${combined}` : combined;
 };
+const useConnectButtonText = ({
   isLoading,
   isConnected,
   wallet,
