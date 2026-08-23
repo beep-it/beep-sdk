@@ -309,7 +309,6 @@ describe('WalletConnectPanel', () => {
   });
 });
 
-
 describe('scaleToInteger', () => {
   it('scales positive decimal values correctly', () => {
     expect(scaleToInteger(1.005, 6)).toBe('1005000');
