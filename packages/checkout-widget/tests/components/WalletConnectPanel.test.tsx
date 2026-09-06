@@ -9,6 +9,8 @@ const dynamicMock = require('@dynamic-labs/sdk-react-core');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const suiMock = require('@dynamic-labs/sui');
 
+const makeCoin = (coinObjectId: string) => ({ coinObjectId, balance: '100000000' });
+
 describe('WalletConnectPanel', () => {
   let mockSetShowAuthFlow: jest.Mock;
   let mockHandleLogOut: jest.Mock;
@@ -36,11 +38,14 @@ describe('WalletConnectPanel', () => {
     mockHandleLogOut = jest.fn().mockResolvedValue(undefined);
     mockOnPaymentComplete = jest.fn();
 
-    // Setup mock Sui client
+    // Setup mock Sui client. The dapp builds the transaction itself now, so the client is what
+    // the CoinWithBalance intent resolves its coins against — keyed by coin type.
     mockSuiClient = {
-      getCoins: jest.fn().mockResolvedValue({
-        data: [{ coinObjectId: 'coin-1', balance: '100000000' }],
-      }),
+      getCoins: jest
+        .fn()
+        .mockImplementation(({ coinType }: { coinType: string }) =>
+          Promise.resolve({ data: [makeCoin(`coin-${coinType}`)] }),
+        ),
       executeTransactionBlock: jest.fn().mockResolvedValue({
         digest: 'tx-digest-123',
       }),
@@ -254,7 +259,7 @@ describe('WalletConnectPanel', () => {
       await waitFor(() => {
         expect(consoleErrorSpy).toHaveBeenCalledWith(
           '[WalletConnectButton] Payment failed:',
-          expect.any(Error),
+          expect.objectContaining({ message: 'No USDC funds in your wallet' }),
         );
       });
 
