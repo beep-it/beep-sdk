@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { WalletConnectPanel } from '../../src/components/WalletConnectPanel';
+import { WalletConnectPanel, scaleToInteger } from '../../src/components/WalletConnectPanel';
 
 // Mocks are configured via moduleNameMapper in jest.config.js
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -311,5 +311,31 @@ describe('WalletConnectPanel', () => {
 
       consoleErrorSpy.mockRestore();
     });
+  });
+});
+
+describe('scaleToInteger', () => {
+  it('scales positive decimal values correctly', () => {
+    expect(scaleToInteger(1.005, 6)).toBe('1005000');
+    expect(scaleToInteger(19.99, 6)).toBe('19990000');
+  });
+  it('handles negative values', () => {
+    expect(scaleToInteger(-0.5, 6)).toBe('-500000');
+  });
+  it('handles values below the scientific notation threshold', () => {
+    // (1e-7).toString() === '1e-7' in JS, which the old split-on-'.' logic
+    // did not handle at all.
+    expect(scaleToInteger(1e-7, 6)).toBe('0');
+  });
+  it('handles values above the scientific notation threshold', () => {
+    // (1e21).toString() === '1e+21' in JS.
+    expect(scaleToInteger(1e21, 6)).toBe(`1${'0'.repeat(27)}`);
+  });
+  it('handles whole numbers and zero', () => {
+    expect(scaleToInteger(5, 6)).toBe('5000000');
+    expect(scaleToInteger(0, 6)).toBe('0');
+  });
+  it('truncates extra fractional digits beyond decimals', () => {
+    expect(scaleToInteger(1.0000001, 6)).toBe('1000000');
   });
 });
