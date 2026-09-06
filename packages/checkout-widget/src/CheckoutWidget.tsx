@@ -200,7 +200,6 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [widgetStep, setWidgetStep] = useState<WidgetSteps>(WidgetSteps.PaymentInterface);
-  // const [otp, setOTP] = useState<string | null>(null);
 
   // const handlePayWithCash = useCallback(() => {
   //   setWidgetStep(WidgetSteps.EmailVerification);
@@ -385,7 +384,6 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
               tosAccepted={tosAccepted}
               setTosAccepted={setTosAccepted}
               setWidgetStep={setWidgetStep}
-              setOTP={setOTP}
               publishableKey={publishableKey}
               serverUrl={serverUrl}
             />
@@ -397,8 +395,6 @@ const CheckoutWidgetInner: React.FC<MerchantWidgetProps> = ({
             <CodeConfirmation
               email={email}
               tosAccepted={tosAccepted}
-              otp={otp}
-              setOTP={setOTP}
               setWidgetStep={setWidgetStep}
               publishableKey={publishableKey}
               serverUrl={serverUrl}

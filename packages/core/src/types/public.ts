@@ -74,7 +74,6 @@ export interface GenerateOTPRequest {
 }
 
 export interface GenerateOTPResponse {
-  verificationCode?: string;
   newCodeGenerated: boolean;
 }
 

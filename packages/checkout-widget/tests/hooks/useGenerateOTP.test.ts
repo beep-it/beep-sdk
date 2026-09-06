@@ -14,7 +14,6 @@ describe('useGenerateOTP', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     __mockWidget.generateOTP.mockResolvedValue({
-      verificationCode: '123456',
       newCodeGenerated: true,
     });
   });
@@ -36,7 +35,6 @@ describe('useGenerateOTP', () => {
       });
 
       expect(response).toEqual({
-        verificationCode: '123456',
         newCodeGenerated: true,
       });
       expect(__mockWidget.generateOTP).toHaveBeenCalledWith({
@@ -47,7 +45,6 @@ describe('useGenerateOTP', () => {
 
     it('handles newCodeGenerated: false response', async () => {
       __mockWidget.generateOTP.mockResolvedValue({
-        verificationCode: undefined,
         newCodeGenerated: false,
       });
 
@@ -64,7 +61,6 @@ describe('useGenerateOTP', () => {
       });
 
       expect(response.newCodeGenerated).toBe(false);
-      expect(response.verificationCode).toBeUndefined();
     });
   });
 

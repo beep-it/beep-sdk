@@ -88,7 +88,7 @@ describe('Widget Module', () => {
 
   describe('generateOTP', () => {
     it('generates an OTP for the given email', async () => {
-      const mockResponse = { newCodeGenerated: true, verificationCode: '123456' };
+      const mockResponse = { newCodeGenerated: true };
       mockAxios.onPost('/v1/widget/generate-otp').reply(200, mockResponse);
 
       const result = await client.widget.generateOTP({
