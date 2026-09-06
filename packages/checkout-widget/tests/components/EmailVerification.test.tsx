@@ -18,7 +18,6 @@ describe('EmailVerification', () => {
     tosAccepted: false,
     setTosAccepted: jest.fn(),
     setWidgetStep: jest.fn(),
-    setOTP: jest.fn(),
     publishableKey: 'beep_pk_test_123',
     serverUrl: 'https://api.test.com',
   };
@@ -28,7 +27,6 @@ describe('EmailVerification', () => {
     validatorMock.isEmail.mockReturnValue(true);
     __mockWidget.generateOTP.mockResolvedValue({
       newCodeGenerated: true,
-      verificationCode: '123456',
     });
   });
 
@@ -191,7 +189,6 @@ describe('EmailVerification', () => {
         });
       });
 
-      expect(defaultProps.setOTP).toHaveBeenCalledWith('123456');
       expect(defaultProps.setWidgetStep).toHaveBeenCalledWith(WidgetSteps.CodeConfirmation);
     });
 
@@ -199,7 +196,6 @@ describe('EmailVerification', () => {
       validatorMock.isEmail.mockReturnValue(true);
       __mockWidget.generateOTP.mockResolvedValue({
         newCodeGenerated: false,
-        verificationCode: null,
       });
 
       render(<EmailVerification {...defaultProps} email="test@example.com" tosAccepted={true} />, {
@@ -213,7 +209,6 @@ describe('EmailVerification', () => {
       });
 
       // Should not set OTP if not newly generated
-      expect(defaultProps.setOTP).not.toHaveBeenCalled();
     });
 
     it('shows validation error when trying to continue with invalid email', async () => {

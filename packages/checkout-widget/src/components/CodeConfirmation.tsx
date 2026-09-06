@@ -9,12 +9,10 @@ const ONE_MINUTE_SECONDS = 60;
 export const CodeConfirmation: React.FC<{
   email: string;
   tosAccepted: boolean;
-  otp: string | null;
-  setOTP: (otp: string | null) => void;
   setWidgetStep: (step: WidgetSteps) => void;
   publishableKey: string;
   serverUrl?: string;
-}> = ({ email, tosAccepted, otp: _otp, setOTP, setWidgetStep, publishableKey, serverUrl }) => {
+}> = ({ email, tosAccepted, setWidgetStep, publishableKey, serverUrl }) => {
   const [code, setCode] = useState('');
   const [timeUntilResend, setTimeUntilResend] = useState(ONE_MINUTE_SECONDS);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
@@ -59,9 +57,7 @@ export const CodeConfirmation: React.FC<{
 
   const handleResend = useCallback(async () => {
     const result = await generateOTP({ email, tosAccepted });
-    if (result.newCodeGenerated && result.verificationCode) {
-      setOTP(result.verificationCode);
-    } else {
+    if (!result.newCodeGenerated) {
       setCodeError(`Verification code was recently sent. Please wait before requesting a new one.`);
     }
 

@@ -14,7 +14,6 @@ describe('CodeConfirmation', () => {
     email: 'test@example.com',
     tosAccepted: true,
     otp: '123456',
-    setOTP: jest.fn(),
     setWidgetStep: jest.fn(),
     publishableKey: 'beep_pk_test_123',
     serverUrl: 'https://api.test.com',
@@ -24,7 +23,6 @@ describe('CodeConfirmation', () => {
     jest.clearAllMocks();
     __mockWidget.generateOTP.mockResolvedValue({
       newCodeGenerated: true,
-      verificationCode: '654321',
     });
     __mockWidget.verifyOTP.mockResolvedValue({
       success: true,
@@ -158,8 +156,6 @@ describe('CodeConfirmation', () => {
           tosAccepted: defaultProps.tosAccepted,
         });
       });
-
-      expect(defaultProps.setOTP).toHaveBeenCalledWith('654321');
     });
 
     it('resets timer after resend', async () => {
@@ -186,7 +182,6 @@ describe('CodeConfirmation', () => {
     it('shows error when code was recently sent', async () => {
       __mockWidget.generateOTP.mockResolvedValue({
         newCodeGenerated: false,
-        verificationCode: null,
       });
 
       render(<CodeConfirmation {...defaultProps} />, { wrapper: createWrapper() });

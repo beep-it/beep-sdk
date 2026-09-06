@@ -10,7 +10,6 @@ export const EmailVerification: React.FC<{
   tosAccepted: boolean;
   setTosAccepted: (accepted: boolean) => void;
   setWidgetStep: (step: WidgetSteps) => void;
-  setOTP: (otp: string | null) => void;
   publishableKey: string;
   serverUrl?: string;
 }> = ({
@@ -19,7 +18,6 @@ export const EmailVerification: React.FC<{
   tosAccepted,
   setTosAccepted,
   setWidgetStep,
-  setOTP,
   publishableKey,
   serverUrl,
 }) => {
@@ -63,10 +61,7 @@ export const EmailVerification: React.FC<{
       return;
     }
 
-    const result = await generateOTP({ email, tosAccepted });
-    if (result.newCodeGenerated && result.verificationCode) {
-      setOTP(result.verificationCode);
-    }
+    await generateOTP({ email, tosAccepted });
     setWidgetStep(WidgetSteps.CodeConfirmation);
   }, [email, tosAccepted]);
 

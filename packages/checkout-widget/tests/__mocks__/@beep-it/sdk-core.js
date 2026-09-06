@@ -19,7 +19,6 @@ const mockWidget = {
     status: 'pending',
   }),
   generateOTP: jest.fn().mockResolvedValue({
-    verificationCode: '123456',
     newCodeGenerated: true,
   }),
   verifyOTP: jest.fn().mockResolvedValue({
@@ -88,7 +87,6 @@ const setDefaultResponses = () => {
     status: 'pending',
   });
   mockWidget.generateOTP.mockResolvedValue({
-    verificationCode: '123456',
     newCodeGenerated: true,
   });
   mockWidget.verifyOTP.mockResolvedValue({
