@@ -273,11 +273,7 @@ export const setupRoutes = (app: Express): void => {
 
   // Optional liveness for MCP endpoint
   app.head('/mcp', (_req, res) => {
-    res
-      .header('Access-Control-Allow-Origin', '*')
-      .header('Access-Control-Expose-Headers', 'mcp-session-id')
-      .status(200)
-      .end();
+    res.header('Access-Control-Expose-Headers', 'mcp-session-id').status(200).end();
   });
 
   // Streamable HTTP transport routes
@@ -309,6 +305,7 @@ start().catch((e) => {
 ```
 
 Notes
+- Set `MCP_AUTH_TOKEN` on the server and send it as `Authorization: Bearer <token>` from the client; requests are refused while it is unset.
 - Always include the `/mcp` path in `SERVER_URL` for the HTTP transport.
 - Ensure the server mounts `express.json()` before the MCP routes.
 - The first client POST must be JSON-RPC `initialize`; the provided client transport handles this automatically.
