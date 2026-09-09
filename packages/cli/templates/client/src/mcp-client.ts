@@ -30,6 +30,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 // Use public SDK type entries; avoid deep dist imports
 import { ListToolsResultSchema } from '@modelcontextprotocol/sdk/types.js';
+import { config } from './config';
 
 interface McpClientStdioParams {
   type: 'stdio';
@@ -80,7 +81,12 @@ export class McpClientInternal {
   private async _initializeHttp(params: McpClientHttpOptions): Promise<void> {
     // HTTP/S mode: connect to a hosted seller MCP endpoint.
     // Provide a full URL like: https://companyA.example.com/mcp
-    const transport = new StreamableHTTPClientTransport(params.url);
+    const transport = new StreamableHTTPClientTransport(
+      params.url,
+      config.mcpAuthToken
+        ? { requestInit: { headers: { Authorization: `Bearer ${config.mcpAuthToken}` } } }
+        : undefined,
+    );
     this._mcpClient = new Client({ name: 'mcp-server', version: '1.0.0' }, { capabilities: {} });
     await this._mcpClient.connect(transport);
     this.isInitialized = true;

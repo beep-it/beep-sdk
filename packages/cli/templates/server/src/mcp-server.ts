@@ -10,7 +10,7 @@ import 'dotenv/config';
 import { Request, Response } from 'express';
 
 // Import tool definitions (not just handlers)
-import { randomUUID } from 'crypto';
+import { randomUUID, timingSafeEqual } from 'crypto';
 import { checkBeepApiTool } from './tools/checkBeepApi';
 import { issuePaymentTool } from './tools/issuePayment';
 import { checkPaymentStatusTool } from './tools/checkPaymentStatus';
@@ -114,9 +114,56 @@ main().catch((error) => {
   process.exit(1);
 });
 
+function envList(name: string): string[] {
+  return (process.env[name] ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function getAllowedHosts(): string[] {
+  const hosts = new Set(['127.0.0.1', 'localhost', ...envList('MCP_ALLOWED_HOSTS')]);
+  const base = process.env.BASE_SERVER_URL;
+  if (base) {
+    try {
+      hosts.add(new URL(base).host);
+    } catch {
+      hosts.add(base);
+    }
+  }
+  return [...hosts];
+}
+
+function applyCorsHeaders(req: Request, res: Response): void {
+  const origin = req.header('origin');
+  if (origin && envList('MCP_ALLOWED_ORIGINS').includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Vary', 'Origin');
+  }
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, mcp-session-id');
+  res.header('Access-Control-Expose-Headers', 'mcp-session-id');
+}
+
+function isAuthorized(req: Request): boolean {
+  const expected = process.env.MCP_AUTH_TOKEN;
+  if (!expected) {
+    return false;
+  }
+  const header = req.header('authorization');
+  if (!header?.startsWith('Bearer ')) {
+    return false;
+  }
+  const provided = Buffer.from(header.slice('Bearer '.length));
+  const secret = Buffer.from(expected);
+  return provided.length === secret.length && timingSafeEqual(provided, secret);
+}
+
 export function createMcpHttpHandler({ logger }: McpHttpHandlerParams) {
   if (!mcpServer) {
     mcpServer = createMCPServer();
+  }
+  if (!process.env.MCP_AUTH_TOKEN) {
+    logger?.error('MCP_AUTH_TOKEN is not set; every MCP request will be refused.');
   }
   // This handler now assumes that initializeMcp() has been called and completed at startup.
   return async (req: Request, res: Response) => {
@@ -132,9 +179,7 @@ export function createMcpHttpHandler({ logger }: McpHttpHandlerParams) {
       return;
     }
     try {
-      res.header('Access-Control-Allow-Origin', '*');
-      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, mcp-session-id');
-      res.header('Access-Control-Expose-Headers', 'mcp-session-id');
+      applyCorsHeaders(req, res);
 
       if (req.method === 'OPTIONS') {
         return res.status(200).end();
@@ -143,6 +188,14 @@ export function createMcpHttpHandler({ logger }: McpHttpHandlerParams) {
       if (req.method === 'HEAD') {
         logger?.debug('Received HEAD request to MCP endpoint');
         return res.status(200).end();
+      }
+
+      if (!isAuthorized(req)) {
+        return res.status(401).json({
+          jsonrpc: '2.0',
+          error: { code: -32001, message: 'Unauthorized' },
+          id: null,
+        });
       }
 
       const sessionId = req.header('mcp-session-id');
@@ -187,10 +240,8 @@ export function createMcpHttpHandler({ logger }: McpHttpHandlerParams) {
 
           const transport = new StreamableHTTPServerTransport({
             sessionIdGenerator: () => randomUUID(),
-            enableDnsRebindingProtection: false,
-            allowedHosts: ['127.0.0.1', 'localhost'].concat(
-              process.env.BASE_SERVER_URL ? [process.env.BASE_SERVER_URL] : [],
-            ),
+            enableDnsRebindingProtection: true,
+            allowedHosts: getAllowedHosts(),
             onsessioninitialized: (newSessionId) => {
               logger?.debug(`New MCP session initialized: ${newSessionId}`);
               transports[newSessionId] = transport;
